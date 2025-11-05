@@ -28,5 +28,4 @@ target_link_libraries(main PRIVATE
     SFML::Window        # Bắt buộc khi dùng RenderWindow
     SFML::System        # Bắt buộc
     SFML::Audio         # Nếu dùng âm thanh (Sound/Music) → có thể bỏ nếu không dùng
-
 )
