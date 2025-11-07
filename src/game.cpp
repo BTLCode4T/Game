@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "Core/GameLoop/game.h"
+#include "GamePlay/UI/UI.h"
 
 /* --- 2. HẰNG SỐ GAME --- */
 // const unsigned int WINDOW_WIDTH = 1000;
@@ -28,80 +29,14 @@ const float CNV2_START_X = 550.0f; // Đặt CNV2 cách CNV1 một khoảng
 const float CNV3_START_X = 800.0f; // Đặt CNV3 cách CNV2 một khoảng
                                    // --- KẾT THÚC THAY ĐỔI ---
 
-/* ---------------------------------------- 3. HÀM TIỆN ÍCH ----------------------------------------------- */
-
-/* Tạo ảnh:
-
-sf::Texture &textureRef :                        biến Texture cần khai báo trước
-const std::string &filePath :                    đường dẫn đến ảnh
-float desiredWidth, float desiredHeight :        Kích thước dạng Vector2f
-float x, float y :                               vị trí ảnh dạng Vector2f
-*/
-sf::Sprite createSprite(sf::Texture &textureRef, const std::string &filePath, float desiredWidth, float desiredHeight,
-                        float x, float y) {
-    if (!textureRef.loadFromFile(filePath)) {
-        std::cerr << "Loi: Khong the tai '" << filePath << "'" << std::endl;
-        return sf::Sprite(textureRef); // Trả về sprite với texture đã tải (nếu có lỗi, texture sẽ rỗng)
-    }
-    sf::Sprite sprite(textureRef);
-    sf::FloatRect bounds = sprite.getLocalBounds();
-    float scaleX = desiredWidth / bounds.size.x;
-    float scaleY = desiredHeight / bounds.size.y;
-    sprite.setScale(sf::Vector2f(scaleX, scaleY));
-    sprite.setPosition({x, y});
-    return sprite;
-}
-
-/* Tạo text
-const sf::Font &fontRef :                   biến font
-const std::wstring &content:                text dạng : L"<text cần viết>"
-unsigned int size:                          Kích thước (int)
-const sf::Color &color:                     Màu sắc
-float x, float y:                           vị trí
-bool centerAnchor = true                    true: căn gữa / false: căn trái
-*/
-sf::Text createText(const sf::Font &fontRef, const std::wstring &content, unsigned int size, const sf::Color &color,
-                    float x, float y, bool centerAnchor = true) {
-    sf::Text text(fontRef, content, size);
-    text.setFillColor(color);
-    if (centerAnchor) {
-        sf::FloatRect bounds = text.getLocalBounds();
-        text.setOrigin({bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f});
-    }
-    text.setPosition(sf::Vector2f(x, y));
-    return text;
-}
-
-// Tạo chướng ngại vật
-// --- THÊM STRUCT CHO CHƯỚNG NGẠI VẬT ---
-/*
-const std::string &filePath:        đường dẫn ảnh
-float width, float height:          kích thước CNV dạng Vector2f
-float x, float y:                   vị trí dạng Vector2f
-*/
-struct Obstacle {
-    std::unique_ptr<sf::Texture> texture;
-    std::unique_ptr<sf::Sprite> sprite;
-    // THAY ĐỔI: Thay 'size' bằng 'width' và 'height' để hỗ trợ hình chữ nhật
-    Obstacle(const std::string &filePath, float width, float height, float x, float y) {
-        texture = std::make_unique<sf::Texture>();
-        if (!texture->loadFromFile(filePath)) {
-            std::cerr << "Loi: Khong the tai '" << filePath << "'" << std::endl;
-        }
-        sprite = std::make_unique<sf::Sprite>(*texture);
-        sf::FloatRect bounds = sprite->getLocalBounds();
-        // SỬ DỤNG width và height riêng biệt để scale
-        float scaleX = width / bounds.size.x;
-        float scaleY = height / bounds.size.y;
-        sprite->setScale(sf::Vector2f(scaleX, scaleY));
-        sprite->setPosition({x, y});
-    }
-};
+/* ---------------------------------------- 3. HÀM TIỆN ÍCH GIAO DIỆN ----------------------------------------------- */
+//  Khai báo tại UI.h
 // -------------------------------------------------------------------------------------------------//
 
 /* --- 4. TRẠNG THÁI GAME (ENUM) --- */
 // Enum để quản lý các màn hình/trạng thái của game
-enum class GameState {
+enum class GameState
+{
     MainMenu,   // Màn hình menu chính
     Playing,    // Đang trong game
     HighScores, // Màn hình bảng xếp hạng
@@ -111,28 +46,35 @@ enum class GameState {
 
 // Quay lại menu
 void handleReturnToMenu(sf::RenderWindow &window,
-                        const std::optional<sf::Event> &event, // Dùng optional cho sự kiện
-                        GameState &currentState, const sf::Sprite &btnHomeSprite) {
-    if (!event.has_value()) {
-        return; // Không có sự kiện, thoát ngay
+                        const std::optional<sf::Event> &event,
+                        GameState &currentState, const sf::Sprite &btnHomeSprite)
+{
+    if (!event.has_value())
+    {
+        return;
     }
 
     // --- 1. Xử lý Phím Escape ---
-    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-        if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+    {
+        if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
+        {
             currentState = GameState::MainMenu; // Quay lại Menu
             return;                             // Thoát ngay sau khi chuyển trạng thái
         }
     }
 
     // --- 2. Xử lý Click chuột (Nút Home) ---
-    if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-        if (mouseButton->button == sf::Mouse::Button::Left) {
+    if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>())
+    {
+        if (mouseButton->button == sf::Mouse::Button::Left)
+        {
             // Lấy tọa độ chuột
             sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
 
             // Kiểm tra va chạm với nút Home
-            if (btnHomeSprite.getGlobalBounds().contains(mousePos)) {
+            if (btnHomeSprite.getGlobalBounds().contains(mousePos))
+            {
                 currentState = GameState::MainMenu; // Quay lại Menu
             }
         }
@@ -140,7 +82,8 @@ void handleReturnToMenu(sf::RenderWindow &window,
 }
 
 /* --- 5. HÀM CHÍNH --- */
-int main() {
+int main()
+{
 
     // ⚠️⚠️⚠️ ========== PHẦN CHO HỆ ĐIỀU HÀNH ( VUI LÒNG KHÔNG ĐỘNG VÀO ) ======== ⚠️⚠️⚠️
 
@@ -150,13 +93,16 @@ int main() {
     window.setVerticalSyncEnabled(true);
     sf::Image iconImage;
 
-    if (iconImage.loadFromFile("assets/icon.png")) {
+    if (iconImage.loadFromFile("assets/icon.png"))
+    {
         unsigned int iconWidth = iconImage.getSize().x;
         unsigned int iconHeight = iconImage.getSize().y;
         const std::uint8_t *iconPixels = iconImage.getPixelsPtr();
         std::size_t iconSize = iconWidth * iconHeight * 4;
         window.setIcon({iconWidth, iconHeight}, iconPixels);
-    } else {
+    }
+    else
+    {
         std::cerr << "Loi: Khong the tai 'assets/Images/icon.png' de lam icon." << std::endl;
     }
     //                     ⚠️⚠️⚠️ ========== KẾT THÚC PHẦN CHO HĐH ======== ⚠️⚠️⚠️
@@ -166,7 +112,8 @@ int main() {
 
     // 1. Tải hình nền (Background)
     sf::Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("assets/Images/bg.png")) {
+    if (!backgroundTexture.loadFromFile("assets/Images/bg.png"))
+    {
         std::cerr << "Loi: Khong the tai 'assets/Images/bg.png'" << std::endl;
         return -1;
     }
@@ -183,7 +130,7 @@ int main() {
 
     //  Cái cây
     sf::Texture treeTexture;
-    sf::Sprite treeSprite = createSprite(treeTexture, "assets/Images/blend/cay.png", 154.0f, 272.0f, 100.0f, 100.0f);
+    sf::Sprite treeSprite = createSprite(treeTexture, "assets/Images/blend/cay.png", 154.0f, 272.0f, 50.0f, 100.0f);
 
     // ---------------------------- Kết thúc tải các phần background ---------------------------------//
 
@@ -240,7 +187,8 @@ int main() {
      */
 
     sf::Font menuFont;
-    if (!menuFont.openFromFile("assets/Images/font.ttf")) {
+    if (!menuFont.openFromFile("assets/Images/font.ttf"))
+    {
         std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
@@ -268,7 +216,7 @@ int main() {
 
     // TextMenu: https://github.com/BTLCode4T
     // v0.0.1
-    sf::Text InfoText = createText(menuFont, L"https://github.com/BTLCode4T\n\t\t\t\t\t\t\t\t\t  v0.0.1", 15,
+    sf::Text InfoText = createText(menuFont, L"https://github.com/BTLCode4T\n\t\t\t\t\t\t\t\t\t  v0.0.3", 15,
                                    sf::Color::White, 1000u - 245.0f, 15.0f, false);
 
     // ----------------------------------------------- Kết thúc tạo text
@@ -282,38 +230,50 @@ int main() {
     sf::Clock clock;
 
     // --- VÒNG LẶP GAME CHÍNH ---
-    while (window.isOpen()) {
+    while (window.isOpen())
+    {
         float deltaTime = clock.restart().asSeconds();
 
         // --- XỬ LÝ SỰ KIỆN (INPUT) ---
-        while (const std::optional<sf::Event> event = window.pollEvent()) {
+        while (const std::optional<sf::Event> event = window.pollEvent())
+        {
             // Sự kiện đóng cửa sổ (luôn xử lý)
             if (event->is<sf::Event::Closed>())
                 window.close();
 
             // Xử lý input dựa trên trạng thái game
-            switch (currentState) {
-            case GameState::MainMenu: {
+            switch (currentState)
+            {
+            case GameState::MainMenu:
+            {
                 /* --- XỬ LÝ INPUT MENU (USER TỰ CODE) --- */
-                if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+                {
                     // Ví dụ:
-                    if (keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
+                    {
                         // Đặt lại vị trí người chơi khi bắt đầu game
                         playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
                         velocity = {0.f, 0.f};
                         isOnGround = false;
                         currentState = GameState::Playing; // Chuyển sang màn hình chơi
-                    } else if (keyPressed->scancode == sf::Keyboard::Scancode::H) {
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::H)
+                    {
                         currentState = GameState::HighScores; // Chuyển sang bảng xếp hạng
-                    } else if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
+                    {
                         window.close(); // Thoát game từ menu
                     }
                 }
 
                 // 2. Xử lý click chuột cho nút btnNew
-                if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>())
+                {
                     // Chỉ xử lý khi nhấn chuột trái
-                    if (mouseButton->button == sf::Mouse::Button::Left) {
+                    if (mouseButton->button == sf::Mouse::Button::Left)
+                    {
                         // Chuyển tọa độ pixel của chuột sang tọa độ thế giới (view)
                         // quan trọng khi view bị di chuyển, nhưng ở đây vẫn nên dùng
                         // *** SỬA LỖI ***
@@ -327,20 +287,27 @@ int main() {
                         sf::FloatRect settingsButtonBounds = btnSettingsSprite.getGlobalBounds();
 
                         // Kiểm tra xem vị trí chuột có nằm trong vùng của nút không
-                        if (buttonBounds.contains(mousePos)) {
+                        if (buttonBounds.contains(mousePos))
+                        {
                             // Nếu có, thực hiện hành động chuyển sang màn hình Playing
                             // (Giống hệt như khi nhấn phím Enter)
                             playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
                             velocity = {0.f, 0.f};
                             isOnGround = false;
                             currentState = GameState::Playing; // Chuyển sang màn hình chơi
-                        } else if (highScoresButtonBounds.contains(mousePos)) {
+                        }
+                        else if (highScoresButtonBounds.contains(mousePos))
+                        {
                             // Nếu có, thực hiện hành động chuyển sang màn hình HighScores
                             currentState = GameState::HighScores;
-                        } else if (btnHelpSprite.getGlobalBounds().contains(mousePos)) {
+                        }
+                        else if (btnHelpSprite.getGlobalBounds().contains(mousePos))
+                        {
                             // Nếu có, thực hiện hành động chuyển sang màn hình Help
                             currentState = GameState::Help;
-                        } else if (settingsButtonBounds.contains(mousePos)) {
+                        }
+                        else if (settingsButtonBounds.contains(mousePos))
+                        {
                             // Nếu có, thực hiện hành động chuyển sang màn hình Settings
                             currentState = GameState::Settings;
                         }
@@ -348,30 +315,36 @@ int main() {
                 }
                 break;
             }
-            case GameState::Playing: {
+            case GameState::Playing:
+            {
                 /* --- XỬ LÝ INPUT GAME --- */
                 handleReturnToMenu(window, event, currentState, btnHomeSprite);
 
                 // LOGIC NHẢY
-                if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+                {
                     // Chỉ cho phép nhảy khi đang chạm đất
-                    if (keyPressed->scancode == sf::Keyboard::Scancode::Space && isOnGround) {
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Space && isOnGround)
+                    {
                         velocity.y = JUMP_VELOCITY;
                     }
                 }
                 break;
             }
-            case GameState::HighScores: {
+            case GameState::HighScores:
+            {
                 /* --- XỬ LÝ INPUT BẢNG XẾP HẠNG (USER TỰ CODE) --- */
                 handleReturnToMenu(window, event, currentState, btnHomeSprite);
                 break;
             }
-            case GameState::Help: {
+            case GameState::Help:
+            {
                 handleReturnToMenu(window, event, currentState, btnHomeSprite);
                 break;
             }
 
-            case GameState::Settings: {
+            case GameState::Settings:
+            {
                 /* --- XỬ LÝ INPUT MÀN HÌNH SETTINGS (USER TỰ CODE) --- */
                 handleReturnToMenu(window, event, currentState, btnHomeSprite);
                 break;
@@ -380,13 +353,16 @@ int main() {
         } // kết thúc while(pollEvent)
 
         // --- CẬP NHẬT LOGIC GAME (UPDATE) ---
-        switch (currentState) {
-        case GameState::MainMenu: {
+        switch (currentState)
+        {
+        case GameState::MainMenu:
+        {
             /* --- CẬP NHẬT LOGIC MENU (USER TỰ CODE) --- */
             // (ví dụ: hiệu ứng hover nút, ...)
             break;
         }
-        case GameState::Playing: {
+        case GameState::Playing:
+        {
             // 1. Lưu vị trí cũ (để quay lại nếu va chạm)
             sf::Vector2f oldPos = playerSprite.getPosition();
 
@@ -410,9 +386,11 @@ int main() {
             sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
 
             // TỐI ƯU: Kiểm tra va chạm X với TẤT CẢ CNV trong vector
-            for (const auto &obs : obstacles) {
+            for (const auto &obs : obstacles)
+            {
                 // Sử dụng -> để truy cập getGlobalBounds()
-                if (playerBounds.findIntersection(obs.sprite->getGlobalBounds())) {
+                if (playerBounds.findIntersection(obs.sprite->getGlobalBounds()))
+                {
                     // Nếu va chạm X, đặt lại vị trí X về vị trí cũ
                     playerSprite.setPosition({oldPos.x, playerSprite.getPosition().y});
                     velocity.x = 0; // Dừng di chuyển ngang
@@ -428,20 +406,23 @@ int main() {
             isOnGround = false;
 
             // Va chạm Y với TẤT CẢ CNV trong vector
-            for (const auto &obs : obstacles) {
+            for (const auto &obs : obstacles)
+            {
                 // Lấy lại playerBounds nếu vị trí đã bị thay đổi bởi va chạm trước
                 playerBounds = playerSprite.getGlobalBounds();
                 sf::FloatRect cnvBounds = obs.sprite->getGlobalBounds(); // Dùng ->
 
-                if (playerBounds.findIntersection(cnvBounds)) {
+                if (playerBounds.findIntersection(cnvBounds))
+                {
                     if (velocity.y > 0) // Đang rơi (va chạm từ trên xuống)
                     {
                         // Đặt nhân vật đứng trên chướng ngại vật
                         playerSprite.setPosition(
                             {playerSprite.getPosition().x, cnvBounds.position.y - playerBounds.size.y});
                         velocity.y = 0;
-                        isOnGround = true;     // Coi như đang "trên mặt đất"
-                    } else if (velocity.y < 0) // Đang nhảy (va chạm từ dưới lên - đụng đầu)
+                        isOnGround = true; // Coi như đang "trên mặt đất"
+                    }
+                    else if (velocity.y < 0) // Đang nhảy (va chạm từ dưới lên - đụng đầu)
                     {
                         // Đặt nhân vật bên dưới chướng ngại vật
                         playerSprite.setPosition(
@@ -453,7 +434,8 @@ int main() {
 
             // 7b. Va chạm Y với mặt đất (vẫn phải kiểm tra)
             playerBounds = playerSprite.getGlobalBounds();
-            if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y) {
+            if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y)
+            {
                 playerSprite.setPosition({playerSprite.getPosition().x, GROUND_Y - playerBounds.size.y});
                 velocity.y = 0;
                 isOnGround = true;
@@ -470,17 +452,20 @@ int main() {
 
             break;
         }
-        case GameState::HighScores: {
+        case GameState::HighScores:
+        {
             /* --- CẬP NHẬT LOGIC BẢNG XẾP HẠNG (USER TỰ CODE) --- */
             // (thường là không cần)
             break;
         }
-        case GameState::Help: {
+        case GameState::Help:
+        {
             /* --- CẬP NHẬT LOGIC MÀN HÌNH HELP (USER TỰ CODE) --- */
             // (thường là không cần)
             break;
         }
-        case GameState::Settings: {
+        case GameState::Settings:
+        {
             /* --- CẬP NHẬT LOGIC MÀN HÌNH SETTINGS (USER TỰ CODE) --- */
             // (thường là không cần)
             break;
@@ -490,8 +475,10 @@ int main() {
         // --- VẼ (RENDER) ---
         window.clear(sf::Color::Black);
 
-        switch (currentState) {
-        case GameState::MainMenu: {
+        switch (currentState)
+        {
+        case GameState::MainMenu:
+        {
             /* --- VẼ MENU CHÍNH (USER TỰ CODE) --- */
             // 1. Vẽ nền
             window.draw(backgroundSprite);
@@ -509,7 +496,8 @@ int main() {
             // 5. Vẽ Nút "Thoát"
             break;
         }
-        case GameState::Playing: {
+        case GameState::Playing:
+        {
             // Code vẽ gốc của bạn
             window.draw(backgroundSprite); // nền
             window.draw(sunSprite);        // mặt trời
@@ -517,7 +505,8 @@ int main() {
 
             // --- THAY ĐỔI: VẼ 3 CHƯỚNG NGẠI VẬT MỚI ---
             // --- VẼ CÁC CHƯỚNG NGẠI VẬT BẰNG VÒNG LẶP ---
-            for (const auto &obs : obstacles) {
+            for (const auto &obs : obstacles)
+            {
                 // Giải tham chiếu con trỏ để có thể truyền đối tượng sf::Sprite
                 window.draw(*obs.sprite);
             }
@@ -527,7 +516,8 @@ int main() {
             window.draw(playerSprite); // nhân vật
             break;
         }
-        case GameState::HighScores: {
+        case GameState::HighScores:
+        {
             /* --- VẼ BẢNG XẾP HẠNG (USER TỰ CODE) --- */
             // 1. Vẽ nền
             window.draw(backgroundSprite);
@@ -540,7 +530,8 @@ int main() {
             // 4. Vẽ hướng dẫn "Nhấn Escape để quay lại"
             break;
         }
-        case GameState::Help: {
+        case GameState::Help:
+        {
             /* --- VẼ MÀN HÌNH HELP (USER TỰ CODE) --- */
             // 1. Vẽ nền
             window.draw(backgroundSprite);
@@ -551,7 +542,8 @@ int main() {
             // 3. Vẽ hướng dẫn "Nhấn Escape để quay lại"
             break;
         }
-        case GameState::Settings: {
+        case GameState::Settings:
+        {
             /* --- VẼ MÀN HÌNH SETTINGS (USER TỰ CODE) --- */
             // 1. Vẽ nền
             window.draw(backgroundSprite);
