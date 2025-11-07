@@ -17,8 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 # File nguồn
-add_executable(main
-    src/main.cpp
+add_executable(main src/main.cpp
 )
 
 # Sử dụng C++17
