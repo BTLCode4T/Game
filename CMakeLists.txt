@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 # File nguồn
-add_executable(main src/main.cpp)
+add_executable(main src/game.cpp src/Core/GameLoop/gameloop.cpp)
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)
