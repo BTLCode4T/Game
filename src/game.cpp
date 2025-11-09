@@ -210,6 +210,8 @@ int main()
 
     // ------------------------------- BIẾN TRẠNG THÁI GAME --------------------------------------//
 
+    // --------------------------------------------- BIẾN TRẠNG THÁI GAME ------------------------------------------//
+    // Đảm bảo chỉ có một lần khai báo currentState ở đây, xóa các dòng thừa!
     GameState currentState = GameState::MainMenu; // Bắt đầu từ Menu chính
     sf::Vector2f velocity(0.f, 0.f);
     bool isOnGround = false;
@@ -226,8 +228,13 @@ int main()
         while (const std::optional<sf::Event> event = window.pollEvent())
         {
             // Sự kiện đóng cửa sổ (luôn xử lý)
-            if (event->is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>()){
+            
+                 JsonProcessor dataManager;
+                 dataManager.updateAndWriteData("data/data.json"); 
+                cout << "=====================================================" << endl;
                 window.close();
+            }
 
             // Xử lý input dựa trên trạng thái game
             switch (currentState)

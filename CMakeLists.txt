@@ -29,3 +29,8 @@ target_link_libraries(main PRIVATE
     SFML::System        # Bắt buộc
     SFML::Audio         # Nếu dùng âm thanh (Sound/Music) → có thể bỏ nếu không dùng
 )
+target_include_directories(main PUBLIC 
+    include 
+    src/Utils # <-- ĐÃ SỬA: Trỏ đến src/Utils để tìm json.h và json.hpp
+)
+file(COPY data/data.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
