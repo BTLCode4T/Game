@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 # File nguồn
-add_executable(main src/game.cpp src/Core/GameLoop/gameloop.cpp src/GamePlay/UI/UI.cpp)
+add_executable(main src/game.cpp src/Core/GameLoop/gameloop.cpp src/GamePlay/UI/UI.cpp src/Utils/json.cpp)
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)
@@ -29,3 +29,8 @@ target_link_libraries(main PRIVATE
     SFML::System        # Bắt buộc
     SFML::Audio         # Nếu dùng âm thanh (Sound/Music) → có thể bỏ nếu không dùng
 )
+target_include_directories(main PUBLIC 
+    include 
+    src/Utils # <-- ĐÃ SỬA: Trỏ đến src/Utils để tìm json.h và json.hpp
+)
+file(COPY data/data.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

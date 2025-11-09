@@ -7,7 +7,7 @@
 #include <vector>
 #include "Core/GameLoop/game.h"
 #include "GamePlay/UI/UI.h"
-
+#include "Core/GameLoop/json.h"
 /* --- 2. HẰNG SỐ GAME --- */
 // const unsigned int WINDOW_WIDTH = 1000;
 // const unsigned int WINDOW_HEIGHT = 600;
@@ -221,9 +221,18 @@ int main()
 
     // ----------------------------------------------- Kết thúc tạo text
     // --------------------------------------------------//
+    // --------------------------------------------- BIẾN TRẠNG THÁI GAME ------------------------------------------//
+JsonProcessor dataManager;
+
+    // 2. Đọc và in dữ liệu ra console ngay khi khởi động
+    cout << "=================== KHOI TAO JSON ===================" << endl;
+    dataManager.readAndPrintData("data/data.json"); 
+    
+    
+    // ------------------------------------ KẾT THÚC TẢI DỮ LIỆU JSON --------------------------------------
 
     // --------------------------------------------- BIẾN TRẠNG THÁI GAME ------------------------------------------//
-
+    // Đảm bảo chỉ có một lần khai báo currentState ở đây, xóa các dòng thừa!
     GameState currentState = GameState::MainMenu; // Bắt đầu từ Menu chính
     sf::Vector2f velocity(0.f, 0.f);
     bool isOnGround = false;
@@ -238,8 +247,13 @@ int main()
         while (const std::optional<sf::Event> event = window.pollEvent())
         {
             // Sự kiện đóng cửa sổ (luôn xử lý)
-            if (event->is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>()){
+            
+                 JsonProcessor dataManager;
+                 dataManager.updateAndWriteData("data/data.json"); 
+                cout << "=====================================================" << endl;
                 window.close();
+            }
 
             // Xử lý input dựa trên trạng thái game
             switch (currentState)
