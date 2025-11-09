@@ -1,4 +1,3 @@
-
 #ifndef UI_H
 #define UI_H
 
@@ -7,34 +6,23 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-// Có thể cần thêm <optional> nếu struct Obstacle dùng nó, nhưng ở đây không cần
+// #include <optional> không cần
 
-// Khai báo struct Obstacle để có thể sử dụng trong các hàm tiện ích
-// Đặt định nghĩa struct ở đây nếu nó là một phần của giao diện công khai
-// Tạo chướng ngại vật
+// THÊM INCLUDE NÀY nếu các hàm UI cần dùng Obstacle 
+// hoặc nếu Obstacle là một kiểu dữ liệu được trả về/nhận vào.
+// Tuy nhiên, vì các hàm dưới đây không dùng Obstacle, 
+// ta có thể KHÔNG CẦN include nếu Obstacle đã được định nghĩa ở nơi khác (game.h).
 
-
-
-/*
-const std::string &filePath:        đường dẫn ảnh
-float width, float height:          kích thước CNV dạng Vector2f
-float x, float y:                   vị trí dạng Vector2f
-*/
-struct Obstacle {
-    std::unique_ptr<sf::Texture> texture;
-    std::unique_ptr<sf::Sprite> sprite;
-    Obstacle(const std::string &filePath, float width, float height, float x, float y);
-};
-
+/* --- CÁC HÀM TIỆN ÍCH UI --- */
 
 /* Tạo ảnh:
-sf::Texture &textureRef :                        biến Texture cần khai báo trước
-const std::string &filePath :                    đường dẫn đến ảnh
-float desiredWidth, float desiredHeight :        Kích thước dạng Vector2f
-float x, float y :                               vị trí ảnh dạng Vector2f
+sf::Texture &textureRef :                         biến Texture cần khai báo trước
+const std::string &filePath :                     đường dẫn đến ảnh
+float desiredWidth, float desiredHeight :         Kích thước dạng Vector2f
+float x, float y :                                vị trí ảnh dạng Vector2f
 */
 sf::Sprite createSprite(sf::Texture &textureRef, const std::string &filePath, float desiredWidth, float desiredHeight,
-                        float x, float y);
+                         float x, float y);
 
 /* Tạo text
 const sf::Font &fontRef :                   biến font

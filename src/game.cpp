@@ -7,31 +7,17 @@
 #include <vector>
 #include "Core/GameLoop/game.h"
 #include "GamePlay/UI/UI.h"
-#include "Core/GameLoop/json.h"
-/* --- 2. HẰNG SỐ GAME --- */
-// const unsigned int WINDOW_WIDTH = 1000;
-// const unsigned int WINDOW_HEIGHT = 600;
-const float PLAYER_SIZE = 50.0f;
-const float PLAYER_START_X = 100.0f;
-const float PLAYER_START_Y = 500.0f; // Sẽ được điều chỉnh khi va chạm đất
-const float GROUND_HEIGHT = 50.0f;
-const float GROUND_Y = 450.0f;
-const float GRAVITY = 3200.0f;
-const float JUMP_VELOCITY = -1000.0f;
-const float MOVE_SPEED = 200.0f;
+#include "GamePlay/Physics/PhysicsSystem.h"
+#include "Core/Constants.h"
 
-// --- THAY ĐỔI: HẰNG SỐ CHO 3 CHƯỚNG NGẠI VẬT (CNV) MỚI ---
-const float CNV_SIZE = 60.0f; // Kích thước 60x60
-// Đặt chướng ngại vật nằm ngay trên mặt đất
-const float CNV_Y = GROUND_Y - CNV_SIZE;
-const float CNV1_START_X = 200.0f;
-const float CNV2_START_X = 550.0f; // Đặt CNV2 cách CNV1 một khoảng
-const float CNV3_START_X = 800.0f; // Đặt CNV3 cách CNV2 một khoảng
-                                   // --- KẾT THÚC THAY ĐỔI ---
+/* ---------------------. HẰNG SỐ GAME --- -------------------------------/
+//  Khai báo tại Core/Constants.h
+// -------------------------------------------------------------------------------//
 
-/* ---------------------------------------- 3. HÀM TIỆN ÍCH GIAO DIỆN ----------------------------------------------- */
+
+/* ------------------------- 3. HÀM TIỆN ÍCH GIAO DIỆN ------------------------- */
 //  Khai báo tại UI.h
-// -------------------------------------------------------------------------------------------------//
+// -------------------------------------------------------------------------------//
 
 /* --- 4. TRẠNG THÁI GAME (ENUM) --- */
 // Enum để quản lý các màn hình/trạng thái của game
@@ -106,6 +92,8 @@ int main()
         std::cerr << "Loi: Khong the tai 'assets/Images/icon.png' de lam icon." << std::endl;
     }
     //                     ⚠️⚠️⚠️ ========== KẾT THÚC PHẦN CHO HĐH ======== ⚠️⚠️⚠️
+
+
 
     // ------------------------------------ TẢI TÀI NGUYÊN (LOAD RESOURCES) -------------------------------------------
     // ---------------------------- Tải các phần background ---------------------------------//
@@ -183,8 +171,7 @@ int main()
 
     /*------------------------------------ Kết thúc tải ảnh cho Menu ----------------------------*/
 
-    /* ----------------------------------- 5. TÀI NGUYÊN CHO TEXT (USER TỰ CODE)---------------------------------------
-     */
+    /* ----------------------------------- 5. TÀI NGUYÊN CHO TEXT ------------------------------*/
 
     sf::Font menuFont;
     if (!menuFont.openFromFile("assets/Images/font.ttf"))
@@ -219,17 +206,9 @@ int main()
     sf::Text InfoText = createText(menuFont, L"https://github.com/BTLCode4T\n\t\t\t\t\t\t\t\t\t  v0.0.3", 15,
                                    sf::Color::White, 1000u - 245.0f, 15.0f, false);
 
-    // ----------------------------------------------- Kết thúc tạo text
-    // --------------------------------------------------//
-    // --------------------------------------------- BIẾN TRẠNG THÁI GAME ------------------------------------------//
-JsonProcessor dataManager;
+    // -------------------------------- Kết thúc tạo text -----------------------------------------//
 
-    // 2. Đọc và in dữ liệu ra console ngay khi khởi động
-    cout << "=================== KHOI TAO JSON ===================" << endl;
-    dataManager.readAndPrintData("data/data.json"); 
-    
-    
-    // ------------------------------------ KẾT THÚC TẢI DỮ LIỆU JSON --------------------------------------
+    // ------------------------------- BIẾN TRẠNG THÁI GAME --------------------------------------//
 
     // --------------------------------------------- BIẾN TRẠNG THÁI GAME ------------------------------------------//
     // Đảm bảo chỉ có một lần khai báo currentState ở đây, xóa các dòng thừa!
@@ -237,6 +216,8 @@ JsonProcessor dataManager;
     sf::Vector2f velocity(0.f, 0.f);
     bool isOnGround = false;
     sf::Clock clock;
+    const int MAX_JUMPS = 2; // Cho phép 2 lần nhảy (1 nhảy đất, 1 nhảy giữa không)
+    int jumpsRemaining = MAX_JUMPS;
 
     // --- VÒNG LẶP GAME CHÍNH ---
     while (window.isOpen())
@@ -260,7 +241,7 @@ JsonProcessor dataManager;
             {
             case GameState::MainMenu:
             {
-                /* --- XỬ LÝ INPUT MENU (USER TỰ CODE) --- */
+                /* --- XỬ LÝ INPUT MENU  --- */
                 if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
                 {
                     // Ví dụ:
@@ -290,9 +271,6 @@ JsonProcessor dataManager;
                     {
                         // Chuyển tọa độ pixel của chuột sang tọa độ thế giới (view)
                         // quan trọng khi view bị di chuyển, nhưng ở đây vẫn nên dùng
-                        // *** SỬA LỖI ***
-                        // Trong SFML 3, 'x' và 'y' được thay thế bằng 'position' (một sf::Vector2i)
-                        // Code cũ: sf::Vector2f mousePos = window.mapPixelToCoords({mouseButton->x, mouseButton->y});
                         sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
 
                         // Lấy vùng chữ nhật bao quanh sprite của nút
@@ -337,10 +315,12 @@ JsonProcessor dataManager;
                 // LOGIC NHẢY
                 if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
                 {
-                    // Chỉ cho phép nhảy khi đang chạm đất
-                    if (keyPressed->scancode == sf::Keyboard::Scancode::Space && isOnGround)
+                    // ⚠️ THAY ĐỔI LOGIC JUMP ⚠️
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Space && jumpsRemaining > 0)
                     {
                         velocity.y = JUMP_VELOCITY;
+                        jumpsRemaining--;   // Giảm số lần nhảy còn lại
+                        isOnGround = false; // Luôn reset, dù đang ở trên không hay không
                     }
                 }
                 break;
@@ -375,12 +355,11 @@ JsonProcessor dataManager;
             // (ví dụ: hiệu ứng hover nút, ...)
             break;
         }
+
         case GameState::Playing:
         {
-            // 1. Lưu vị trí cũ (để quay lại nếu va chạm)
             sf::Vector2f oldPos = playerSprite.getPosition();
-
-            // 2. Cập nhật vận tốc X từ input
+            // 1. Cập nhật vận tốc X từ input (VẪN GIỮ NGUYÊN)
             velocity.x = 0.f;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Left) ||
                 sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
@@ -389,78 +368,20 @@ JsonProcessor dataManager;
                 sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
                 velocity.x = MOVE_SPEED;
 
-            // 3. Cập nhật vận tốc Y từ trọng lực
-            if (!isOnGround)
-                velocity.y += GRAVITY * deltaTime;
+            // 2. GỌI HỆ THỐNG VẬT LÝ MỚI
+            PhysicsSystem::Update(playerSprite, velocity, deltaTime, obstacles, isOnGround);
 
-            // 4. Di chuyển theo trục X
-            playerSprite.move({velocity.x * deltaTime, 0.f});
-
-            // 5. Kiểm tra va chạm X
-            sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
-
-            // TỐI ƯU: Kiểm tra va chạm X với TẤT CẢ CNV trong vector
-            for (const auto &obs : obstacles)
+            if (isOnGround)
             {
-                // Sử dụng -> để truy cập getGlobalBounds()
-                if (playerBounds.findIntersection(obs.sprite->getGlobalBounds()))
-                {
-                    // Nếu va chạm X, đặt lại vị trí X về vị trí cũ
-                    playerSprite.setPosition({oldPos.x, playerSprite.getPosition().y});
-                    velocity.x = 0; // Dừng di chuyển ngang
-                    break;          // Thoát ngay khi tìm thấy va chạm
-                }
+                jumpsRemaining = MAX_JUMPS;
             }
 
-            // 6. Di chuyển theo trục Y
-            playerSprite.move({0.f, velocity.y * deltaTime});
-
-            // 7. Kiểm tra va chạm Y (Trọng lực)
-            playerBounds = playerSprite.getGlobalBounds();
-            isOnGround = false;
-
-            // Va chạm Y với TẤT CẢ CNV trong vector
-            for (const auto &obs : obstacles)
-            {
-                // Lấy lại playerBounds nếu vị trí đã bị thay đổi bởi va chạm trước
-                playerBounds = playerSprite.getGlobalBounds();
-                sf::FloatRect cnvBounds = obs.sprite->getGlobalBounds(); // Dùng ->
-
-                if (playerBounds.findIntersection(cnvBounds))
-                {
-                    if (velocity.y > 0) // Đang rơi (va chạm từ trên xuống)
-                    {
-                        // Đặt nhân vật đứng trên chướng ngại vật
-                        playerSprite.setPosition(
-                            {playerSprite.getPosition().x, cnvBounds.position.y - playerBounds.size.y});
-                        velocity.y = 0;
-                        isOnGround = true; // Coi như đang "trên mặt đất"
-                    }
-                    else if (velocity.y < 0) // Đang nhảy (va chạm từ dưới lên - đụng đầu)
-                    {
-                        // Đặt nhân vật bên dưới chướng ngại vật
-                        playerSprite.setPosition(
-                            {playerSprite.getPosition().x, cnvBounds.position.y + cnvBounds.size.y});
-                        velocity.y = 0; // Ngừng lực nhảy
-                    }
-                }
-            }
-
-            // 7b. Va chạm Y với mặt đất (vẫn phải kiểm tra)
-            playerBounds = playerSprite.getGlobalBounds();
-            if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y)
-            {
-                playerSprite.setPosition({playerSprite.getPosition().x, GROUND_Y - playerBounds.size.y});
-                velocity.y = 0;
-                isOnGround = true;
-            }
-
-            // 8. Giới hạn trong cửa sổ (luôn thực hiện sau cùng)
+            // 3. Giới hạn trong cửa sổ (Giữ lại logic này trong GameLoop)
             const sf::Vector2f pos = playerSprite.getPosition();
             if (pos.x < 0.f)
                 playerSprite.setPosition({0.f, pos.y});
 
-            playerBounds = playerSprite.getGlobalBounds();
+            sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
             if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
                 playerSprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
 

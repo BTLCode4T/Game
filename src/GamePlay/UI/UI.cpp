@@ -3,18 +3,18 @@
 #include "GamePlay/UI/UI.h"
 
 // --- Định nghĩa Struct Obstacle (đã tách ra khỏi game.cpp) ---
-Obstacle::Obstacle(const std::string &filePath, float width, float height, float x, float y) {
-    texture = std::make_unique<sf::Texture>();
-    if (!texture->loadFromFile(filePath)) {
-        std::cerr << "Loi: Khong the tai '" << filePath << "'" << std::endl;
-    }
-    sprite = std::make_unique<sf::Sprite>(*texture);
-    sf::FloatRect bounds = sprite->getLocalBounds();
-    float scaleX = width / bounds.size.x;
-    float scaleY = height / bounds.size.y;
-    sprite->setScale(sf::Vector2f(scaleX, scaleY));
-    sprite->setPosition({x, y});
-}
+// Obstacle::Obstacle(const std::string &filePath, float width, float height, float x, float y) {
+//     texture = std::make_unique<sf::Texture>();
+//     if (!texture->loadFromFile(filePath)) {
+//         std::cerr << "Loi: Khong the tai '" << filePath << "'" << std::endl;
+//     }
+//     sprite = std::make_unique<sf::Sprite>(*texture);
+//     sf::FloatRect bounds = sprite->getLocalBounds();
+//     float scaleX = width / bounds.size.x;
+//     float scaleY = height / bounds.size.y;
+//     sprite->setScale(sf::Vector2f(scaleX, scaleY));
+//     sprite->setPosition({x, y});
+// }
 
 
 // --- Định nghĩa Hàm createSprite ---
