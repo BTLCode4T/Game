@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm> // Dùng cho std::max/min
+#include <SFML/Graphics.hpp> // MỚI: Thêm thư viện đồ họa SFML
 
 using namespace std;
 
@@ -20,17 +21,35 @@ private:
     string inventory;
     string skill;
 
+    // --- Thuộc hính Đồ họa (MỚI) ---
+    sf::Texture texture; // Biến "ảnh" (lưu trữ ảnh)
+    sf::Sprite sprite;   // Biến "nhân vật" (dùng để vẽ)
+
 public:
-    // Constructor
+    // Constructor (Cập nhật: thêm đường dẫn ảnh)
     Entity(const string& type, const string& name, float x, float y,
-        int maxHealth, float speed);
+           int maxHealth, float speed, const string& texturePath); // CẬP NHẬT
 
     // Destructor ảo
     virtual ~Entity() = default;
 
     // --- Hàm chức năng ---
-    void Move(float dx, float dy);
+    void Move(float dx, float dy); // Sẽ được cập nhật để di chuyển sprite
     void TakeDamage(int amount);
+
+    // --- Hàm chức năng MỚI (Render và SetTexture) ---
+
+    /**
+     * @brief Hàm "edit" ảnh - Tải một ảnh mới cho Entity.
+     * @param texturePath Đường dẫn tới file ảnh (ví dụ: "assets/player.png")
+     */
+    void SetTexture(const string& texturePath); // MỚI
+
+    /**
+     * @brief Hàm "hiện con nhân vật ra" - Vẽ nhân vật lên cửa sổ game.
+     * @param window Cửa sổ RenderWindow mà bạn muốn vẽ lên.
+     */
+    void Render(sf::RenderWindow& window); // MỚI
 
     // --- Hàm cập nhật & Setters ---
     void AddSkill(const string& skillCode) {
