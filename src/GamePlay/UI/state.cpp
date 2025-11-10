@@ -125,9 +125,6 @@ void GameStateManager::handleEvents() {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
         // Sự kiện đóng cửa sổ (Luôn xử lý)
         if (event->is<sf::Event::Closed>()) {
-            JsonProcessor dataManager;
-            dataManager.updateAndWriteData("data/data.json");
-            std::cout << "=====================================================" << std::endl;
             window.close();
         }
 
