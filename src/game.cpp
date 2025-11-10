@@ -27,34 +27,7 @@
 // Enum quản lý các màn hình hoặc trạng thái của game
 // Đã chuyển sang state.h
 
-// Hàm xử lý quay về menu khi nhấn phím Escape hoặc click nút Home
-void handleReturnToMenu(sf::RenderWindow &window, const std::optional<sf::Event> &event, GameState &currentState,
-                        const sf::Sprite &btnHomeSprite) {
-    if (!event.has_value()) {
-        return;
-    }
 
-    // --- 1. Xử lý Phím Escape ---
-    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-        if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-            currentState = GameState::MainMenu; // Quay lại Menu
-            return;                             // Thoát ngay sau khi chuyển trạng thái
-        }
-    }
-
-    // --- 2. Xử lý Click chuột (Nút Home) ---
-    if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-        if (mouseButton->button == sf::Mouse::Button::Left) {
-            // Lấy tọa độ chuột trong cửa sổ
-            sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
-
-            // Kiểm tra va chạm với nút Home
-            if (btnHomeSprite.getGlobalBounds().contains(mousePos)) {
-                currentState = GameState::MainMenu; // Quay lại Menu
-            }
-        }
-    }
-}
 
 /* --- 5. HÀM CHÍNH --- */
 int main() {
