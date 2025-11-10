@@ -125,3 +125,13 @@ void decreasingTime(List &l) {
         }
     }
 }
+
+void deleteList(List &l) {
+    Node* current = l.head;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
+    }
+    l.head = l.tail = nullptr;
+}

@@ -66,10 +66,16 @@ private:
     std::unique_ptr<sf::Sprite> btnNoneSprite3;
     std::unique_ptr<sf::Sprite> btnNoneSprite4;
 
-
-public:
+   
+public: 
+    List scoresList;
     HighScoresUI(const sf::Sprite& bg, const sf::Sprite& homeBtn, const sf::Font& font);
     void Render(sf::RenderWindow& window, const sf::Font& font) override;
+    virtual ~HighScoresUI();
+    const sf::Sprite& getBtnDecreasingScore() const { return *btnNoneSprite1; }
+    const sf::Sprite& getBtnIncreasingScore() const { return *btnNoneSprite2; }
+    const sf::Sprite& getBtnDecreasingTime() const { return *btnNoneSprite3; }
+    const sf::Sprite& getBtnIncreasingTime() const { return *btnNoneSprite4; }
 };
 
 /* --- HELP --- */
@@ -99,5 +105,8 @@ public:
 
 
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY);
+
+
+
 
 #endif

@@ -67,8 +67,8 @@ int main() {
     // ⚠️⚠️⚠️ PHẦN CHO HỆ ĐIỀU HÀNH: KHÔNG ĐỘNG VÀO ⚠️⚠️⚠️
     sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Dino Game Setup NT - SFML 3.0.0",
                             sf::Style::Titlebar | sf::Style::Close, sf::State::Windowed);
-    window.setFramerateLimit(60);          // Giới hạn FPS
-    window.setVerticalSyncEnabled(true);   // Đồng bộ hóa với tần số quét
+    window.setFramerateLimit(60);        // Giới hạn FPS
+    window.setVerticalSyncEnabled(true); // Đồng bộ hóa với tần số quét
     sf::Image iconImage;
 
     // Tải icon game
@@ -219,7 +219,37 @@ int main() {
                 }
                 break;
             }
-            case GameState::HighScores:
+            case GameState::HighScores: {
+                handleReturnToMenu(window, event, currentState, btnHomeSprite);
+                
+                // *** LOGIC XỬ LÝ CLICK SẮP XẾP ***
+                if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
+                    if (mouseButton->button == sf::Mouse::Button::Left) {
+                        sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
+                        
+                        // Lấy tham chiếu đến danh sách điểm số (đã được sửa thành public)
+                        List& currentList = highScoresUI.scoresList; 
+                        
+                        // 1. Điểm giảm dần
+                        if (highScoresUI.getBtnDecreasingScore().getGlobalBounds().contains(mousePos)) {
+                            decreasingScore(currentList);
+                        } 
+                        // 2. Điểm tăng dần
+                        else if (highScoresUI.getBtnIncreasingScore().getGlobalBounds().contains(mousePos)) {
+                            increasingScore(currentList);
+                        } 
+                        // 3. Thời gian giảm dần
+                        else if (highScoresUI.getBtnDecreasingTime().getGlobalBounds().contains(mousePos)) {
+                            decreasingTime(currentList);
+                        } 
+                        // 4. Thời gian tăng dần
+                        else if (highScoresUI.getBtnIncreasingTime().getGlobalBounds().contains(mousePos)) {
+                            increasingTime(currentList);
+                        }
+                    }
+                }
+                break;
+            }
             case GameState::Help:
             case GameState::Settings: {
                 handleReturnToMenu(window, event, currentState, btnHomeSprite);

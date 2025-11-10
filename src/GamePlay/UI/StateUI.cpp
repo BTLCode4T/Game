@@ -60,23 +60,21 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
     titleText = std::make_unique<sf::Text>(createText(font, L"BẢNG XẾP HẠNG", 40, sf::Color::Red, 350.0f, 125.0f));
 
     // --- [2] Dòng hiển thị điểm số người chơi ---
-    
 
     tableListSprite = std::make_unique<sf::Sprite>(
         createSprite(tableListTexture, "assets/Images/list.png", 670.5f, 502.5f, 25.0f, 60.0f));
 
     btnNoneSprite1 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture1, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 125.0f));
-
+        createSprite(btnNoneTexture1, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 125.0f));
 
     btnNoneSprite2 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture2, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 225.0f));
+        createSprite(btnNoneTexture2, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 225.0f));
 
     btnNoneSprite3 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture3, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 325.0f));
+        createSprite(btnNoneTexture3, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 325.0f));
 
     btnNoneSprite4 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 425.0f));
+        createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 425.0f));
 
     // Khu vực tạo text sắp xếp
     // std::unique_ptr<sf::Text> decreaingScore;
@@ -94,10 +92,10 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
         std::make_unique<sf::Text>(createText(font, L"Thời gian giảm dần", 20, sf::Color::White, 855.0f, 350.0f));
 
     increaingTime =
-        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));
-
+        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));initList(scoresList); 
+    readFile("Scores.txt", scoresList);
 }
-
+    
 /* --- Render HighScoresUI ---
  * Vẽ nền, nút home và các text liên quan đến bảng điểm.
  */
@@ -105,43 +103,28 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
  * Vẽ nền, nút home và các text liên quan đến bảng điểm.
  */
 void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
-    List l;
-    initList(l);
-
-    readFile("Scores.txt", l);
-
-    // // Vị trí bắt đầu vẽ danh sách điểm
-    // float startX = 50.0f;
-    // float startY = 200.0f;
-
-    // GỌI HÀM VẼ ĐIỂM SỐ (KHẮC PHỤC LỖI 87)
+    // List l; // >> Bỏ dòng này
+    // initList(l); // >> Bỏ dòng này
+    // readFile("Scores.txt", l); // >> Bỏ dòng này
 
     window.draw(backgroundSprite);
     window.draw(btnHomeSprite);
-    window.draw(*tableListSprite); // Giả định tableListSprite là nền bảng điểm
+    window.draw(*tableListSprite);
     window.draw(*titleText);
-    drawScoresList(window, l, font, 120.0f, 200.0f);
-    window.draw(*btnNoneSprite1); // decreaingScore
-    window.draw(*btnNoneSprite2); // increasingScor
-    window.draw(*btnNoneSprite3); // decreaingTime
-    window.draw(*btnNoneSprite4); // increaingTime
+
+    // *** DÙNG scoresList THÀNH VIÊN ĐÃ TẢI ***
+    drawScoresList(window, scoresList, font, 120.0f, 200.0f);
+
+    window.draw(*btnNoneSprite1);
+    window.draw(*btnNoneSprite2);
+    window.draw(*btnNoneSprite3);
+    window.draw(*btnNoneSprite4);
     window.draw(*decreaingScore);
     window.draw(*increaingScore);
     window.draw(*decreaingTime);
     window.draw(*increaingTime);
 
-
-    // Khu vực kiểm tra ấn nút và chạy hàm sắp xếp
-
-
-
-
-
-
-
-
-
-    // Lưu ý: Sau khi sử dụng, bạn nên có một hàm để giải phóng bộ nhớ (ví dụ: deleteList(l);)
+    // Khu vực kiểm tra ấn nút và chạy hàm sắp xếp (Sẽ làm ở main.cpp)
 }
 
 /* ============================================================
@@ -242,4 +225,12 @@ void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &fon
         p = p->next;
         currentLine++; // Tăng biến đếm dòng
     }
+}
+
+// Fix: The destructor should be virtual as it's part of an inheritance hierarchy.
+// Also, it should load the scores from the file when constructed, not when rendered.
+// The destructor should also free the memory allocated for the scores list.
+
+HighScoresUI::~HighScoresUI() { // *** KHẮC PHỤC LỖI DESTUCTOR: Định nghĩa hàm ***
+    deleteList(scoresList); // Gọi hàm giải phóng danh sách
 }
