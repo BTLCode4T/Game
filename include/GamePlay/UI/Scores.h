@@ -28,7 +28,7 @@ struct List {
     Node* tail;
 };
 
-// Khởi tạo danh sách rỗng
+// Khởi tạo danh sách
 void initList(List &l);
 
 // Tạo node mới
@@ -43,4 +43,16 @@ void readFile(const std::string &filename, List &l);
 // In danh sách
 void printList(const List &l);
 
-#endif
+// Giải phóng danh sách
+void deleteList(List &l);
+
+// --- Sắp xếp ---
+// Sắp xếp theo điểm
+void increasingScore(List &l);
+void decreasingScore(List &l);
+
+// Sắp xếp theo thời gian
+void increasingTime(List &l);
+void decreasingTime(List &l);
+
+#endif // SCORES_H

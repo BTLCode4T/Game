@@ -7,6 +7,8 @@
 #include "GamePlay/UI/UI.h"
 #include "Core/Constants.h"
 #include "Core/GameLoop/game.h"
+#include "GamePlay/UI/Scores.h"
+
 
 enum class GameState;
 
@@ -50,12 +52,19 @@ public:
 /* --- HIGH SCORES --- */
 class HighScoresUI : public IGameStateUI {
 private:
-    sf::Texture tableListTexture;
+    sf::Texture tableListTexture, btnNoneTexture1, btnNoneTexture2, btnNoneTexture3, btnNoneTexture4;
     std::unique_ptr<sf::Text> titleText;
-    std::unique_ptr<sf::Text> idCharacterText;
+    std::unique_ptr<sf::Text> decreaingScore;
+    std::unique_ptr<sf::Text> increaingScore;
+    std::unique_ptr<sf::Text> decreaingTime;
+    std::unique_ptr<sf::Text> increaingTime;
     const sf::Sprite& backgroundSprite;
     const sf::Sprite& btnHomeSprite;
     std::unique_ptr<sf::Sprite> tableListSprite;
+    std::unique_ptr<sf::Sprite> btnNoneSprite1;
+    std::unique_ptr<sf::Sprite> btnNoneSprite2;
+    std::unique_ptr<sf::Sprite> btnNoneSprite3;
+    std::unique_ptr<sf::Sprite> btnNoneSprite4;
 
 
 public:
@@ -87,5 +96,8 @@ public:
     SettingsUI(const sf::Sprite& bg, const sf::Sprite& homeBtn, const sf::Font& font);
     void Render(sf::RenderWindow& window, const sf::Font& font) override;
 };
+
+
+void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY);
 
 #endif

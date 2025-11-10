@@ -63,3 +63,65 @@ void printList(const List &l) {
     }
 }
 
+void swapNodeData(Node* a, Node* b) {
+    std::swap(a->point, b->point);
+    std::swap(a->t, b->t);
+    std::swap(a->d, b->d);
+}
+
+// Sắp xếp theo điểm tăng dần
+void increasingScore(List &l) {
+    if (!l.head) return;
+    for (Node* i = l.head; i->next; i = i->next) {
+        for (Node* j = i->next; j; j = j->next) {
+            if (i->point > j->point) {
+                swapNodeData(i, j);
+            }
+        }
+    }
+}
+
+// Sắp xếp theo điểm giảm dần
+void decreasingScore(List &l) {
+    if (!l.head) return;
+    for (Node* i = l.head; i->next; i = i->next) {
+        for (Node* j = i->next; j; j = j->next) {
+            if (i->point < j->point) {
+                swapNodeData(i, j);
+            }
+        }
+    }
+}
+
+// So sánh thời gian, trả về true nếu t1 trước t2
+bool isEarlier(Time t1, Date d1, Time t2, Date d2) {
+    if (d1.year != d2.year) return d1.year < d2.year;
+    if (d1.month != d2.month) return d1.month < d2.month;
+    if (d1.day != d2.day) return d1.day < d2.day;
+    if (t1.hour != t2.hour) return t1.hour < t2.hour;
+    return t1.minute < t2.minute;
+}
+
+// Sắp xếp theo thời gian tăng dần
+void increasingTime(List &l) {
+    if (!l.head) return;
+    for (Node* i = l.head; i->next; i = i->next) {
+        for (Node* j = i->next; j; j = j->next) {
+            if (!isEarlier(i->t, i->d, j->t, j->d)) {
+                swapNodeData(i, j);
+            }
+        }
+    }
+}
+
+// Sắp xếp theo thời gian giảm dần
+void decreasingTime(List &l) {
+    if (!l.head) return;
+    for (Node* i = l.head; i->next; i = i->next) {
+        for (Node* j = i->next; j; j = j->next) {
+            if (isEarlier(i->t, i->d, j->t, j->d)) {
+                swapNodeData(i, j);
+            }
+        }
+    }
+}

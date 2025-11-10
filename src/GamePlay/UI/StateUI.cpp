@@ -1,7 +1,9 @@
 #include "GamePlay/UI/StateUI.h"
 #include "GamePlay/UI/Scores.h"
 #include "GamePlay/UI/UI.h"
+#include <SFML/Graphics.hpp>
 #include <iostream>
+#include <sstream>
 
 /* ============================================================
  *   CLASS: MainMenuUI — Giao diện chính của game
@@ -58,13 +60,47 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
     titleText = std::make_unique<sf::Text>(createText(font, L"BẢNG XẾP HẠNG", 40, sf::Color::Red, 350.0f, 125.0f));
 
     // --- [2] Dòng hiển thị điểm số người chơi ---
-    idCharacterText =
-        std::make_unique<sf::Text>(createText(font, L"Ngọc Tiên #1", 28, sf::Color::White, 700.0f, 250.0f));
+    
 
     tableListSprite = std::make_unique<sf::Sprite>(
         createSprite(tableListTexture, "assets/Images/list.png", 670.5f, 502.5f, 25.0f, 60.0f));
+
+    btnNoneSprite1 = std::make_unique<sf::Sprite>(
+        createSprite(btnNoneTexture1, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 125.0f));
+
+
+    btnNoneSprite2 = std::make_unique<sf::Sprite>(
+        createSprite(btnNoneTexture2, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 225.0f));
+
+    btnNoneSprite3 = std::make_unique<sf::Sprite>(
+        createSprite(btnNoneTexture3, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 325.0f));
+
+    btnNoneSprite4 = std::make_unique<sf::Sprite>(
+        createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 52.5f, 750.0f, 425.0f));
+
+    // Khu vực tạo text sắp xếp
+    // std::unique_ptr<sf::Text> decreaingScore;
+    // std::unique_ptr<sf::Text> increaingScore;
+    // std::unique_ptr<sf::Text> decreaingTime;
+    // std::unique_ptr<sf::Text> decreaingTime;
+
+    decreaingScore =
+        std::make_unique<sf::Text>(createText(font, L"Điểm giảm dần", 20, sf::Color::White, 855.0f, 150.0f));
+
+    increaingScore =
+        std::make_unique<sf::Text>(createText(font, L"Điểm tăng dần", 20, sf::Color::White, 855.0f, 250.0f));
+
+    decreaingTime =
+        std::make_unique<sf::Text>(createText(font, L"Thời gian giảm dần", 20, sf::Color::White, 855.0f, 350.0f));
+
+    increaingTime =
+        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));
+
 }
 
+/* --- Render HighScoresUI ---
+ * Vẽ nền, nút home và các text liên quan đến bảng điểm.
+ */
 /* --- Render HighScoresUI ---
  * Vẽ nền, nút home và các text liên quan đến bảng điểm.
  */
@@ -73,13 +109,39 @@ void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     initList(l);
 
     readFile("Scores.txt", l);
-    printList(l);
+
+    // // Vị trí bắt đầu vẽ danh sách điểm
+    // float startX = 50.0f;
+    // float startY = 200.0f;
+
+    // GỌI HÀM VẼ ĐIỂM SỐ (KHẮC PHỤC LỖI 87)
 
     window.draw(backgroundSprite);
     window.draw(btnHomeSprite);
-    window.draw(*tableListSprite);
+    window.draw(*tableListSprite); // Giả định tableListSprite là nền bảng điểm
     window.draw(*titleText);
-    window.draw(*idCharacterText);
+    drawScoresList(window, l, font, 120.0f, 200.0f);
+    window.draw(*btnNoneSprite1); // decreaingScore
+    window.draw(*btnNoneSprite2); // increasingScor
+    window.draw(*btnNoneSprite3); // decreaingTime
+    window.draw(*btnNoneSprite4); // increaingTime
+    window.draw(*decreaingScore);
+    window.draw(*increaingScore);
+    window.draw(*decreaingTime);
+    window.draw(*increaingTime);
+
+
+    // Khu vực kiểm tra ấn nút và chạy hàm sắp xếp
+
+
+
+
+
+
+
+
+
+    // Lưu ý: Sau khi sử dụng, bạn nên có một hàm để giải phóng bộ nhớ (ví dụ: deleteList(l);)
 }
 
 /* ============================================================
@@ -125,4 +187,59 @@ void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(backgroundSprite);
     window.draw(btnHomeSprite);
     window.draw(*settingsText);
+}
+
+void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY) {
+    Node *p = l.head;
+    float currentY = startY;
+
+    // --- [1] Vẽ Tiêu đề ---
+    // Giữ nguyên phần này
+    sf::Text headerText(font, L"ĐIỂM\t\t\tTHỜI GIAN\t\t\tNGÀY", 22);
+    headerText.setFillColor(sf::Color::Yellow);
+    headerText.setPosition(sf::Vector2f(135.0f, 175.0f));
+    window.draw(headerText);
+    currentY += 35.0f;
+
+    // --- [2] Duyệt và vẽ từng điểm số ---
+    const int maxLines = 5;
+    int currentLine = 0;
+
+    // Vòng lặp sẽ dừng khi p là nullptr (cuối danh sách) HOẶC khi đã vẽ 5 dòng
+    while (p && currentLine < maxLines) {
+        std::wstringstream wss;
+
+        // --- BƯỚC 1: Xây dựng chuỗi Time và Date để setw có thể áp dụng ---
+
+        std::wstring time_str = (p->t.hour < 10 ? L"0" : L"") + std::to_wstring(p->t.hour) + L":" +
+                                (p->t.minute < 10 ? L"0" : L"") + std::to_wstring(p->t.minute);
+
+        std::wstring date_str = (p->d.day < 10 ? L"0" : L"") + std::to_wstring(p->d.day) + L"/" +
+                                (p->d.month < 10 ? L"0" : L"") + std::to_wstring(p->d.month) + L"/" +
+                                std::to_wstring(p->d.year);
+
+        // --- BƯỚC 2: Định dạng wstringstream bằng setw và thêm khoảng trắng phân tách ---
+
+        // 1. Cột Point (Rộng 8, Căn phải)
+        wss << std::right << std::setw(8) << p->point;
+        wss << L"               "; // <<< THÊM 3 KHOẢNG TRẮNG PHÂN TÁCH SAU ĐIỂM
+
+        // 2. Cột Time (Rộng 12, Căn trái)
+        wss << std::left << std::setw(12) << time_str;
+        wss << L"      "; // <<< THÊM 3 KHOẢNG TRẮNG PHÂN TÁCH SAU THỜI GIAN
+
+        // 3. Cột Date (Rộng 15, Căn trái)
+        wss << std::left << std::setw(15) << date_str;
+
+        // ... (Tiếp tục tạo và vẽ sf::Text) ...
+        sf::Text scoreLineText(font, wss.str(), 23);
+        scoreLineText.setFillColor(sf::Color::White);
+        scoreLineText.setPosition(sf::Vector2f(startX, currentY));
+
+        window.draw(scoreLineText);
+        currentY += 54.0f;
+
+        p = p->next;
+        currentLine++; // Tăng biến đếm dòng
+    }
 }
