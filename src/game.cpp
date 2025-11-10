@@ -7,7 +7,7 @@
 #include "GamePlay/UI/StateUI.h"
 #include "GamePlay/UI/UI.h"
 #include <SFML/Graphics.hpp>
-#include "GamePlay/UI/state.h"
+#include "Core/Input/Input.h"
 #include <iostream>
 #include <memory>
 #include <optional>

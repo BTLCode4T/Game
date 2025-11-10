@@ -1,6 +1,6 @@
 // state.cpp
 
-#include "GamePlay/UI/state.h"
+#include "Core/Input/Input.h"
 #include "Core/GameLoop/json.h" // Bao gồm nếu cần cho sự kiện đóng cửa sổ
 #include <iostream>
 
