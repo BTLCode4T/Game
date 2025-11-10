@@ -23,7 +23,8 @@ add_executable (main
                 src/GamePlay/UI/UI.cpp 
                 src/GamePlay/Physics/PhysicsSystem.cpp 
                 src/Utils/json.cpp
-                src/GamePlay/UI/StateUI.cpp)
+                src/GamePlay/UI/StateUI.cpp
+                src/GamePlay/UI/Scores.cpp)
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)
@@ -42,6 +43,7 @@ src/Utils # <-- ĐÃ SỬA: Trỏ đến src/Utils để tìm json.h và json.hp
 )
 # Copy file data.json
 file(COPY data/data.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY data/Scores.txt DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 # file(COPY data/HighScores.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Copy toàn bộ thư mục assets

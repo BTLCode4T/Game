@@ -50,10 +50,13 @@ public:
 /* --- HIGH SCORES --- */
 class HighScoresUI : public IGameStateUI {
 private:
+    sf::Texture tableListTexture;
     std::unique_ptr<sf::Text> titleText;
     std::unique_ptr<sf::Text> idCharacterText;
     const sf::Sprite& backgroundSprite;
     const sf::Sprite& btnHomeSprite;
+    std::unique_ptr<sf::Sprite> tableListSprite;
+
 
 public:
     HighScoresUI(const sf::Sprite& bg, const sf::Sprite& homeBtn, const sf::Font& font);
