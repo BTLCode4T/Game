@@ -1,78 +1,65 @@
-﻿#ifndef ENTITY_H
+#ifndef ENTITY_H
 #define ENTITY_H
 
 #include <iostream>
 #include <string>
-#include <algorithm> // Dùng cho std::max/min
-#include <SFML/Graphics.hpp> // MỚI: Thêm thư viện đồ họa SFML
-
-using namespace std;
+#include <algorithm>        // Dùng cho std::max/min
+#include <SFML/Graphics.hpp> // Thư viện đồ họa SFML
 
 class Entity {
 private:
     // --- Thuộc tính Chung ---
-    string type;
-    string name;
+    std::string type;
+    std::string name;
     float x;
     float y;
     int health;
     int maxHealth;
     float speed;
-    string inventory;
-    string skill;
+    std::string inventory;
+    std::string skill;
 
-    // --- Thuộc hính Đồ họa (MỚI) ---
-    sf::Texture texture; // Biến "ảnh" (lưu trữ ảnh)
-    sf::Sprite sprite;   // Biến "nhân vật" (dùng để vẽ)
+    // --- Thuộc tính Đồ họa ---
+    sf::Texture texture; // Ảnh nhân vật
+    sf::Sprite sprite;   // Sprite để vẽ ảnh
 
 public:
     // Constructor (Cập nhật: thêm đường dẫn ảnh)
-    Entity(const string& type, const string& name, float x, float y,
-           int maxHealth, float speed, const string& texturePath); // CẬP NHẬT
+    Entity(const std::string& type, const std::string& name,
+           float x, float y, int maxHealth, float speed,
+           const std::string& texturePath);
 
     // Destructor ảo
     virtual ~Entity() = default;
 
-    // --- Hàm chức năng ---
-    void Move(float dx, float dy); // Sẽ được cập nhật để di chuyển sprite
+    // --- Chức năng chính ---
+    void Move(float dx, float dy);
     void TakeDamage(int amount);
+    void DisplayStatus() const;
 
-    // --- Hàm chức năng MỚI (Render và SetTexture) ---
+    // --- Hàm MỚI (SFML) ---
+    void SetTexture(const std::string& texturePath);
+    void Render(sf::RenderWindow& window);
 
-    /**
-     * @brief Hàm "edit" ảnh - Tải một ảnh mới cho Entity.
-     * @param texturePath Đường dẫn tới file ảnh (ví dụ: "assets/player.png")
-     */
-    void SetTexture(const string& texturePath); // MỚI
-
-    /**
-     * @brief Hàm "hiện con nhân vật ra" - Vẽ nhân vật lên cửa sổ game.
-     * @param window Cửa sổ RenderWindow mà bạn muốn vẽ lên.
-     */
-    void Render(sf::RenderWindow& window); // MỚI
-
-    // --- Hàm cập nhật & Setters ---
-    void AddSkill(const string& skillCode) {
-        skill = skillCode;
-        cout << name << " hoc duoc ky nang moi: " << skillCode << endl;
-    }
-    void AddInventory(const string& itemCode) {
-        inventory = itemCode;
-        cout << name << " nhat duoc: " << itemCode << endl;
-    }
-
-    // Khai báo
+    // --- Setter ---
     void SetHealth(int newHealth);
-    void SetName(const string& newName);
+    void SetName(const std::string& newName);
     void SetSpeed(float newSpeed);
 
-    // --- Getters ---
+    void AddSkill(const std::string& skillCode) {
+        skill = skillCode;
+        std::cout << name << " hoc duoc ky nang moi: " << skillCode << std::endl;
+    }
+
+    void AddInventory(const std::string& itemCode) {
+        inventory = itemCode;
+        std::cout << name << " nhat duoc: " << itemCode << std::endl;
+    }
+
+    // --- Getter ---
     float GetX() const { return x; }
     float GetY() const { return y; }
-    string GetName() const { return name; }
-
-    // Hàm hiển thị trạng thái
-    virtual void DisplayStatus() const;
+    std::string GetName() const { return name; }
 };
 
 #endif // ENTITY_H
