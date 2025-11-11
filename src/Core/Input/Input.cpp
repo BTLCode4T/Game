@@ -1,258 +1,106 @@
-// state.cpp
-
 #include "Core/Input/Input.h"
-#include "Core/GameLoop/json.h" // Bao gồm nếu cần cho sự kiện đóng cửa sổ
-#include <iostream>
 
-// Hàm tiện ích để quay về menu
-void GameStateManager::handleReturnToMenu(const std::optional<sf::Event> &event) {
-    if (!event.has_value()) {
-        return;
+
+// hàm mẫu để sử dụng cho các thao tác
+
+
+InputManager::InputManager() {
+}
+
+//=============================================================================================================================
+// Xử lý khi có sự kiện SFML gửi đến
+void InputManager::ProcessEvent(const sf::Event &event) {
+    // phím
+    if (const auto *key = event.getIf<sf::Event::KeyPressed>()) {
+        if (!keyDown[key->scancode])          // Nếu phím chưa được giữ xuống
+            keyPressed[key->scancode] = true; // Ghi nhận là vừa nhấn
+        keyDown[key->scancode] = true;        // Đánh dấu phím đang được giữ
+    }
+    // thả phím
+    if (const auto *key = event.getIf<sf::Event::KeyReleased>()) {
+        keyDown[key->scancode] = false;
+        keyReleased[key->scancode] = true;
     }
 
-    // --- 1. Xử lý Phím Escape ---
-    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-        if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-            currentState = GameState::MainMenu; // Quay lại Menu
-            return;                             // Thoát ngay sau khi chuyển trạng thái
-        }
+    // nhấn chuột
+    if (const auto *mouse = event.getIf<sf::Event::MouseButtonPressed>()) {
+        if (!mouseDown[mouse->button])
+            mousePressed[mouse->button] = true;
+        mouseDown[mouse->button] = true;
+    }
+    // thả chuột
+    if (const auto *mouse = event.getIf<sf::Event::MouseButtonReleased>()) {
+        mouseDown[mouse->button] = false;
+        mouseReleased[mouse->button] = true;
     }
 
-    // --- 2. Xử lý Click chuột (Nút Home) ---
-    if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-        if (mouseButton->button == sf::Mouse::Button::Left) {
-            // Lấy tọa độ chuột trong cửa sổ
-            sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
-
-            // Kiểm tra va chạm với nút Home
-            if (btnHomeSprite.getGlobalBounds().contains(mousePos)) {
-                currentState = GameState::MainMenu; // Quay lại Menu
-            }
-        }
+    // Khi chuột di chuyển, lưu tọa độ hiện tại
+    if (const auto *move = event.getIf<sf::Event::MouseMoved>()) {
+        mousePos = {move->position.x, move->position.y};
     }
 }
+//=============================================================================================================================
 
-// ----------------- XỬ LÝ SỰ KIỆN -----------------
 
-void GameStateManager::handleMainMenuEvent(const std::optional<sf::Event>& event) {
-    if (!event.has_value()) return;
+// ==================================================== Cập nhật frame ========================================================
 
-    // --- Xử lý phím trong menu ---
-    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-        if (keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
-            playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-            velocity = {0.f, 0.f};
-            isOnGround = false;
-            currentState = GameState::Playing;
-        } else if (keyPressed->scancode == sf::Keyboard::Scancode::H) {
-            currentState = GameState::HighScores;
-        } else if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-            window.close();
-        }
-    }
+void InputManager::Update() {
+    // Cờ “vừa nhấn” và “vừa nhả” chỉ tồn tại đúng 1 frame duy nhất,
+    //     nên phải reset sau mỗi vòng lặp update() hoặc render() — để game chỉ xử lý sự kiện mới xảy ra,
+    //     không bị lặp lại từ frame trước.keyPressed.clear();
+    keyPressed.clear();
+    keyReleased.clear();
+    mousePressed.clear();
+    mouseReleased.clear();
+}
+//=============================================================================================================================
 
-    // --- Xử lý click chuột cho menu ---
-    if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-        if (mouseButton->button == sf::Mouse::Button::Left) {
-            sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
-            if (mainMenu.getBtnNewSprite().getGlobalBounds().contains(mousePos)) {
-                playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-                velocity = {0.f, 0.f};
-                isOnGround = false;
-                currentState = GameState::Playing;
-            } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
-                currentState = GameState::HighScores;
-            } else if (mainMenu.getBtnHelpSprite().getGlobalBounds().contains(mousePos)) {
-                currentState = GameState::Help;
-            } else if (mainMenu.getBtnSettingsSprite().getGlobalBounds().contains(mousePos)) {
-                currentState = GameState::Settings;
-            }
-        }
-    }
+
+////================================================= Kiểm tra ===========================================================
+// Dùng trong vòng lặp update()
+
+// phím
+bool InputManager::IsKeyDown(sf::Keyboard::Scancode key) const {
+    // Trả về true nếu phím đang được giữ
+    auto it = keyDown.find(key);
+    return it != keyDown.end() && it->second;
 }
 
-void GameStateManager::handlePlayingEvent(const std::optional<sf::Event>& event) {
-    // Xử lý nút Home/Escape
-    handleReturnToMenu(event);
-
-    // Logic nhảy
-    if (event.has_value()) {
-        if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-            if (keyPressed->scancode == sf::Keyboard::Scancode::Space && jumpsRemaining > 0) {
-                velocity.y = JUMP_VELOCITY;
-                jumpsRemaining--;   // Giảm số lần nhảy
-                isOnGround = false; // Reset trạng thái đất
-            }
-        }
-    }
+bool InputManager::IsKeyPressed(sf::Keyboard::Scancode key) const {
+    // Trả về true nếu phím vừa được nhấn ở frame này
+    auto it = keyPressed.find(key);
+    return it != keyPressed.end() && it->second;
 }
 
-void GameStateManager::handleHighScoresEvent(const std::optional<sf::Event>& event) {
-    // Xử lý nút Home/Escape
-    handleReturnToMenu(event);
-
-    // *** LOGIC XỬ LÝ CLICK SẮP XẾP ***
-    if (event.has_value()) {
-        if (const auto *mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-            if (mouseButton->button == sf::Mouse::Button::Left) {
-                sf::Vector2f mousePos = window.mapPixelToCoords(mouseButton->position);
-                
-                // Lấy tham chiếu đến danh sách điểm số (đã được sửa thành public)
-                List& currentList = highScoresUI.scoresList; 
-                
-                // 1. Điểm giảm dần
-                if (highScoresUI.getBtnDecreasingScore().getGlobalBounds().contains(mousePos)) {
-                    decreasingScore(currentList);
-                } 
-                // 2. Điểm tăng dần
-                else if (highScoresUI.getBtnIncreasingScore().getGlobalBounds().contains(mousePos)) {
-                    increasingScore(currentList);
-                } 
-                // 3. Thời gian giảm dần
-                else if (highScoresUI.getBtnDecreasingTime().getGlobalBounds().contains(mousePos)) {
-                    decreasingTime(currentList);
-                } 
-                // 4. Thời gian tăng dần
-                else if (highScoresUI.getBtnIncreasingTime().getGlobalBounds().contains(mousePos)) {
-                    increasingTime(currentList);
-                }
-            }
-        }
-    }
+bool InputManager::IsKeyReleased(sf::Keyboard::Scancode key) const {
+    // Trả về true nếu phím vừa được nhả ở frame này
+    auto it = keyReleased.find(key);
+    return it != keyReleased.end() && it->second;
 }
 
-void GameStateManager::handleEvents() {
-    while (const std::optional<sf::Event> event = window.pollEvent()) {
-        // Sự kiện đóng cửa sổ (Luôn xử lý)
-        if (event->is<sf::Event::Closed>()) {
-            window.close();
-        }
-
-        // Xử lý input theo trạng thái game
-        switch (currentState) {
-            case GameState::MainMenu: {
-                handleMainMenuEvent(event);
-                break;
-            }
-            case GameState::Playing: {
-                handlePlayingEvent(event);
-                break;
-            }
-            case GameState::HighScores: {
-                handleHighScoresEvent(event);
-                break;
-            }
-            case GameState::Help:
-            case GameState::Settings: {
-                handleReturnToMenu(event);
-                break;
-            }
-        } // kết thúc switch(currentState)
-    } // kết thúc while(pollEvent)
+// chuột
+bool InputManager::IsMouseDown(sf::Mouse::Button btn) const {
+    auto it = mouseDown.find(btn);
+    return it != mouseDown.end() && it->second;
 }
 
-// ----------------- CẬP NHẬT LOGIC -----------------
-
-void GameStateManager::updatePlaying(float deltaTime) {
-    sf::Vector2f oldPos = playerSprite.getPosition();
-    // Cập nhật vận tốc X từ input
-    velocity.x = 0.f;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Left) ||
-        sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
-        velocity.x = -MOVE_SPEED;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Right) ||
-        sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
-        velocity.x = MOVE_SPEED;
-
-    // Gọi hệ thống vật lý
-    PhysicsSystem::Update(playerSprite, velocity, deltaTime, obstacles, isOnGround);
-
-    if (isOnGround) {
-        jumpsRemaining = MAX_JUMPS;
-    }
-
-    // Giới hạn trong cửa sổ
-    const sf::Vector2f pos = playerSprite.getPosition();
-    if (pos.x < 0.f)
-        playerSprite.setPosition({0.f, pos.y});
-
-    sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
-    if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
-        playerSprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
+bool InputManager::IsMousePressed(sf::Mouse::Button btn) const {
+    auto it = mousePressed.find(btn);
+    return it != mousePressed.end() && it->second;
 }
 
-void GameStateManager::update(float deltaTime) {
-    switch (currentState) {
-        case GameState::MainMenu: {
-            // Cập nhật menu (hiệu ứng hover, ...)
-            break;
-        }
-        case GameState::Playing: {
-            updatePlaying(deltaTime);
-            break;
-        }
-        case GameState::HighScores:
-        case GameState::Help:
-        case GameState::Settings: {
-            // Cập nhật logic không cần thiết (thường không cần)
-            break;
-        }
-    } // kết thúc switch(currentState)
+bool InputManager::IsMouseReleased(sf::Mouse::Button btn) const {
+    auto it = mouseReleased.find(btn);
+    return it != mouseReleased.end() && it->second;
+}
+//=============================================================================================================================
+
+
+
+//=================================================== Lấy vị trí chuột =========================================================
+
+sf::Vector2i InputManager::GetMousePosition() const {
+    return mousePos;
 }
 
-// ----------------- VẼ -----------------
-
-void GameStateManager::render() {
-    window.clear(sf::Color::Black);
-
-    switch (currentState) {
-        case GameState::MainMenu: {
-            mainMenu.Render(window, menuFont); // Render menu
-            break;
-        }
-        case GameState::Playing: {
-            window.draw(backgroundSprite); // nền
-            window.draw(sunSprite);        // mặt trời
-            window.draw(ground);           // mặt đất
-
-            // Vẽ các chướng ngại vật
-            for (const auto &obs : obstacles) {
-                window.draw(*obs.sprite);
-            }
-
-            window.draw(playerSprite); // nhân vật
-            break;
-        }
-        case GameState::HighScores: {
-            highScoresUI.Render(window, menuFont);
-            break;
-        }
-        case GameState::Help: {
-            helpUI.Render(window, menuFont);
-            break;
-        }
-        case GameState::Settings: {
-            settingsUI.Render(window, menuFont);
-            break;
-        }
-    } // kết thúc switch(currentState)
-
-    window.display();
-}
-
-// ----------------- VÒNG LẶP CHÍNH -----------------
-
-void GameStateManager::runGameLoop() {
-    while (window.isOpen()) {
-        float deltaTime = clock.restart().asSeconds();
-
-        // 1. Xử lý Sự kiện (Input)
-        handleEvents();
-
-        // 2. Cập nhật Logic Game (Update)
-        update(deltaTime);
-
-        // 3. Vẽ (Render)
-        render();
-    } // kết thúc while(window.isOpen)
-}
+//=============================================================================================================================

@@ -5,12 +5,9 @@
 #include <memory>
 #include <vector>
 #include "GamePlay/UI/UI.h"
-#include "Core/Constants.h"
-#include "Core/GameLoop/game.h"
+#include "Utils/Constants.h"
 #include "GamePlay/UI/Scores.h"
-
-
-enum class GameState;
+#include "Utils/GameSate.h"
 
 /* --- INTERFACE VẼ TRẠNG THÁI --- */
 class IGameStateUI {
@@ -105,8 +102,5 @@ public:
 
 
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY);
-
-
-
 
 #endif

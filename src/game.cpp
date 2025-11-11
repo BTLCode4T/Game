@@ -1,45 +1,34 @@
-/* --- 1. BAO GỒM THƯ VIỆN --- */
-// Bao gồm các thư viện cốt lõi, UI, vật lý, SFML và các thư viện chuẩn C++
 #include "Core/GameLoop/game.h"
-#include "Core/Constants.h"
+
+#include "Utils/Constants.h"
 #include "Core/GameLoop/json.h"
+#include "Core/Input/Input.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
 #include "GamePlay/UI/UI.h"
+#include "Utils/GameSate.h"
 #include <SFML/Graphics.hpp>
-#include "Core/Input/Input.h"
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-/* ---------------------. HẰNG SỐ GAME --- -------------------------------/
-//  Khai báo các hằng số trong Core/Constants.h
-// -------------------------------------------------------------------------------//
 
-
-/* ------------------------- 3. HÀM TIỆN ÍCH GIAO DIỆN ------------------------- */
-//  Các hàm tiện ích cho UI, khai báo trong UI.h
-// -------------------------------------------------------------------------------//
-
-/* --- 4. TRẠNG THÁI GAME (ENUM) --- */
-// Enum quản lý các màn hình hoặc trạng thái của game
-// Đã chuyển sang state.h
-
-
-
-/* --- 5. HÀM CHÍNH --- */
 int main() {
 
     // ⚠️⚠️⚠️ PHẦN CHO HỆ ĐIỀU HÀNH: KHÔNG ĐỘNG VÀO ⚠️⚠️⚠️
-    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Dino Game Setup NT - SFML 3.0.0",
-                            sf::Style::Titlebar | sf::Style::Close, sf::State::Windowed);
-    window.setFramerateLimit(60);        // Giới hạn FPS
+    //============================================================================================================
+    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Dino Game Setup NT - SFML 3.0.0", sf::Style::Default);
+    std::cout << "Da khoi tao window" << std::endl;
+    window.setFramerateLimit(60);
+    window.setMinimumSize(sf::Vector2u(1000, 600));
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    unsigned int screenWidth = desktop.size.x;
+    unsigned int screenHeight = desktop.size.y;
+    window.setMaximumSize(sf::Vector2u(screenWidth, screenHeight));
     window.setVerticalSyncEnabled(true); // Đồng bộ hóa với tần số quét
-    sf::Image iconImage;
-
-    // Tải icon game
+    sf::Image iconImage;                 // Tải icon game
     if (iconImage.loadFromFile("assets/icon.png")) {
         unsigned int iconWidth = iconImage.getSize().x;
         unsigned int iconHeight = iconImage.getSize().y;
@@ -49,12 +38,10 @@ int main() {
     } else {
         std::cerr << "Loi: Khong the tai 'assets/Images/icon.png' de lam icon." << std::endl;
     }
-    // ⚠️⚠️⚠️ KẾT THÚC PHẦN CHO HỆ ĐIỀU HÀNH ⚠️⚠️⚠️
+    //============================================================================================================
 
-    // ---------------------------- Tải các phần background ---------------------------------//
-
-    // 1. Tải hình nền (Background)
-    sf::Texture backgroundTexture;
+    //===================================== Phần tải ảnh trước cho game ==========================================
+    sf::Texture backgroundTexture; // nền
     if (!backgroundTexture.loadFromFile("assets/Images/bg.png")) {
         std::cerr << "Loi: Khong the tai 'assets/Images/bg.png'" << std::endl;
         return -1;
@@ -65,52 +52,45 @@ int main() {
         sf::Vector2f((float)WINDOW_WIDTH / bgBounds.size.x, (float)WINDOW_HEIGHT / bgBounds.size.y));
     backgroundSprite.setPosition({0.f, 0.f});
 
-    // Mặt trời
-    sf::Texture sunTexture;
+    sf::Texture sunTexture; // mặt trời
     sf::Sprite sunSprite = createSprite(sunTexture, "assets/Images/blend/x2sun9.png", 50.0f, 50.0f, 200.0f, 100.0f);
-    
-    // Cây
-    sf::Texture treeTexture;
+
+    sf::Texture treeTexture; // cây
     sf::Sprite treeSprite = createSprite(treeTexture, "assets/Images/blend/cay.png", 154.0f, 272.0f, 50.0f, 100.0f);
 
-    // ---------------------------- Kết thúc tải background ---------------------------------//
+    sf::Texture playerTexture; // nhân vật
+    sf::Sprite playerSprite = createSprite(playerTexture, "assets/Images/a.png",
+                                       PLAYER_SIZE, PLAYER_SIZE, PLAYER_START_X, PLAYER_START_Y);
 
-    // Tải nhân vật
-    sf::Texture playerTexture;
-    sf::Sprite playerSprite =
-        createSprite(playerTexture, "assets/Images/a.png", PLAYER_SIZE, PLAYER_SIZE, PLAYER_START_X, PLAYER_START_Y);
-    
-    // Tạo mặt đất (Ground)
-    sf::RectangleShape ground(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
+
+    sf::RectangleShape ground(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT)); // mặt đất
     ground.setFillColor(sf::Color(139, 69, 19));
     ground.setPosition({0.f, GROUND_Y});
 
-    // 1. Tải Texture cho chướng ngại vật (Obstacle)
-    std::vector<Obstacle> obstacles;
+    std::vector<Obstacle> obstacles; // chướng ngại vật
     obstacles.emplace_back("assets/Images/dat1.png", 60.0f, 60.0f, 250.0f, 450.0f - 60.0f);
-    obstacles.emplace_back("assets/Images/dat2.png", 60.0f, 60.0f, 550.0f, 390.0f); 
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 800.0f, 390.0f); 
+    obstacles.emplace_back("assets/Images/dat2.png", 60.0f, 60.0f, 550.0f, 390.0f);
+    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 800.0f, 390.0f);
     obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 0.0f, 450.0f - 138.0f);
 
-    // ---------------------------- Nút Home ----------------------------//
-    sf::Texture btnHome;
+    sf::Texture btnHome; // nút home
     sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 50.0f, 50.0f, 15.0f, 15.0f);
 
-    /* ----------------------------------- Tải font ------------------------------*/
-    sf::Font menuFont;
-    if (!menuFont.openFromFile("assets/Images/font.ttf")) {
-        std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
+    sf::Font menuFont; // phong chữ
+    if (!menuFont.openFromFile("assets/Images/font-times-new-roman.ttf")) {
+        std::cerr << "Loi: Khong the tai 'assets/Images/font-times-new-roman.ttf'" << std::endl;
         return -1;
     }
-    
-    // ---------------------------- KHỞI TẠO VÀ CHẠY GAME LOOP --------------------------//
-    
-    // Khởi tạo GameStateManager, truyền các tài nguyên cần thiết
-    GameStateManager manager(window, menuFont, playerSprite, backgroundSprite, sunSprite, 
-                             treeSprite, ground, btnHomeSprite, obstacles);
+   
+    //============================================================================================================
 
-    // Bắt đầu vòng lặp game
-    manager.runGameLoop();
+    //============================================= Vào game =====================================================
+
+    GameManager manager(window, menuFont, playerSprite, backgroundSprite, sunSprite, treeSprite, ground, btnHomeSprite,
+                        obstacles); // truyền trước vào
+   
+    manager.runGameLoop(); // Bắt đầu vòng lặp game
 
     return 0;
 }
+
