@@ -1,4 +1,4 @@
-﻿#ifndef ENTITY_H
+#ifndef ENTITY_H
 #define ENTITY_H
 
 #include <iostream>
@@ -30,12 +30,14 @@ public:
     Entity(const string& type, const string& name, float x, float y,
            int maxHealth, float speed, const string& texturePath); // CẬP NHẬT
 
+
     // Destructor ảo
     virtual ~Entity() = default;
 
     // --- Hàm chức năng ---
     void Move(float dx, float dy); // Sẽ được cập nhật để di chuyển sprite
     void TakeDamage(int amount);
+
 
     // --- Hàm chức năng MỚI (Render và SetTexture) ---
 
@@ -57,6 +59,7 @@ public:
         cout << name << " hoc duoc ky nang moi: " << skillCode << endl;
     }
     void AddInventory(const string& itemCode) {
+
         inventory = itemCode;
         cout << name << " nhat duoc: " << itemCode << endl;
     }
