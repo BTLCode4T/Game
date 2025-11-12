@@ -1,19 +1,22 @@
 ﻿#include "GamePlay/Entity/Entity.h"
-#include <SFML/Graphics.hpp> // MỚI: Thêm thư viện
+#include <SFML/Graphics.hpp> // Thư viện đồ họa SFML
 #include <algorithm>         // Cần thiết cho std::max/min
 
-// Constructor (CẬP NHẬT: Thêm texturePath)
+// Constructor (Đã sửa lỗi khởi tạo sf::Sprite)
 Entity::Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
-               const string &texturePath) // CẬP NHẬT
-    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), speed(speed) {
-
+               const string &texturePath)
+    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), speed(speed), 
+      // KHẮC PHỤC LỖI 1: Khởi tạo sprite bằng cách liên kết nó với texture
+      sprite(texture) 
+{ 
     health = maxHealth;
     inventory = "NONE";
     skill = "NONE";
 
     // MỚI: Tải ảnh và thiết lập Sprite
-    SetTexture(texturePath);  // Gọi hàm "edit" để tải ảnh
-    sprite.setPosition(x, y); // Đặt vị trí ban đầu cho sprite
+    SetTexture(texturePath);  // Gọi hàm "edit" để tải ảnh (sẽ tự động thiết lập texture cho sprite)
+    // Dùng sf::Vector2f cho setPosition
+    sprite.setPosition(sf::Vector2f(x, y)); 
 
     cout << "Entity '" << name << "' (" << type << ") duoc tao tai (" << x << ", " << y << ")." << endl;
 }
@@ -27,7 +30,7 @@ void Entity::Move(float dx, float dy) {
     y += moveY;
 
     // CẬP NHẬT: Đồng bộ vị trí của sprite với vị trí logic (x, y)
-    sprite.setPosition(x, y);
+    sprite.setPosition(sf::Vector2f(x, y));
 
     cout << name << " di chuyen toi (" << x << ", " << y << ") (buoc di: " << moveX << "x, " << moveY << "y)." << endl;
 }
@@ -37,12 +40,15 @@ void Entity::SetTexture(const string &texturePath) {
     if (!texture.loadFromFile(texturePath)) {
         cerr << "Loi: Khong tai duoc file ' " << texturePath << "' cho Entity '" << name << "'" << endl;
     } else {
-        sprite.setTexture(texture);
+        // setTextur/e sẽ liên kết texture đã tải với sprite
+        sprite.setTexture(texture); 
         cout << name << " da tai anh: " << texturePath << endl;
 
         // Tùy chọn: Đặt tâm của sprite vào giữa
         sf::FloatRect bounds = sprite.getLocalBounds();
-        sprite.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        
+        // setOrigin phải dùng sf::Vector2f trong SFML 3.x
+        sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f)); 
     }
 }
 
@@ -53,7 +59,6 @@ void Entity::Render(sf::RenderWindow &window) {
 
 // Hàm nhận sát thương
 void Entity::TakeDamage(int amount) {
-    // ... (Giữ nguyên code của bạn)
     if (amount < 0)
         return;
     health -= amount;
@@ -69,7 +74,6 @@ void Entity::TakeDamage(int amount) {
 
 // Hàm hiển thị trạng thái
 void Entity::DisplayStatus() const {
-    // ... (Giữ nguyên code của bạn)
     cout << "--- Trang thai " << name << " (" << type << ") ---" << endl;
     cout << "  Mau: " << health << "/" << maxHealth << endl;
     cout << "  Vi tri: (" << x << ", " << y << ")" << endl;
@@ -81,19 +85,19 @@ void Entity::DisplayStatus() const {
 
 // --- Triển khai các Setter còn lại ---
 void Entity::SetHealth(int newHealth) {
-   
+
     health = std::max(0, std::min(newHealth, maxHealth));
     cout << name << " da thay doi mau hien tai thanh: " << health << "/" << maxHealth << endl;
 }
 
 void Entity::SetName(const string &newName) {
-    
+
     name = newName;
     cout << "Ten Entity duoc doi thanh: " << newName << endl;
 }
 
 void Entity::SetSpeed(float newSpeed) {
-    
+
     if (newSpeed < 0)
         newSpeed = 0;
     speed = newSpeed;

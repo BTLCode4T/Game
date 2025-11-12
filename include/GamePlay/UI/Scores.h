@@ -55,4 +55,8 @@ void decreasingScore(List &l);
 void increasingTime(List &l);
 void decreasingTime(List &l);
 
+bool searchByPoint(List &l, int target);
+
+int countList(const List &l);
+
 #endif // SCORES_H

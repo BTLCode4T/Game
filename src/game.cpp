@@ -77,8 +77,8 @@ int main() {
     sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 50.0f, 50.0f, 15.0f, 15.0f);
 
     sf::Font menuFont; // phong chữ
-    if (!menuFont.openFromFile("assets/Images/font-times-new-roman.ttf")) {
-        std::cerr << "Loi: Khong the tai 'assets/Images/font-times-new-roman.ttf'" << std::endl;
+    if (!menuFont.openFromFile("assets/Images/font.ttf")) {
+        std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
    
