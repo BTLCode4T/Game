@@ -84,6 +84,7 @@ void GameManager::render() {
         window.draw(backgroundSprite);
         window.draw(sunSprite);
         window.draw(ground);
+        window.draw(ground2);
 
         // Vẽ obstacles
         for (const auto &obs : obstacles) {
@@ -201,8 +202,32 @@ void GameManager::handleHighScoresEvent() {
 }
 
 void GameManager::updatePlaying(float deltaTime) {
+    updateScrollingBackground(deltaTime);
     sf::Vector2f oldPos = playerSprite.getPosition();
 
+    // Lặp qua tất cả chướng ngại vật và di chuyển chúng sang trái
+
+    for (auto &obs : obstacles) {
+        // Di chuyển bằng đúng tốc độ cuộn của nền
+        obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
+        const float obsWidth = obs.sprite->getGlobalBounds().size.x;
+        // Kiểm tra xem mép phải của vật cản (vị trí X + chiều rộng)
+        // đã đi qua mép trái màn hình (X = 0) hay chưa.
+        if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
+
+            // Nếu đã ra khỏi, di chuyển nó về phía trước một khoảng.
+            // Chúng ta dùng WINDOW_WIDTH (1000) vì các vật cản ban đầu của bạn
+            // (ở 0, 250, 550, 800) dường như tạo thành một "mẫu"
+            // lặp lại mỗi 1000 pixel.
+            //
+            // Việc này sẽ giữ nguyên khoảng cách tương đối giữa chúng.
+            // Ví dụ: Vật cản ở 800 sẽ lặp lại ở ~1800.
+            //         Vật cản ở 0 sẽ lặp lại ở ~1000.
+            // Khoảng cách giữa chúng vẫn là 800.
+
+            obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
+        }
+    }
     bool leftPressed = inputManager.IsKeyDown(sf::Keyboard::Scancode::Left) || 
                        inputManager.IsKeyDown(sf::Keyboard::Scancode::A);
     bool rightPressed = inputManager.IsKeyDown(sf::Keyboard::Scancode::Right) || 
@@ -252,4 +277,31 @@ void GameManager::updatePlaying(float deltaTime) {
     sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
     if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
         playerSprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
+}
+/* ============================================================
+ * HÀM MỚI: Cập nhật nền cuộn
+ * (Đây là code cho hàm bạn đã khai báo trong game.h)
+ * ============================================================ */
+void GameManager::updateScrollingBackground(float deltaTime) {
+    // Di chuyển cả 2 mảng đất sang trái
+    ground.move({-SCROLL_SPEED * deltaTime, 0.f});
+    ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
+
+    // Lấy chiều rộng của mặt đất
+    const float groundWidth = WINDOW_WIDTH; // Lấy từ Constants.h
+
+    // Kiểm tra mảng đất 1 (ground)
+    // Nếu nó đã đi hết ra khỏi màn hình (về bên trái)
+    if (ground.getPosition().x + groundWidth <= 0.f) {
+        // Dịch chuyển nó ra phía sau mảng đất 2 (ground2)
+        // Trừ 1.0f để tránh bị hở 1 pixel do sai số float
+        ground.setPosition({ground2.getPosition().x + groundWidth - 0.f, GROUND_Y});
+    }
+
+    // Kiểm tra mảng đất 2 (ground2)
+    // Nếu nó đã đi hết ra khỏi màn hình (về bên trái)
+    if (ground2.getPosition().x + groundWidth <= 0.f) {
+        // Dịch chuyển nó ra phía sau mảng đất 1 (ground)
+        ground2.setPosition({ground.getPosition().x + groundWidth - 0.f, GROUND_Y});
+    }
 }

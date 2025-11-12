@@ -74,6 +74,7 @@ class GameManager {
     sf::Sprite &sunSprite;            // Hình mặt trời (trang trí)
     sf::Sprite &treeSprite;           // Hình cây (trang trí)
     sf::RectangleShape &ground;       // Mặt đất
+    sf::RectangleShape ground2;       // Mặt đất thứ 2 để tạo hiệu ứng cuộn nền
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
 
@@ -125,6 +126,12 @@ class GameManager {
           isOnGround(false),                 // Chưa đứng trên đất
           jumpsRemaining(MAX_JUMPS)          // Số lần nhảy còn lại = tối đa
     {
+        ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
+
+        ground2.setFillColor(sf::Color(139, 69, 19));
+        // Đặt vị trí ngay sau ground 1
+        ground2.setPosition({WINDOW_WIDTH, GROUND_Y});
+
     }
 
     // Hàm chính chạy vòng lặp game
@@ -150,4 +157,7 @@ class GameManager {
 
     // Hàm update cho từng trạng thái
     void updatePlaying(float deltaTime);
+    //cuộn cuộn
+    void updateScrollingBackground(float deltaTime);
+   
 };

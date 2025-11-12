@@ -29,3 +29,6 @@ const float ACCELERATION = 2000.f;
 
 // Tốc độ mà nhân vật dừng lại (càng cao càng "trơn trượt" ít)
 const float FRICTION = 1500.f;
+
+// --- HẰNG SỐ CHUYỂN ĐỘNG CỦA GAME ---
+const float SCROLL_SPEED = 200.0f;
