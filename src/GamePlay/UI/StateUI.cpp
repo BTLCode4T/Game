@@ -2,11 +2,13 @@
 #include "GamePlay/UI/Scores.h"
 #include "GamePlay/UI/UI.h"
 #include <SFML/Graphics.hpp>
+#include <cstdint> // đảm bảo có
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
 /* ============================================================
- *   CLASS: MainMenuUI — Giao diện chính của game
+ * CLASS: MainMenuUI — Giao diện chính của game
  * ============================================================ */
 MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sprite &tree, const sf::Font &font)
     : backgroundSprite(bg), sunSprite(sun), treeSprite(tree) {
@@ -51,7 +53,7 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
 }
 
 /* ============================================================
- *   CLASS: HighScoresUI — Màn hình bảng xếp hạng
+ * CLASS: HighScoresUI — Màn hình bảng xếp hạng
  * ============================================================ */
 HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
@@ -76,11 +78,35 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
     btnNoneSprite4 = std::make_unique<sf::Sprite>(
         createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 425.0f));
 
+    btnTextInputSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnTextInputTexture, "assets/Images/TextInput.png", 225.0f, 55.5f, 750.0f, 525.0f));
+
+    notFoundSprite = std::make_unique<sf::Sprite>(
+        createSprite(notFoundSpriteTexture, "assets/Images/btnone.png", 420.0f, 333.0f, 250.0f, 150.0f));
+
     // Khu vực tạo text sắp xếp
     // std::unique_ptr<sf::Text> decreaingScore;
     // std::unique_ptr<sf::Text> increaingScore;
     // std::unique_ptr<sf::Text> decreaingTime;
     // std::unique_ptr<sf::Text> decreaingTime;
+
+    // --- THAY THẾ: Khởi tạo prompt và input riêng biệt ---
+    promptText =
+        std::make_unique<sf::Text>(createText(font, L"Tìm theo điểm", 22, sf::Color(128, 128, 128), 862.0f, 550.0f, true));
+    inputTextDisplay =
+        std::make_unique<sf::Text>(font, "", 22); // SỬA: Sử dụng constructor có tham số đúng thứ tự: font, string, size
+    inputTextDisplay->setFillColor(sf::Color::Red); 
+    inputTextDisplay->setPosition(sf::Vector2f(840.0f, 540.5f)); // SỬA: Sử dụng Vector2f
+    inputTextDisplay->setStyle(sf::Text::Style::Bold);            // Giữ bold nếu có (tùy chọn)
+
+    // --- THÊM: Khởi tạo con trỏ "|" ---
+    cursorShape.setSize(sf::Vector2f(2.0f, 22.0f)); // Kích thước "|" (rộng 2px, cao bằng font size)
+    cursorShape.setFillColor(sf::Color::Black);     // Màu đen
+    cursorShape.setPosition(sf::Vector2f(
+        862.5f + 100.0f, 552.75f)); // SỬA: Sử dụng Vector2f Vị trí sau prompt/input (điều chỉnh offset nếu cần)
+
+    // currentInput giữ nguyên rỗng ban đầu
+    currentInput = "";
 
     decreaingScore =
         std::make_unique<sf::Text>(createText(font, L"Điểm giảm dần", 20, sf::Color::White, 855.0f, 150.0f));
@@ -92,13 +118,28 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
         std::make_unique<sf::Text>(createText(font, L"Thời gian giảm dần", 20, sf::Color::White, 855.0f, 350.0f));
 
     increaingTime =
-        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));initList(scoresList); 
-    readFile("Scores.txt", scoresList);
-}
+        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));
     
-/* --- Render HighScoresUI ---
- * Vẽ nền, nút home và các text liên quan đến bảng điểm.
- */
+    searchNone =
+        std::make_unique<sf::Text>(createText(font, L"Không tìm thấy !", 30, sf::Color::Yellow, 450.0f, 250.0f));
+    searchNone2 =
+        std::make_unique<sf::Text>(createText(font, L"Ấn vị trí trống bất \n\nkì để tiếp tục !", 25, sf::Color::Blue, 450.0f, 350.0f));
+    
+        scrollText =
+        std::make_unique<sf::Text>(createText(font, L"< Ấn phím mũi tên ^/v để cuộn! >", 15, sf::Color::Yellow, 350.0f, 515.0f));
+
+
+    
+    //bất kì ", 
+
+
+    // Load scores từ file ngay khi tạo UI
+    initList(scoresList);
+    readFile("Scores.txt", scoresList);
+
+
+}
+
 /* --- Render HighScoresUI ---
  * Vẽ nền, nút home và các text liên quan đến bảng điểm.
  */
@@ -111,24 +152,52 @@ void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(btnHomeSprite);
     window.draw(*tableListSprite);
     window.draw(*titleText);
+    window.draw(*scrollText);
 
     // *** DÙNG scoresList THÀNH VIÊN ĐÃ TẢI ***
-    drawScoresList(window, scoresList, font, 120.0f, 200.0f);
+    drawScoresList(window, scoresList, font, 120.0f, 200.0f, scrollIndex);
 
     window.draw(*btnNoneSprite1);
     window.draw(*btnNoneSprite2);
     window.draw(*btnNoneSprite3);
     window.draw(*btnNoneSprite4);
+
     window.draw(*decreaingScore);
     window.draw(*increaingScore);
     window.draw(*decreaingTime);
     window.draw(*increaingTime);
 
-    // Khu vực kiểm tra ấn nút và chạy hàm sắp xếp (Sẽ làm ở main.cpp)
+    window.draw(*btnTextInputSprite); 
+
+    if (!isInputActive) {
+        window.draw(*promptText);
+    } else {
+        window.draw(*inputTextDisplay);
+        float elapsed = cursorBlinkClock.getElapsedTime().asSeconds();
+        if (elapsed > blinkInterval) {
+            cursorVisible = !cursorVisible;
+            cursorBlinkClock.restart();
+        }
+        if (cursorVisible) {
+            sf::Color cursorColor = cursorShape.getFillColor();
+            cursorColor.a = 200;
+            cursorShape.setFillColor(cursorColor);
+            window.draw(cursorShape);
+        }
+    }
+    window.draw(*decreaingScore);
+
+    if (isNotFoundVisible) {
+        window.draw(*notFoundSprite);
+        window.draw(*searchNone);
+        window.draw(*searchNone2);
+    }
+
+
 }
 
 /* ============================================================
- *   CLASS: HelpUI — Màn hình hướng dẫn chơi
+ * CLASS: HelpUI — Màn hình hướng dẫn chơi
  * ============================================================ */
 HelpUI::HelpUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
@@ -153,7 +222,7 @@ void HelpUI::Render(sf::RenderWindow &window, const sf::Font &font) {
 }
 
 /* ============================================================
- *   CLASS: SettingsUI — Màn hình cài đặt
+ * CLASS: SettingsUI — Màn hình cài đặt
  * ============================================================ */
 SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
@@ -172,49 +241,43 @@ void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*settingsText);
 }
 
-void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY) {
+void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY, int startIndex) {
     Node *p = l.head;
     float currentY = startY;
 
     // --- [1] Vẽ Tiêu đề ---
-    // Giữ nguyên phần này
     sf::Text headerText(font, L"ĐIỂM\t\t\tTHỜI GIAN\t\t\tNGÀY", 22);
     headerText.setFillColor(sf::Color::Yellow);
     headerText.setPosition(sf::Vector2f(135.0f, 175.0f));
     window.draw(headerText);
     currentY += 35.0f;
 
-    // --- [2] Duyệt và vẽ từng điểm số ---
+    // --- [2] BỎ QUA CÁC NODE DỰA TRÊN SCROLL INDEX ---
+    int skip = startIndex;
+    while (p && skip > 0) {
+        p = p->next;
+        skip--;
+    }
+
+    // --- [3] Duyệt và vẽ (Tối đa 5 dòng từ vị trí hiện tại) ---
     const int maxLines = 5;
     int currentLine = 0;
 
-    // Vòng lặp sẽ dừng khi p là nullptr (cuối danh sách) HOẶC khi đã vẽ 5 dòng
     while (p && currentLine < maxLines) {
+        // ... (Code xử lý chuỗi wstringstream giữ nguyên như cũ) ...
         std::wstringstream wss;
-
-        // --- BƯỚC 1: Xây dựng chuỗi Time và Date để setw có thể áp dụng ---
-
         std::wstring time_str = (p->t.hour < 10 ? L"0" : L"") + std::to_wstring(p->t.hour) + L":" +
                                 (p->t.minute < 10 ? L"0" : L"") + std::to_wstring(p->t.minute);
-
         std::wstring date_str = (p->d.day < 10 ? L"0" : L"") + std::to_wstring(p->d.day) + L"/" +
                                 (p->d.month < 10 ? L"0" : L"") + std::to_wstring(p->d.month) + L"/" +
                                 std::to_wstring(p->d.year);
 
-        // --- BƯỚC 2: Định dạng wstringstream bằng setw và thêm khoảng trắng phân tách ---
-
-        // 1. Cột Point (Rộng 8, Căn phải)
         wss << std::right << std::setw(8) << p->point;
-        wss << L"               "; // <<< THÊM 3 KHOẢNG TRẮNG PHÂN TÁCH SAU ĐIỂM
-
-        // 2. Cột Time (Rộng 12, Căn trái)
+        wss << L"               "; 
         wss << std::left << std::setw(12) << time_str;
-        wss << L"      "; // <<< THÊM 3 KHOẢNG TRẮNG PHÂN TÁCH SAU THỜI GIAN
-
-        // 3. Cột Date (Rộng 15, Căn trái)
+        wss << L"      "; 
         wss << std::left << std::setw(15) << date_str;
 
-        // ... (Tiếp tục tạo và vẽ sf::Text) ...
         sf::Text scoreLineText(font, wss.str(), 23);
         scoreLineText.setFillColor(sf::Color::White);
         scoreLineText.setPosition(sf::Vector2f(startX, currentY));
@@ -223,14 +286,112 @@ void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &fon
         currentY += 54.0f;
 
         p = p->next;
-        currentLine++; // Tăng biến đếm dòng
+        currentLine++;
     }
 }
 
-// Fix: The destructor should be virtual as it's part of an inheritance hierarchy.
-// Also, it should load the scores from the file when constructed, not when rendered.
-// The destructor should also free the memory allocated for the scores list.
-
 HighScoresUI::~HighScoresUI() { // *** KHẮC PHỤC LỖI DESTUCTOR: Định nghĩa hàm ***
-    deleteList(scoresList); // Gọi hàm giải phóng danh sách
+    deleteList(scoresList);     // Gọi hàm giải phóng danh sách
+}
+
+// *** SỬA: Định nghĩa member function đúng cách ***
+void HighScoresUI::setInputActive(bool active) {
+    isInputActive = active;
+    if (active) {
+        cursorBlinkClock.restart(); // restart blink
+        cursorVisible = true;
+        sf::FloatRect textBounds = inputTextDisplay->getLocalBounds();
+        cursorShape.setPosition(sf::Vector2f(inputTextDisplay->getPosition().x + textBounds.size.x + 2.0f,
+                                             inputTextDisplay->getPosition().y));
+
+    } else {
+        // Nếu tắt input, ẩn cursor
+        cursorVisible = false;
+    }
+}
+
+// Thêm ký tự (chỉ cho phép số và Backspace), cập nhật vị trí con trỏ
+void HighScoresUI::addCharToInput(std::uint32_t unicode) {
+    if (!isInputActive)
+        return;
+
+    // Backspace (code = 8) hoặc Delete tùy ý
+    if (unicode == 8) { // Backspace
+        if (!currentInput.empty()) {
+            currentInput.pop_back();
+        }
+    } else if (unicode >= '0' && unicode <= '9') { // chỉ cho phép số
+        currentInput += static_cast<char>(unicode);
+    }
+    // Nếu muốn cho phép xóa toàn bộ với ESC, hoặc dấu khác thêm ở đây
+
+    // Cập nhật text hiển thị
+    inputTextDisplay->setString(sf::String::fromUtf8(currentInput.begin(), currentInput.end()));
+
+    // Cập nhật vị trí con trỏ (cursor)
+    sf::FloatRect textBounds = inputTextDisplay->getLocalBounds();
+    // Nếu text có origin != 0, xử lý tương ứng (ở đây giả định origin là (0,0))
+       // sf::Vector2f(inputTextDisplay->getPosition().x + textBounds + 2.0f, inputTextDisplay->getPosition().y);
+        cursorShape.setPosition(sf::Vector2f(inputTextDisplay->getPosition().x + textBounds.size.x + 2.0f, inputTextDisplay->getPosition().y));
+}
+
+// Xử lý khi nhấn Enter (Giả định là tìm kiếm điểm) - THÊM: Đảm bảo caller pass scoresList
+void HighScoresUI::handleInputFinished(List &l) {
+    if (!isInputActive)
+        return;
+    isInputActive = false;
+    resetScroll();
+    try {
+        if (currentInput.empty()) {
+            // Nếu rỗng thì reset list
+            deleteList(l);
+            initList(l);
+            readFile("Scores.txt", l);
+            isNotFoundVisible = false; // Ẩn thông báo nếu có
+        } else {
+            int point = std::stoi(currentInput);
+            
+            // SỬA: Gọi searchByPoint và kiểm tra kết quả
+            bool found = searchByPoint(l, point);
+            
+            if (!found) {
+                isNotFoundVisible = true; // Không thấy -> Bật ảnh
+            } else {
+                isNotFoundVisible = false; // Thấy -> Tắt ảnh
+            }
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Loi chuyen doi diem: " << e.what() << std::endl;
+    }
+
+    currentInput.clear();
+    inputTextDisplay->setString("");
+    cursorVisible = false;
+    cursorBlinkClock.restart();
+}
+
+void HighScoresUI::resetInputState() {
+    currentInput = "";
+    inputTextDisplay->setString("");
+    cursorVisible = true;
+    cursorBlinkClock.restart();
+    isNotFoundVisible = false;
+}
+
+void HighScoresUI::scrollUp() {
+    if (scrollIndex > 0) {
+        scrollIndex--;
+    }
+}
+
+void HighScoresUI::scrollDown() {
+    int totalNodes = countList(scoresList);
+    // Chỉ cho cuộn nếu còn phần tử phía dưới chưa hiển thị
+    if (scrollIndex + MAX_LINES < totalNodes) {
+        scrollIndex++;
+    }
+}
+
+void HighScoresUI::resetScroll() {
+    scrollIndex = 0;
 }
