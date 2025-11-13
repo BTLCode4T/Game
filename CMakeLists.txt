@@ -26,7 +26,10 @@ add_executable (main
                 src/GamePlay/UI/StateUI.cpp
                 src/GamePlay/UI/Scores.cpp
                 src/Core/Input/Input.cpp
-                src/Utils/Entity.cpp)
+                src/Utils/Entity.cpp
+                src/GamePlay/Avatar/player.cpp
+                src/GamePlay/Entity/Dinosaur.cpp
+                )
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)
