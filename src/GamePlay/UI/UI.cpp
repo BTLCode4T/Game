@@ -16,6 +16,19 @@
 //     sprite->setPosition({x, y});
 // }
 
+void drawSpriteBounds(sf::RenderWindow &window, const sf::Sprite &sprite) {
+    sf::FloatRect bounds = sprite.getGlobalBounds();
+
+    sf::RectangleShape rect;
+    rect.setPosition(bounds.position);
+    rect.setSize({bounds.size.x, bounds.size.y});
+    rect.setFillColor(sf::Color::Transparent);
+    rect.setOutlineColor(sf::Color::Red);
+    rect.setOutlineThickness(2.f); // độ dày viền
+    
+
+    window.draw(rect);
+}
 
 // --- Định nghĩa Hàm createSprite ---
 sf::Sprite createSprite(sf::Texture &textureRef, const std::string &filePath, float desiredWidth, float desiredHeight,
@@ -31,6 +44,7 @@ sf::Sprite createSprite(sf::Texture &textureRef, const std::string &filePath, fl
     float scaleY = desiredHeight / bounds.size.y;
     sprite.setScale(sf::Vector2f(scaleX, scaleY));
     sprite.setPosition({x, y});
+
     return sprite;
 }
 

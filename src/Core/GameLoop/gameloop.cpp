@@ -6,6 +6,7 @@
 void GameManager::runGameLoop() {
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
+        playerManager.setPushV(-SCROLL_SPEED * deltaTime);
 
         //============================================================================================================
         // 1. Xử lý Sự kiện (Input) // bắt buộc có, nếu  k sẽ k chạy đc :-)
@@ -37,8 +38,9 @@ void GameManager::handleEvents() {
             continue;
         }
 
-    // phần này cần sửa lại tách hàm riêng********************************************************************************
-        // Xử lý nhập liệu văn bản TRƯỚC khi gọi inputManager.ProcessEvent
+        // phần này cần sửa lại tách hàm
+        // riêng******************************************************************************** Xử lý nhập liệu văn bản
+        // TRƯỚC khi gọi inputManager.ProcessEvent
         if (currentState == GameState::HighScores && highScoresUI.isCurrentlyInputting()) {
             // Bắt ký tự (chỉ khi đang nhập)
             if (const auto *text = event.getIf<sf::Event::TextEntered>()) {
@@ -122,7 +124,8 @@ void GameManager::render() {
         }
 
         // Vẽ player
-                window.draw(playerManager.sprite);
+        window.draw(playerManager.sprite);
+         drawSpriteBounds(window,playerManager.sprite);
 
         break;
 
@@ -163,8 +166,8 @@ void GameManager::handleMainMenuEvent() {
     // Enter
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
         playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-        velocity = {0.f, 0.f};
-        isOnGround = false;
+        playerManager.setVelocity(0, 0);
+        playerManager.setIsOnGround(false);
         currentState = GameState::Playing;
     } else if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::H)) {
         currentState = GameState::HighScores;
@@ -179,8 +182,8 @@ void GameManager::handleMainMenuEvent() {
 
         if (mainMenu.getBtnNewSprite().getGlobalBounds().contains(mousePos)) {
             playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-            velocity = {0.f, 0.f};
-            isOnGround = false;
+           playerManager.setVelocity(0, 0);
+            playerManager.setIsOnGround(false);
             currentState = GameState::Playing;
         } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
             currentState = GameState::HighScores;
@@ -196,8 +199,8 @@ void GameManager::handleMainMenuEvent() {
 void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
     // nhẩy
-    if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && jumpsRemaining > 0) {
-        playerManager.jump(isOnGround,MAX_JUMPS,jumpsRemaining);
+    if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && playerManager.getJump() > 0) {
+        playerManager.jump(MAX_JUMPS);
     }
 }
 
@@ -255,20 +258,6 @@ void GameManager::handleHighScoresEvent() {
 
 void GameManager::updatePlaying(float deltaTime) {
     updateScrollingBackground(deltaTime);
-    sf::Vector2f oldPos = playerSprite.getPosition();
-
-    // Lặp qua tất cả chướng ngại vật và di chuyển chúng sang trái
-
-    for (auto &obs : obstacles) {
-        // Di chuyển bằng đúng tốc độ cuộn của nền
-        obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
-        const float obsWidth = obs.sprite->getGlobalBounds().size.x;
-        // Kiểm tra xem mép phải của vật cản (vị trí X + chiều rộng)
-        // đã đi qua mép trái màn hình (X = 0) hay chưa.
-        if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
-            obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
-        }
-    }
 
     // di chuyển người chơi =========================================================================================
     // không cần thay đổi nữa
@@ -276,34 +265,39 @@ void GameManager::updatePlaying(float deltaTime) {
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Left) || inputManager.IsKeyDown(sf::Keyboard::Scancode::A);
     bool rightPressed =
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Right) || inputManager.IsKeyDown(sf::Keyboard::Scancode::D);
-        
-       playerManager.Move(leftPressed,rightPressed,deltaTime,obstacles,isOnGround,MAX_JUMPS,jumpsRemaining);
-}
-    // ==============================================================================================================
 
-/* ============================================================
- Cuộn
- * ============================================================ */
+    playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
+}
+// ==============================================================================================================
 void GameManager::updateScrollingBackground(float deltaTime) {
+   
     // Di chuyển cả 2 mảng đất sang trái
     ground.move({-SCROLL_SPEED * deltaTime, 0.f});
     ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
 
     // Lấy chiều rộng của mặt đất
-    const float groundWidth = WINDOW_WIDTH; // Lấy từ Constants.h
+    const float groundWidth = WINDOW_WIDTH; 
 
     // Kiểm tra mảng đất 1 (ground)
-    // Nếu nó đã đi hết ra khỏi màn hình (về bên trái)
     if (ground.getPosition().x + groundWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau mảng đất 2 (ground2)
-        // Trừ 1.0f để tránh bị hở 1 pixel do sai số float
-        ground.setPosition({ground2.getPosition().x + groundWidth - 0.f, GROUND_Y});
+        // Trừ 1.0f để tạo overlap, tránh bị hở
+        ground.setPosition({ground2.getPosition().x + groundWidth - 1.0f, GROUND_Y});
     }
 
     // Kiểm tra mảng đất 2 (ground2)
-    // Nếu nó đã đi hết ra khỏi màn hình (về bên trái)
     if (ground2.getPosition().x + groundWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau mảng đất 1 (ground)
-        ground2.setPosition({ground.getPosition().x + groundWidth - 0.f, GROUND_Y});
+        ground2.setPosition({ground.getPosition().x + groundWidth - 1.0f, GROUND_Y});
+    }
+
+    // dịch chuyển lập lại vật cản
+     for (auto &obs : obstacles) {
+        // Di chuyển bằng đúng tốc độ cuộn của nền
+        obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
+        const float obsWidth = obs.sprite->getGlobalBounds().size.x;
+        if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
+            obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
+        }
     }
 }

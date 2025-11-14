@@ -5,25 +5,24 @@
 
 Entity::Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
                const string &texturePath)
-    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), speed(speed),
-
-      sprite(texture) {
-    health = maxHealth;
-    inventory = "NONE";
-    skill = "NONE";
-
+    :type(type), name(name), x(x), y(y), maxHealth(maxHealth), health(maxHealth), speed(speed),
+      inventory("NONE"), skill("NONE"),
+      sprite(texture), pushV(0) {
     sprite = createSprite(texture, "assets/Images/a.png", PLAYER_SIZE, PLAYER_SIZE, PLAYER_START_X, PLAYER_START_Y);
+    sprite.setPosition(sf::Vector2f(x, y));
 }
 
-void Entity::jump(bool &isOnGround, const int MAX_JUMPS, int &jumpsRemaining) {
+void Entity::jump(const int MAX_JUMPS) {
     velocity.y = JUMP_VELOCITY;
     jumpsRemaining--;
     isOnGround = false;
 }
 
+
 // Hàm di chuyển (Move) (CẬP NHẬT: Di chuyển cả sprite)
 void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
-                  bool &isOnGround, const int MAX_JUMPS, int &jumpsRemaining) {
+                  const int MAX_JUMPS) {
+   
     if (leftPressed) {
         // Tăng tốc sang trái (velocity.x giảm)
         velocity.x -= ACCELERATION * deltaTime;
@@ -52,10 +51,8 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
     } else if (velocity.x < -MAX_MOVE_SPEED) {
         velocity.x = -MAX_MOVE_SPEED;
     }
-    x += velocity.x * deltaTime;
-    y += velocity.y * deltaTime;
-
-    PhysicsSystem::Update(sprite, velocity, deltaTime, obs, isOnGround);
+    
+    PhysicsSystem::Update(sprite, deltaTime, obs, *this);
     // Reset số lần nhảy nếu chạm đất
     if (isOnGround) {
         jumpsRemaining = MAX_JUMPS;
@@ -68,8 +65,6 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
     if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
         sprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
 
-    // CẬP NHẬT: Đồng bộ vị trí của sprite với vị trí logic (x, y)
-    sprite.setPosition(sf::Vector2f(x, y));
 }
 
 // MỚI: Định nghĩa hàm SetTexture (hàm "edit" ảnh)
@@ -91,7 +86,6 @@ void Entity::SetTexture(const string &texturePath) {
 
 // vẽ
 void Entity::Render(sf::RenderWindow &window) {
-    sprite.setPosition(sf::Vector2f(x, y));
     window.draw(sprite);
 }
 

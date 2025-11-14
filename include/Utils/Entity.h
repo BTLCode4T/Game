@@ -5,18 +5,17 @@
 
 #include "Core/Input/Input.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
+#include "GamePlay/UI/UI.h"
 #include <SFML/Graphics.hpp> // MỚI: Thêm thư viện đồ họa SFML
 #include <algorithm>         // Dùng cho std::max/min
 #include <iostream>
 #include <string>
-#include "GamePlay/UI/UI.h"
 
 using namespace std;
 
 class Entity {
   private:
-   
-    sf::Vector2f velocity;  // Vận tốc di chuyển của nhân vật
+    sf::Vector2f velocity; // Vận tốc di chuyển của nhân vật
     // --- Thuộc tính Chung ---
     string type;
     string name;
@@ -27,14 +26,16 @@ class Entity {
     float speed;
     string inventory;
     string skill;
-
-  
+    int jumpsRemaining = MAX_JUMPS;
+    bool isOnGround = false;
+    float pushV;
 
   public:
     // --- Thuộc hính Đồ họa (MỚI) ---
-    sf::Texture texture; // Biến "ảnh" (lưu trữ ảnh)
-    sf::Sprite sprite;   // Biến "nhân vật" (dùng để vẽ)
-   InputManager inputManager; // hàm input
+
+    sf::Texture texture;       // Biến "ảnh" (lưu trữ ảnh)
+    sf::Sprite sprite;         // Biến "nhân vật" (dùng để vẽ)
+    InputManager inputManager; // hàm input
     // Constructor (Cập nhật: thêm đường dẫn ảnh)
     Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
            const string &texturePath); // CẬP NHẬT
@@ -43,8 +44,9 @@ class Entity {
     virtual ~Entity() = default;
 
     // --- Hàm chức năng ---
-    void Move(bool leftPressed,  bool rightPressed, float deltaTime,const std::vector<Obstacle>& obs, bool &isOnGround,  const int MAX_JUMPS, int &jumpsRemaining); // Sẽ được cập nhật để di chuyển sprite
-    void jump( bool &isOnGround,  const int MAX_JUMPS, int &jumpsRemaining);
+    void Move(bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
+              const int MAX_JUMPS); // Sẽ được cập nhật để di chuyển sprite
+    void jump(const int MAX_JUMPS);
     virtual void TakeDamage(int amount);
     /**
      * @brief Hàm "edit" ảnh - Tải một ảnh mới cho Entity.
@@ -74,6 +76,23 @@ class Entity {
     void SetName(const string &newName);
     void SetSpeed(float newSpeed);
 
+    void setIsOnGround(bool isOnGround2) {
+        isOnGround = isOnGround2;
+    }
+
+    void setVelocity(float x, float y) {
+        velocity.x = x;
+        velocity.y = y;
+    }
+
+    void setVelocityY(float y) {
+        velocity.y = y;
+    }
+
+    void setPushV(float x){
+        pushV =x;
+    }
+    
     // --- Getters ---
     float GetX() const {
         return x;
@@ -85,8 +104,21 @@ class Entity {
         return name;
     }
 
-    int getHealth() const{
+    int getHealth() const {
         return health;
+    }
+    int getJump() {
+        return jumpsRemaining;
+    }
+    bool getIsOnGround() {
+        return isOnGround;
+    }
+    float getPushV(){
+        return pushV;
+    }
+
+    sf::Vector2f getVelocity() const {
+        return velocity;
     }
 
     // Hàm hiển thị trạng thái

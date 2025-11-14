@@ -1,10 +1,12 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <vector>
-#include <memory>
 #include "Utils/Constants.h"
-#include <iostream> 
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <memory>
+#include <vector>
+
+class Entity;
 
 struct Obstacle {
     // SỬA ĐỔI: Sử dụng unique_ptr cho cả Sprite VÀ Texture
@@ -39,8 +41,6 @@ struct Obstacle {
     Obstacle &operator=(Obstacle &&other) noexcept = default; // <--- THAY ĐỔI Ở ĐÂY (Hoặc xóa)
 };
 
-
-
 // Định nghĩa các hằng số cần thiết (Có thể lấy từ game.cpp)
 // *LƯU Ý*: Nên khai báo các hằng số này trong một file riêng (ví dụ: Constants.h)
 // để tránh trùng lặp và dễ quản lý, nhưng tôi tạm khai báo ở đây để đơn giản hóa.
@@ -51,7 +51,7 @@ struct Obstacle {
 
 // Class PhysicsSystem sẽ đảm nhận việc cập nhật vị trí và xử lý va chạm
 class PhysicsSystem {
-public:
+  public:
     // Hàm cập nhật vật lý chính
     // Nó nhận vào:
     // 1. Đối tượng người chơi (sf::Sprite)
@@ -59,16 +59,14 @@ public:
     // 3. Thời gian đã trôi qua (float deltaTime)
     // 4. Danh sách các chướng ngại vật (std::vector<Obstacle>)
     // 5. Biến cờ kiểm tra đang trên mặt đất (bool& isOnGround)
-    static void Update(sf::Sprite& playerSprite, sf::Vector2f& velocity,
-                       float deltaTime, const std::vector<Obstacle>& obstacles,
-                       bool& isOnGround);
+    static void Update(sf::Sprite &playerSprite, float deltaTime, const std::vector<Obstacle> &obstacles,
+                       Entity &entity);
 
-private:
+  private:
     // Hàm riêng tư để xử lý va chạm với chướng ngại vật/mặt đất theo trục X
-    static void HandleXCollision(sf::Sprite& playerSprite, const sf::Vector2f& oldPos,
-                                 const std::vector<Obstacle>& obstacles, sf::Vector2f& velocity);
+    static void HandleXCollision(sf::Sprite &playerSprite, const sf::Vector2f &oldPos,
+                                 const std::vector<Obstacle> &obstacles, Entity &entity);
 
     // Hàm riêng tư để xử lý va chạm với chướng ngại vật/mặt đất theo trục Y
-    static void HandleYCollision(sf::Sprite& playerSprite, sf::Vector2f& velocity,
-                                 const std::vector<Obstacle>& obstacles, bool& isOnGround);
+    static void HandleYCollision(sf::Sprite &playerSprite, const std::vector<Obstacle> &obstacles, Entity &entity);
 };
