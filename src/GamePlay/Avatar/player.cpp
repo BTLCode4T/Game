@@ -14,9 +14,8 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
 
 // Hàm xử lý Input
 void PlayerManager::HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,
-                                             const std::vector<Obstacle> &obs, bool &isOnGround, const int MAX_JUMPS,
-                                             int &jumpsRemaining) {
-    this->Move(leftPressed, rightPressed, deltaTime, obs, isOnGround, MAX_JUMPS, jumpsRemaining);
+                                             const std::vector<Obstacle> &obs, const int MAX_JUMPS) {
+    this->Move(leftPressed, rightPressed, deltaTime, obs, MAX_JUMPS);
 }
 int PlayerManager::GetHealth() {
     return Entity::getHealth();

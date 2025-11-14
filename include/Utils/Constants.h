@@ -22,7 +22,7 @@ const float CNV2_START_X = 550.0f;
 const float CNV3_START_X = 800.0f;
 
 // Đổi tên MOVE_SPEED thành tốc độ tối đa
-const float MAX_MOVE_SPEED = 300.f; 
+const float MAX_MOVE_SPEED = 500.f; 
 
 // Tốc độ mà nhân vật tăng tốc (càng cao càng "nhạy")
 const float ACCELERATION = 2000.f;  
@@ -32,3 +32,5 @@ const float FRICTION = 1500.f;
 
 // --- HẰNG SỐ CHUYỂN ĐỘNG CỦA GAME ---
 const float SCROLL_SPEED = 200.0f;
+
+const int MAX_JUMPS = 2;
