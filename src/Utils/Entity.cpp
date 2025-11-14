@@ -1,38 +1,75 @@
-﻿#include "GamePlay/Entity/Entity.h"
-#include <SFML/Graphics.hpp> // Thư viện đồ họa SFML
-#include <algorithm>         // Cần thiết cho std::max/min
+﻿#include "Utils/Entity.h"
 
-// Constructor (Đã sửa lỗi khởi tạo sf::Sprite)
+#include <SFML/Graphics.hpp>
+#include <algorithm>
+
 Entity::Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
                const string &texturePath)
-    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), speed(speed), 
-      // KHẮC PHỤC LỖI 1: Khởi tạo sprite bằng cách liên kết nó với texture
-      sprite(texture) 
-{ 
+    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), speed(speed),
+
+      sprite(texture) {
     health = maxHealth;
     inventory = "NONE";
     skill = "NONE";
 
-    // MỚI: Tải ảnh và thiết lập Sprite
-    SetTexture(texturePath);  // Gọi hàm "edit" để tải ảnh (sẽ tự động thiết lập texture cho sprite)
-    // Dùng sf::Vector2f cho setPosition
-    sprite.setPosition(sf::Vector2f(x, y)); 
+    sprite = createSprite(texture, "assets/Images/a.png", PLAYER_SIZE, PLAYER_SIZE, PLAYER_START_X, PLAYER_START_Y);
+}
 
-    cout << "Entity '" << name << "' (" << type << ") duoc tao tai (" << x << ", " << y << ")." << endl;
+void Entity::jump(bool &isOnGround, const int MAX_JUMPS, int &jumpsRemaining) {
+    velocity.y = JUMP_VELOCITY;
+    jumpsRemaining--;
+    isOnGround = false;
 }
 
 // Hàm di chuyển (Move) (CẬP NHẬT: Di chuyển cả sprite)
-void Entity::Move(float dx, float dy) {
-    float moveX = dx * speed;
-    float moveY = dy * speed;
+void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
+                  bool &isOnGround, const int MAX_JUMPS, int &jumpsRemaining) {
+    if (leftPressed) {
+        // Tăng tốc sang trái (velocity.x giảm)
+        velocity.x -= ACCELERATION * deltaTime;
+    } else if (rightPressed) {
+        // Tăng tốc sang phải (velocity.x tăng)
+        velocity.x += ACCELERATION * deltaTime;
+    } else {
+        // 3. Không nhấn phím -> Áp dụng ma sát (Giảm tốc)
+        if (velocity.x > 0.f) {
+            // Đang di chuyển sang phải -> ma sát đẩy sang trái
+            velocity.x -= FRICTION * deltaTime;
+            // Kẹp lại, tránh bị "trôi" ngược
+            if (velocity.x < 0.f)
+                velocity.x = 0.f;
+        } else if (velocity.x < 0.f) {
+            // Đang di chuyển sang trái -> ma sát đẩy sang phải
+            velocity.x += FRICTION * deltaTime;
+            // Kẹp lại
+            if (velocity.x > 0.f)
+                velocity.x = 0.f;
+        }
+    }
+    // 4. Giới hạn tốc độ tối đa
+    if (velocity.x > MAX_MOVE_SPEED) {
+        velocity.x = MAX_MOVE_SPEED;
+    } else if (velocity.x < -MAX_MOVE_SPEED) {
+        velocity.x = -MAX_MOVE_SPEED;
+    }
+    x += velocity.x * deltaTime;
+    y += velocity.y * deltaTime;
 
-    x += moveX;
-    y += moveY;
+    PhysicsSystem::Update(sprite, velocity, deltaTime, obs, isOnGround);
+    // Reset số lần nhảy nếu chạm đất
+    if (isOnGround) {
+        jumpsRemaining = MAX_JUMPS;
+    }
+    // Giới hạn trong cửa sổ
+    const sf::Vector2f pos = sprite.getPosition();
+    if (pos.x < 0.f)
+        sprite.setPosition({0.f, pos.y});
+    sf::FloatRect playerBounds = sprite.getGlobalBounds();
+    if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
+        sprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
 
     // CẬP NHẬT: Đồng bộ vị trí của sprite với vị trí logic (x, y)
     sprite.setPosition(sf::Vector2f(x, y));
-
-    cout << name << " di chuyen toi (" << x << ", " << y << ") (buoc di: " << moveX << "x, " << moveY << "y)." << endl;
 }
 
 // MỚI: Định nghĩa hàm SetTexture (hàm "edit" ảnh)
@@ -41,20 +78,21 @@ void Entity::SetTexture(const string &texturePath) {
         cerr << "Loi: Khong tai duoc file ' " << texturePath << "' cho Entity '" << name << "'" << endl;
     } else {
         // setTextur/e sẽ liên kết texture đã tải với sprite
-        sprite.setTexture(texture); 
+        sprite.setTexture(texture);
         cout << name << " da tai anh: " << texturePath << endl;
 
         // Tùy chọn: Đặt tâm của sprite vào giữa
         sf::FloatRect bounds = sprite.getLocalBounds();
-        
+
         // setOrigin phải dùng sf::Vector2f trong SFML 3.x
-        sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f)); 
+        sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f));
     }
 }
 
-// MỚI: Định nghĩa hàm Render (hàm "hiện nhân vật")
+// vẽ
 void Entity::Render(sf::RenderWindow &window) {
-    window.draw(sprite); // Đơn giản là vẽ sprite lên cửa sổ
+    sprite.setPosition(sf::Vector2f(x, y));
+    window.draw(sprite);
 }
 
 // Hàm nhận sát thương

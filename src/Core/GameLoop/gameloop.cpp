@@ -37,6 +37,7 @@ void GameManager::handleEvents() {
             continue;
         }
 
+    // phần này cần sửa lại tách hàm riêng********************************************************************************
         // Xử lý nhập liệu văn bản TRƯỚC khi gọi inputManager.ProcessEvent
         if (currentState == GameState::HighScores && highScoresUI.isCurrentlyInputting()) {
             // Bắt ký tự (chỉ khi đang nhập)
@@ -50,9 +51,6 @@ void GameManager::handleEvents() {
                 highScoresUI.handleInputFinished(highScoresUI.scoresList);
             }
         }
-
-
-        // --- ĐOẠN NÀY ĐỂ XỬ LÝ CUỘN ---
         if (currentState == GameState::HighScores && event.is<sf::Event::KeyPressed>()) {
             auto keyEvent = event.getIf<sf::Event::KeyPressed>();
             if (keyEvent->code == sf::Keyboard::Key::Up) {
@@ -61,6 +59,7 @@ void GameManager::handleEvents() {
                 highScoresUI.scrollDown();
             }
         }
+        //******************************************************************************************************************
 
         inputManager.ProcessEvent(event);
 
@@ -123,7 +122,8 @@ void GameManager::render() {
         }
 
         // Vẽ player
-        window.draw(playerSprite);
+                window.draw(playerManager.sprite);
+
         break;
 
     case GameState::HighScores:
@@ -195,16 +195,11 @@ void GameManager::handleMainMenuEvent() {
 // lúc chơi
 void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
-
     // nhẩy
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && jumpsRemaining > 0) {
-        velocity.y = JUMP_VELOCITY;
-        jumpsRemaining--;
-        isOnGround = false;
+        playerManager.jump(isOnGround,MAX_JUMPS,jumpsRemaining);
     }
 }
-
-// Trong handleHighScoresEvent(): THÊM deactivate input SAU khi lấy mousePos, bên trong if (IsMousePressed).
 
 void GameManager::handleHighScoresEvent() {
     handleReturnToMenu();
@@ -271,77 +266,23 @@ void GameManager::updatePlaying(float deltaTime) {
         // Kiểm tra xem mép phải của vật cản (vị trí X + chiều rộng)
         // đã đi qua mép trái màn hình (X = 0) hay chưa.
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
-
-            // Nếu đã ra khỏi, di chuyển nó về phía trước một khoảng.
-            // Chúng ta dùng WINDOW_WIDTH (1000) vì các vật cản ban đầu của bạn
-            // (ở 0, 250, 550, 800) dường như tạo thành một "mẫu"
-            // lặp lại mỗi 1000 pixel.
-            //
-            // Việc này sẽ giữ nguyên khoảng cách tương đối giữa chúng.
-            // Ví dụ: Vật cản ở 800 sẽ lặp lại ở ~1800.
-            //         Vật cản ở 0 sẽ lặp lại ở ~1000.
-            // Khoảng cách giữa chúng vẫn là 800.
-
             obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
         }
     }
 
+    // di chuyển người chơi =========================================================================================
+    // không cần thay đổi nữa
     bool leftPressed =
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Left) || inputManager.IsKeyDown(sf::Keyboard::Scancode::A);
     bool rightPressed =
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Right) || inputManager.IsKeyDown(sf::Keyboard::Scancode::D);
-
-
-    // 2. Tăng/Giảm tốc độ (Gia tốc)
-    if (leftPressed) {
-        // Tăng tốc sang trái (velocity.x giảm)
-        velocity.x -= ACCELERATION * deltaTime;
-    } else if (rightPressed) {
-        // Tăng tốc sang phải (velocity.x tăng)
-        velocity.x += ACCELERATION * deltaTime;
-    } else {
-        // 3. Không nhấn phím -> Áp dụng ma sát (Giảm tốc)
-        if (velocity.x > 0.f) {
-            // Đang di chuyển sang phải -> ma sát đẩy sang trái
-            velocity.x -= FRICTION * deltaTime;
-            // Kẹp lại, tránh bị "trôi" ngược
-            if (velocity.x < 0.f)
-                velocity.x = 0.f;
-        } else if (velocity.x < 0.f) {
-            // Đang di chuyển sang trái -> ma sát đẩy sang phải
-            velocity.x += FRICTION * deltaTime;
-            // Kẹp lại
-            if (velocity.x > 0.f)
-                velocity.x = 0.f;
-        }
-    }
-
-    // 4. Giới hạn tốc độ tối đa
-    if (velocity.x > MAX_MOVE_SPEED) {
-        velocity.x = MAX_MOVE_SPEED;
-    } else if (velocity.x < -MAX_MOVE_SPEED) {
-        velocity.x = -MAX_MOVE_SPEED;
-    }
-
-    PhysicsSystem::Update(playerSprite, velocity, deltaTime, obstacles, isOnGround);
-
-    // Reset số lần nhảy nếu chạm đất
-    if (isOnGround) {
-        jumpsRemaining = MAX_JUMPS;
-    }
-
-    // Giới hạn trong cửa sổ
-    const sf::Vector2f pos = playerSprite.getPosition();
-    if (pos.x < 0.f)
-        playerSprite.setPosition({0.f, pos.y});
-
-    sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
-    if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
-        playerSprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
+        
+       playerManager.Move(leftPressed,rightPressed,deltaTime,obstacles,isOnGround,MAX_JUMPS,jumpsRemaining);
 }
+    // ==============================================================================================================
+
 /* ============================================================
- * HÀM MỚI: Cập nhật nền cuộn
- * (Đây là code cho hàm bạn đã khai báo trong game.h)
+ Cuộn
  * ============================================================ */
 void GameManager::updateScrollingBackground(float deltaTime) {
     // Di chuyển cả 2 mảng đất sang trái

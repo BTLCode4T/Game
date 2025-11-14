@@ -1,40 +1,31 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef PlayerManager_H
+#define PlayerManager_H
 
-#include "GamePlay/Entity/Entity.h" 
+#include "Utils/Entity.h"
 #include <SFML/Window.hpp>          
 
-class Player : public Entity {
+class PlayerManager : public Entity {
 private:
-    int level;
-    int experience;
     bool isAlive; 
-
 public:
     // Constructor
-    Player(const string& name, float x, float y,
-           int maxHealth, float speed, const string& texturePath,
-           int initialLevel = 1);
-
-    virtual ~Player() = default;
-
-    // --- Hàm chức năng chính ---
-    void HandleInput();
-    bool CheckCollision(const Entity& other) const;
-    void HandleDinosaurCollision(const Entity& other); 
+    PlayerManager(const string& name, float x, float y,
+           int maxHealth, float speed, const string& texturePath);
+    virtual ~PlayerManager() = default;
+  
+   
+     void HandleInputPlayerManager(bool leftPressed,  bool rightPressed, float deltaTime,const std::vector<Obstacle>& obs, bool &isOnGround,  const int MAX_JUMPS, int &jumpsRemaining);
+    
+    bool CheckCollision(const Entity& other) const; // va chạm 
+     void HandleDinosaurCollision(const Entity& other); //chạm vào khủng long
+    // xóa GetLevel() vì chưa cần
+     void TakeDamage(int amount) override;
     void Die();
-
-    // --- Ghi đè hàm của Entity ---
-    // Lỗi OVERRIDE được giải quyết bằng cách thêm 'virtual' vào Entity::TakeDamage
-    void TakeDamage(int amount) override; 
-
-    void DisplayStatus() const override;
-
-    // --- Getters & Setters riêng ---
-    int GetLevel() const { return level; }
     bool IsAlive() const { return isAlive; }
-    void AddExperience(int amount);
+    //AddExperience( vì chưa cần)
     int GetHealth();
+    void DisplayStatus() const override;
 };
 
-#endif // PLAYER_H
+#endif // PlayerManager_H
+

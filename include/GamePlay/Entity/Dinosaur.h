@@ -1,12 +1,11 @@
 #ifndef DINOSAUR_H
 #define DINOSAUR_H
-#include "Entity.h" // Bắt buộc phải include class cha
+#include "Utils/Entity.h" // Bắt buộc phải include class cha
 
 class Dinosaur : public Entity {
 private:
     // Thêm các thuộc tính riêng của Khủng long nếu cần (ví dụ: tầm nhìn, sát thương cơ bản)
     float attackRange; 
-
 public:
     /**
      * @brief Constructor cho Khủng long.

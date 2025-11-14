@@ -13,25 +13,9 @@ Dinosaur::Dinosaur(const string& name, float x, float y,
     cout << "Dinosaur '" << name << "' da duoc tao tai (" << x << ", " << y << ")." << endl;
 }
 
-// Hàm AI (Ví dụ: Đuổi theo người chơi)
+
 void Dinosaur::ChasePlayer(float playerX, float playerY) {
-    // Tính toán khoảng cách theo trục X và Y
-    float dx = playerX - GetX();
-    float dy = playerY - GetY();
-
-    // Tính toán độ lớn vector khoảng cách (sử dụng định lý Pitago)
-    float distance = std::sqrt(dx * dx + dy * dy);
-
-    // Nếu khoảng cách lớn hơn 1.0f (tránh rung lắc khi quá gần)
-    if (distance > 1.0f) {
-        // Chuẩn hóa vector di chuyển thành vector đơn vị
-        // Chia dx và dy cho khoảng cách để được hướng di chuyển
-        float moveX = dx / distance; 
-        float moveY = dy / distance;
-        
-        // Gọi hàm Move của Entity. Khủng long sẽ di chuyển theo hướng của người chơi
-        Move(moveX, moveY);
-    }
+  // cần sửa
 }
 
 // Ghi đè hàm DisplayStatus
