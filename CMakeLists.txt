@@ -29,6 +29,8 @@ add_executable (main
                 src/Utils/Entity.cpp
                 src/GamePlay/Avatar/player.cpp
                 src/GamePlay/Entity/Dinosaur.cpp
+                  src/Core/Audio/Audio.cpp
+                src/Core/Audio/MusicManager.cpp
                 src/GamePlay/UI/Animation.cpp
                 )
 
