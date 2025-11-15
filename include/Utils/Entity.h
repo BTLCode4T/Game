@@ -10,7 +10,8 @@
 #include <algorithm>         // Dùng cho std::max/min
 #include <iostream>
 #include <string>
-
+#include "GamePlay/UI/Animation.h" 
+#include <memory>//cho unique_ptr
 using namespace std;
 
 class Entity {
@@ -34,11 +35,13 @@ class Entity {
     // --- Thuộc hính Đồ họa (MỚI) ---
 
     sf::Texture texture;       // Biến "ảnh" (lưu trữ ảnh)
-    sf::Sprite sprite;         // Biến "nhân vật" (dùng để vẽ)
+    std::unique_ptr<Animation> animation; // Biến "nhân vật" (dùng để vẽ)
     InputManager inputManager; // hàm input
     // Constructor (Cập nhật: thêm đường dẫn ảnh)
+  
     Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
-           const string &texturePath); // CẬP NHẬT
+           const string &texturePath, float width = PLAYER_SIZE, float height = PLAYER_SIZE,
+           sf::Vector2i frameNum = sf::Vector2i(1, 1), float frameTime = 0.f); // CẬP NHẬT
 
     // Destructor ảo
     virtual ~Entity() = default;
@@ -102,6 +105,13 @@ class Entity {
     }
     string GetName() const {
         return name;
+    }
+
+    string GetType() const {
+        return type;
+    }
+    float GetSpeed() const {
+        return speed;
     }
 
     int getHealth() const {

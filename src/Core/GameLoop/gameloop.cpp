@@ -124,9 +124,16 @@ void GameManager::render() {
         }
 
         // Vẽ player
-        window.draw(playerManager.sprite);
-         drawSpriteBounds(window,playerManager.sprite);
-
+        playerManager.Render(window);
+        // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
+        /*drawSpriteBounds(window, *playerManager.animation);*/
+        
+         // --- VẼ KHỦNG LONG (THÊM VÀO ĐÂY) ---
+        for (auto &dino_ptr : dinosaurs) {
+            dino_ptr->Render(window);
+            // (Nếu bạn dùng debug):
+            // drawSpriteBounds(window, *dino_ptr->animation);
+        }
         break;
 
     case GameState::HighScores:
@@ -267,6 +274,19 @@ void GameManager::updatePlaying(float deltaTime) {
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Right) || inputManager.IsKeyDown(sf::Keyboard::Scancode::D);
 
     playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
+
+    //Cập nhật khung hình animation của người chơi
+    playerManager.animation->Update(deltaTime);
+
+    // Lấy vị trí người chơi để khủng long biết đường đuổi
+    sf::Vector2f playerPos = playerManager.animation->getPosition();
+
+    // Lặp qua tất cả khủng long trong danh sách
+    for (auto &dino_ptr : dinosaurs) {
+        dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
+        dino_ptr->animation->Update(deltaTime);
+        PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, *dino_ptr);
+    }
 }
 // ==============================================================================================================
 void GameManager::updateScrollingBackground(float deltaTime) {

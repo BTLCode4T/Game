@@ -5,8 +5,10 @@
 #include <iostream>
 
 // Constructor của PlayerManager
-PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxHealth, float speed, const std::string &texturePath)
-    : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath),
+PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxHealth, float speed,
+                             const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
+                             float frameTime)
+    : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
    isAlive(true)
 {
   

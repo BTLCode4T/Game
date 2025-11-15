@@ -29,6 +29,7 @@ add_executable (main
                 src/Utils/Entity.cpp
                 src/GamePlay/Avatar/player.cpp
                 src/GamePlay/Entity/Dinosaur.cpp
+                src/GamePlay/UI/Animation.cpp
                 )
 
 # Sử dụng C++17

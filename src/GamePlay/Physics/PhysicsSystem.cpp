@@ -9,6 +9,9 @@ void PhysicsSystem::HandleXCollision(sf::Sprite &playerSprite, const sf::Vector2
     sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
     sf::Vector2f vel = entity.getVelocity();
     for (const auto &obs : obstacles) {
+        if (entity.GetType() == "Dinosaur") {
+            continue; // Nếu là Khủng long, bỏ qua vật cản này
+        }
         // Va chạm X: kiểm tra giao nhau sau khi di chuyển
         if (playerBounds.findIntersection(obs.sprite->getGlobalBounds())) {
             playerSprite.setPosition({oldPos.x + entity.getPushV(),
@@ -36,6 +39,9 @@ void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector
         sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
         sf::FloatRect cnvBounds = obs.sprite->getGlobalBounds();
         if (playerBounds.findIntersection(cnvBounds)) {
+            if (entity.GetType() == "Dinosaur") {
+                continue; // Nếu là Khủng long, bỏ qua vật cản này
+            }
             if (vel.y > 0) // Đang rơi (va chạm từ trên xuống)
             {
                 // Đặt nhân vật đứng trên chướng ngại vật
