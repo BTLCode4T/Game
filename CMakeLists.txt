@@ -29,7 +29,8 @@ add_executable (main
                 src/Utils/Entity.cpp
                 src/GamePlay/Avatar/player.cpp
                 src/GamePlay/Entity/Dinosaur.cpp
-                )
+                src/Core/Audio/Audio.cpp
+                src/Core/Audio/MusicManager.cpp)
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)

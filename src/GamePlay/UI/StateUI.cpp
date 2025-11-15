@@ -6,6 +6,9 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "Core/Audio/Audio.h"
+#include "Core/Audio/MusicManager.h"
+
 
 /* ============================================================
  * CLASS: MainMenuUI — Giao diện chính của game
@@ -35,6 +38,12 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
         createText(font, L"https://github.com/BTLCode4T/Game", 15, sf::Color::White, 850.0f, 25.0f));
 
     versionText = std::make_unique<sf::Text>(createText(font, L"v1.0.0", 15, sf::Color::White, 975.0f, 50.0f));
+
+    // --- [6] Mở nhạc nền
+
+    MusicManager::Get().Play("menu");
+
+
 }
 
 /* --- Hàm Render của MainMenuUI ---
@@ -56,8 +65,7 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
  * CLASS: HighScoresUI — Màn hình bảng xếp hạng
  * ============================================================ */
 HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
-    : backgroundSprite(bg), btnHomeSprite(homeBtn) {
-
+    : backgroundSprite(bg), btnHomeSprite(homeBtn) {     
     // --- [1] Tiêu đề ---
     titleText = std::make_unique<sf::Text>(createText(font, L"BẢNG XẾP HẠNG", 40, sf::Color::Red, 350.0f, 125.0f));
 
@@ -129,13 +137,12 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
         std::make_unique<sf::Text>(createText(font, L"< Ấn phím mũi tên ^/v để cuộn! >", 15, sf::Color::Yellow, 350.0f, 515.0f));
 
 
-    
-    //bất kì ", 
-
-
     // Load scores từ file ngay khi tạo UI
     initList(scoresList);
     readFile("Scores.txt", scoresList);
+
+
+    // Phát nhạc
 
 
 }
@@ -230,6 +237,34 @@ SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf
     // --- [1] Text thông báo đang phát triển ---
     settingsText = std::make_unique<sf::Text>(
         createText(font, L"Tùy chỉnh (đang phát triển)", 28, sf::Color::White, 500.0f, 250.0f));
+
+    // --- [2] Text Âm thanh
+
+    AudioSettingText = std::make_unique<sf::Text>(
+        createText(font, L"Âm thanh", 28, sf::Color::White, 320.0f, 200.0f));
+
+    MusicSettingText = std::make_unique<sf::Text>(
+        createText(font, L"Âm thanh nhạc nền", 28, sf::Color::White, 385.0f, 350.0f));
+
+
+    btnNoneSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 170.0f, 50.0f));
+
+
+    mutedSprite = std::make_unique<sf::Sprite>(
+        createSprite(mutedTexture, "assets/Images/muted_true.png",  50.0f, 50.0f, 650.0f, 175.0f));
+    
+    unmutedSprite = std::make_unique<sf::Sprite>(
+        createSprite(unmutedTexture, "assets/Images/muted_false.png",  50.0f, 50.0f, 650.0f, 175.0f));
+
+
+    musicMutedSprite = std::make_unique<sf::Sprite>(
+        createSprite(musicMutedTexture, "assets/Images/muted_true.png",  50.0f, 50.0f, 650.0f, 325.0f)); // Vị trí mới
+    
+    musicUnmutedSprite = std::make_unique<sf::Sprite>(
+        createSprite(musicUnmutedTexture, "assets/Images/muted_false.png",  50.0f, 50.0f, 650.0f, 325.0f)); // Vị trí mới
+
+    
 }
 
 /* --- Render SettingsUI ---
@@ -238,7 +273,26 @@ SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf
 void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(backgroundSprite);
     window.draw(btnHomeSprite);
-    window.draw(*settingsText);
+    // window.draw(*settingsText);
+    window.draw(*btnNoneSprite);
+
+    window.draw(*AudioSettingText);
+    window.draw(*MusicSettingText);
+
+    // --- BỔ SUNG: Vẽ nút Muted/Unmuted ---
+    if (Audio::Get().IsMuted()) {
+        window.draw(*mutedSprite); 
+    } else {
+        window.draw(*unmutedSprite);
+    }
+
+    // BỔ SUNG: Music Mute/Unmute
+    if (MusicManager::Get().IsMuted()) {
+        window.draw(*musicMutedSprite); 
+    } else {
+        window.draw(*musicUnmutedSprite);
+    }
+
 }
 
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY, int startIndex) {
@@ -380,6 +434,7 @@ void HighScoresUI::resetInputState() {
 
 void HighScoresUI::scrollUp() {
     if (scrollIndex > 0) {
+        Audio::Get().Play("switch_type");
         scrollIndex--;
     }
 }
@@ -388,6 +443,7 @@ void HighScoresUI::scrollDown() {
     int totalNodes = countList(scoresList);
     // Chỉ cho cuộn nếu còn phần tử phía dưới chưa hiển thị
     if (scrollIndex + MAX_LINES < totalNodes) {
+        Audio::Get().Play("switch_type");
         scrollIndex++;
     }
 }
