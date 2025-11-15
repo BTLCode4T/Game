@@ -10,7 +10,8 @@ class PlayerManager : public Entity {
 
   public:
     // Constructor
-    PlayerManager(const string &name, float x, float y, int maxHealth, float speed, const string &texturePath);
+    PlayerManager(const string &name, float x, float y, int maxHealth, float speed, const string &texturePath,
+                  float width, float height, sf::Vector2i frameNum, float frameTime);
     virtual ~PlayerManager() = default;
 
     void HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,

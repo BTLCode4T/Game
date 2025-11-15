@@ -3,13 +3,32 @@
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 
+// ĐỊNH NGHĨA MỚI (9 tham số)
 Entity::Entity(const string &type, const string &name, float x, float y, int maxHealth, float speed,
-               const string &texturePath)
-    :type(type), name(name), x(x), y(y), maxHealth(maxHealth), health(maxHealth), speed(speed),
-      inventory("NONE"), skill("NONE"),
-      sprite(texture), pushV(0) {
-    sprite = createSprite(texture, "assets/Images/a.png", PLAYER_SIZE, PLAYER_SIZE, PLAYER_START_X, PLAYER_START_Y);
-    sprite.setPosition(sf::Vector2f(x, y));
+               const string &texturePath, float width, float height, sf::Vector2i frameNum,
+               float frameTime) // <-- Thêm width, height ở đây
+    : type(type), name(name), x(x), y(y), maxHealth(maxHealth), health(maxHealth), speed(speed), inventory("NONE"),
+      skill("NONE"), texture(), animation(nullptr), pushV(0) {
+
+    if (!texture.loadFromFile(texturePath)) {
+        // DÒNG MỚI:
+        std::cerr << "Loi: Khong the tai '" << texturePath << "'" << std::endl;
+    }
+
+    // 2. Tạo đối tượng Animation bằng con trỏ unique_ptr
+    animation = std::make_unique<Animation>(texture, frameNum, frameTime);
+
+    // 3. Đặt Kích thước (Scale) và Vị trí (Position)
+    // Lấy kích thước của 1 khung hình (mà Animation đã cắt)
+    sf::Vector2i frameSize = animation->getFrameSize(); // Lấy kích thước 1 frame (chính xác)
+
+    // Chúng ta phải ép kiểu (cast) sang float để phép chia chính xác
+    float scaleX = width / static_cast<float>(frameSize.x);
+    float scaleY = height / static_cast<float>(frameSize.y);
+
+    // Áp dụng scale và vị trí
+    animation->setScale(sf::Vector2f(scaleX, scaleY));
+    animation->setPosition({x, y});
 }
 
 void Entity::jump(const int MAX_JUMPS) {
@@ -52,41 +71,41 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
         velocity.x = -MAX_MOVE_SPEED;
     }
     
-    PhysicsSystem::Update(sprite, deltaTime, obs, *this);
+    PhysicsSystem::Update(*animation, deltaTime, obs, *this);
     // Reset số lần nhảy nếu chạm đất
     if (isOnGround) {
         jumpsRemaining = MAX_JUMPS;
     }
     // Giới hạn trong cửa sổ
-    const sf::Vector2f pos = sprite.getPosition();
+    const sf::Vector2f pos = animation->getPosition();
     if (pos.x < 0.f)
-        sprite.setPosition({0.f, pos.y});
-    sf::FloatRect playerBounds = sprite.getGlobalBounds();
+        animation->setPosition({0.f, pos.y});
+    sf::FloatRect playerBounds = animation->getGlobalBounds();
     if (pos.x + playerBounds.size.x > WINDOW_WIDTH)
-        sprite.setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
+        animation->setPosition({WINDOW_WIDTH - playerBounds.size.x, pos.y});
 
 }
 
 // MỚI: Định nghĩa hàm SetTexture (hàm "edit" ảnh)
 void Entity::SetTexture(const string &texturePath) {
-    if (!texture.loadFromFile(texturePath)) {
-        cerr << "Loi: Khong tai duoc file ' " << texturePath << "' cho Entity '" << name << "'" << endl;
-    } else {
-        // setTextur/e sẽ liên kết texture đã tải với sprite
-        sprite.setTexture(texture);
-        cout << name << " da tai anh: " << texturePath << endl;
+    //if (!texture.loadFromFile(texturePath)) {
+    //    cerr << "Loi: Khong tai duoc file ' " << texturePath << "' cho Entity '" << name << "'" << endl;
+    //} else {
+    //    // setTextur/e sẽ liên kết texture đã tải với sprite
+    //    sprite.setTexture(texture);
+    //    cout << name << " da tai anh: " << texturePath << endl;
 
-        // Tùy chọn: Đặt tâm của sprite vào giữa
-        sf::FloatRect bounds = sprite.getLocalBounds();
+    //    // Tùy chọn: Đặt tâm của sprite vào giữa
+    //    sf::FloatRect bounds = sprite.getLocalBounds();
 
-        // setOrigin phải dùng sf::Vector2f trong SFML 3.x
-        sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f));
-    }
+    //    // setOrigin phải dùng sf::Vector2f trong SFML 3.x
+    //    sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f));
+    //}
 }
 
 // vẽ
 void Entity::Render(sf::RenderWindow &window) {
-    window.draw(sprite);
+    window.draw(*animation);
 }
 
 // Hàm nhận sát thương

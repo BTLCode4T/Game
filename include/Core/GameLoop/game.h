@@ -23,7 +23,7 @@
 #include "Core/Input/Input.h"
 
 #include "GamePlay/Avatar/player.h"
-
+#include "GamePlay/Entity/Dinosaur.h"
 using namespace std;
 
 // --- 1. HẰNG SỐ CỬA SỔ (Giữ nguyên) ---
@@ -58,6 +58,8 @@ class GameManager {
     sf::Clock clock; // Đồng hồ đo thời gian (cho deltaTime, animation, v.v.)
 
     PlayerManager playerManager;
+    
+    std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
 
   public:
     // ui
@@ -73,8 +75,10 @@ class GameManager {
           ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
-          playerManager("Meo_bao", WINDOW_WIDTH / 2.f, WINDOW_HEIGHT / 2.f, 10, 1.f, "assets/Images/a.png"),
-
+          playerManager("Meo_bao", WINDOW_WIDTH / 2.f, WINDOW_HEIGHT / 2.f, 10, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
+                        PLAYER_SIZE,        // Rộng, Cao
+                        sf::Vector2i(6, 1), // <-- VÍ DỤ: Ảnh player ("a.png") có 6 khung hình ngang, 1 dọc
+                        0.1f),              // <-- VÍ DỤ: 0.1 giây mỗi khung
           // Khởi tạo UI
           mainMenu(backgroundSprite, sunSprite, treeSprite, menuFont),
           highScoresUI(backgroundSprite, btnHomeSprite, menuFont), helpUI(backgroundSprite, btnHomeSprite, menuFont),
@@ -84,6 +88,17 @@ class GameManager {
         ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
         ground2.setFillColor(sf::Color(139, 69, 19));
         ground2.setPosition({WINDOW_WIDTH, GROUND_Y});
+        dinosaurs.emplace_back(std::make_unique<Dinosaur>(
+                               "Rex",
+                               0.0f,                     // Vị trí X
+                               WINDOW_HEIGHT / 2.f,         
+                               100,                        // Máu
+                               15.0f,                      // Tốc độ
+                               "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
+                               250.0f,                     // Rộng
+                               350.0f,                    //Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+                               sf::Vector2i(6, 1),             // <-- CHỈNH SỐ FRAME Ở ĐÂY
+                               0.1f));
     }
 
     // Hàm chính chạy vòng lặp game
