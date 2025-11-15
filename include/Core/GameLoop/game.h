@@ -106,6 +106,7 @@ class GameManager {
     void handleMainMenuEvent();
     void handlePlayingEvent();
     void handleHighScoresEvent();
+    void handleSettingsEvent();
 
     // Hàm update cho từng trạng thái
     void updatePlaying(float deltaTime);
