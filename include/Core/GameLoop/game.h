@@ -21,7 +21,7 @@
 #include "Utils/GameSate.h"
 
 #include "Core/Input/Input.h"
-#include "GamePlay/Gun/Gun.h"
+#include "GamePlay/Gun/gun.h"
 #include "GamePlay/Gun/bullet.h"
 
 #include "GamePlay/Avatar/player.h"
