@@ -128,8 +128,8 @@ void GameManager::render() {
         playerManager.Render(window);
         // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
         /*drawSpriteBounds(window, *playerManager.animation);*/
-        
-         // --- VẼ KHỦNG LONG (THÊM VÀO ĐÂY) ---
+
+        // --- VẼ KHỦNG LONG (THÊM VÀO ĐÂY) ---
         for (auto &dino_ptr : dinosaurs) {
             dino_ptr->Render(window);
             // (Nếu bạn dùng debug):
@@ -197,6 +197,7 @@ void GameManager::handleMainMenuEvent() {
             playerManager.setIsOnGround(false);
             Audio::Get().Play("click");
             MusicManager::Get().Stop();
+            Audio::Get().PlayLoopVol("dinosaur", 5.0f);
             currentState = GameState::Playing;
         } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
             Audio::Get().Play("click");
@@ -224,6 +225,7 @@ void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && playerManager.getJump() > 0) {
         playerManager.jump(MAX_JUMPS);
+        Audio::Get().Play("jump");
     }
 }
 
@@ -347,7 +349,7 @@ void GameManager::updatePlaying(float deltaTime) {
 
     playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
 
-    //Cập nhật khung hình animation của người chơi
+    // Cập nhật khung hình animation của người chơi
     playerManager.animation->Update(deltaTime);
 
     // Lấy vị trí người chơi để khủng long biết đường đuổi

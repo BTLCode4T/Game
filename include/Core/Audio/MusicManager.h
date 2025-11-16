@@ -14,7 +14,7 @@ private:
     bool muted = false;
 
     std::string currentID = "";
-    float fadeSpeed = 80.0f; // volume giảm mỗi giây khi fade out
+    float fadeSpeed = 80.0f; 
 
     MusicManager();
 

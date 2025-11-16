@@ -9,7 +9,7 @@
 class Audio {
 private:
     std::map<std::string, sf::SoundBuffer> buffers;
-    std::map<std::string, sf::Sound> sounds;
+    std::map<std::string, sf::Sound> sounds; 
 
     bool muted = false;   // ⚡ Cờ hiệu mute
 
@@ -25,6 +25,13 @@ public:
     void operator=(const Audio&) = delete;
 
     void Play(const std::string& id);
+    
+    void PlayTime(const std::string& id, int time_seconds); 
+    void Stop(const std::string& id); 
+    
+    void PlayVol(const std::string& id, float volume); 
+
+    void PlayLoopVol(const std::string& id, float volume);
 
     bool Exists(const std::string& id);
 

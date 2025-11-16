@@ -9,6 +9,7 @@ MusicManager::MusicManager() {
         // {"Game",    "assets/music/Game.ogg"},
         {"Help",    "assets/music/Help.ogg"},
         // {"Settings",    "assets/music/Settings.ogg"},
+        {"run",   "assets/Sounds/run.wav"},
     };
 }
 
