@@ -22,18 +22,10 @@
 
 #include "Core/Input/Input.h"
 
+#include "GamePlay/Map/map.h"
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
 using namespace std;
-
-// --- 1. HẰNG SỐ CỬA SỔ (Giữ nguyên) ---
-
-// --- 2. CẤU TRÚC CHO CHƯỚNG NGẠI VẬT (Obstacle) ---
-// Phải được định nghĩa ở đây để PhysicsSystem và game.cpp có thể dùng.
-// Hàm xử lý quay về menu khi nhấn phím Escape hoặc click nút Home (Giữ lại trong file chính/hàm tiện ích nếu muốn,
-// nhưng để đơn giản, ta sẽ đặt nó vào GameManager nếu nó thao tác trên trạng thái game.)
-// Tuy nhiên, vì nó cần 'window', 'event', 'currentState', 'btnHomeSprite', ta sẽ để nó là hàm tiện ích trong game.cpp
-// hoặc đưa vào class. Tốt nhất là đưa logic xử lý trạng thái vào lớp quản lý.
 
 class GameManager {
   private:
@@ -47,11 +39,11 @@ class GameManager {
     sf::RectangleShape &ground; // Mặt đất
     sf::RectangleShape ground2; // Mặt đất thứ 2 để tạo hiệu ứng cuộn nền
  
-
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
 
     InputManager inputManager;
+    
 
     GameState currentState; // Trạng thái hiện tại của game (Menu, Playing, v.v.)
 
@@ -60,6 +52,7 @@ class GameManager {
     PlayerManager playerManager;
     
     std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
+   Map map;
 
   public:
     // ui
