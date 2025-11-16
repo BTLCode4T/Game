@@ -3,6 +3,7 @@
 #include "Utils/Constants.h"
 #include "Core/GameLoop/json.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/SettingsManager.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
 #include "GamePlay/UI/UI.h"
@@ -76,12 +77,40 @@ int main() {
     sf::Texture btnHome; // nút home
     sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 50.0f, 50.0f, 15.0f, 15.0f);
 
+    sf::Texture heartTexture;
+    if (!heartTexture.loadFromFile("assets/Images/heart.png")) { // Đảm bảo bạn có file này
+        std::cerr << "Loi: Khong the tai 'assets/Images/heart.png'" << std::endl;
+        return -1;
+    }
+
+    std::vector<sf::Sprite> heartSprites;
+    float heartSize = 40.0f; // Kích thước (rộng/cao) của mỗi trái tim
+    float padding = 10.0f;   // Khoảng cách từ mép phải và giữa các trái tim
+
+    // Vị trí X của trái tim ngoài cùng bên phải
+    float startX = WINDOW_WIDTH - heartSize - padding;
+
+    for (int i = 0; i < 3; ++i) { // Tạo 3 trái tim
+        sf::Sprite heartSprite(heartTexture);
+
+        // Tính toán scale để đạt kích thước mong muốn
+        sf::FloatRect bounds = heartSprite.getLocalBounds();
+        heartSprite.setScale(sf::Vector2f(heartSize / bounds.size.x, heartSize / bounds.size.y));
+
+        // Đặt vị trí: trái tim thứ 2, 3 sẽ cách trái tim trước đó (bên phải)
+        heartSprite.setPosition({startX - i * (heartSize + padding), padding});
+
+        heartSprites.push_back(heartSprite);
+    }
+
     sf::Font menuFont; // phong chữ
     if (!menuFont.openFromFile("assets/Images/font.ttf")) {
         std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
-   
+    
+    SettingsManager::Get();
+
     //============================================================================================================
 
     //============================================= Vào game =====================================================

@@ -95,6 +95,7 @@ void GameManager::update(float dt) {
         break;
     case GameState::Playing:
         updatePlaying(dt);
+
         break;
     case GameState::HighScores:
 
@@ -111,6 +112,7 @@ void GameManager::render() {
     switch (currentState) {
     case GameState::MainMenu:
         mainMenu.Render(window, menuFont);
+
         break;
 
     case GameState::Playing:
@@ -138,6 +140,12 @@ void GameManager::render() {
             // (Nếu bạn dùng debug):
             // drawSpriteBounds(window, *dino_ptr->animation);
         }
+
+         // vẽ máu
+        for (const auto &heart : heartSprites) {
+            window.draw(heart);
+        }
+
         break;
 
     case GameState::HighScores:
@@ -200,6 +208,7 @@ void GameManager::handleMainMenuEvent() {
             playerManager.setIsOnGround(false);
             Audio::Get().Play("click");
             MusicManager::Get().Stop();
+            Audio::Get().PlayLoopVol("dinosaur", 5.0f);
             currentState = GameState::Playing;
         } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
             Audio::Get().Play("click");
@@ -227,6 +236,7 @@ void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && playerManager.getJump() > 0) {
         playerManager.jump(MAX_JUMPS);
+        Audio::Get().Play("jump");
     }
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::R)) {
         if (Gun* gun = playerManager.GetGun()) {
@@ -355,7 +365,7 @@ void GameManager::updatePlaying(float deltaTime) {
 
     playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
 
-    //Cập nhật khung hình animation của người chơi
+    // Cập nhật khung hình animation của người chơi
     playerManager.animation->Update(deltaTime);
 
     sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
@@ -446,8 +456,28 @@ bullets.erase(
         dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
         dino_ptr->animation->Update(deltaTime);
         PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, *dino_ptr);
+
+    }
+    int currentHealth = playerManager.GetHealth(); //
+    for (int i = 0; i < heartSprites.size(); ++i) {
+        if (i < currentHealth) {
+            heartSprites[i].setColor(sf::Color::White); // Hiện
+        } else {
+            heartSprites[i].setColor(sf::Color(255, 255, 255, 50)); // Mờ
+        }
+    }
+    updateHealthBarUI();
+    if (playerManager.IsAlive()) {
+
+        // Duyệt qua tất cả khủng long trong danh sách 'dinosaurs' (được định nghĩa trong game.h)
+        for (const auto &dino : dinosaurs) {
+
+            // *dino vì 'dinosaurs' là vector chứa unique_ptr
+            playerManager.HandleDinosaurCollision(*dino);
+        }
     }
 }
+      
 // ==============================================================================================================
 void GameManager::updateScrollingBackground(float deltaTime) {
 
@@ -478,6 +508,27 @@ void GameManager::updateScrollingBackground(float deltaTime) {
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
             obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
+        }
+    }
+    
+}
+void GameManager::updateHealthBarUI() {
+    // 1. Lấy máu hiện tại của player
+    int currentPlayerHealth = playerManager.GetHealth();
+    // 2. Lặp qua từng trái tim trong vector 'heartSprites'
+    for (int i = 0; i < heartSprites.size(); ++i) {
+
+        // 'i' là chỉ số của trái tim (0, 1, 2)
+
+        if (i < currentPlayerHealth) {
+            // Nếu máu hiện tại là 2:
+            // i = 0 (0 < 2) -> Tim đầy
+            // i = 1 (1 < 2) -> Tim đầy
+            // i = 2 (2 < 2) -> Sai -> Tim rỗng
+            heartSprites[i].setTexture(healthTexture_full);
+        } else {
+            // Tim rỗng
+            heartSprites[i].setTexture(healthTexture_empty);
         }
     }
 }

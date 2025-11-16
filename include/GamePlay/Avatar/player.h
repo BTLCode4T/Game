@@ -22,6 +22,7 @@ class PlayerManager : public Entity {
     bool CheckCollision(const Entity &other) const;    // va chạm
     void HandleDinosaurCollision(const Entity &other); // chạm vào khủng long
     // xóa GetLevel() vì chưa cần
+    void Render(sf::RenderWindow &window);
     void TakeDamage(int amount) override;
     void Die();
     bool IsAlive() const {
@@ -31,6 +32,10 @@ class PlayerManager : public Entity {
     Gun* GetGun() const { return currentGun.get(); }
     // AddExperience( vì chưa cần)
     int GetHealth();
+    int GetMaxHealth() const {
+        return Entity::getMaxHealth();
+    }
+    bool IsImmune() const;
     void DisplayStatus() const override;
     void Render(sf::RenderWindow &window) override;
 };

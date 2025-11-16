@@ -34,6 +34,7 @@ add_executable (main
                   src/Core/Audio/Audio.cpp
                 src/Core/Audio/MusicManager.cpp
                 src/GamePlay/UI/Animation.cpp
+                src/Core/Input/SettingsManager.cpp
                 )
 
 # Sử dụng C++17
