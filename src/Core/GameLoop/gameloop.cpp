@@ -7,6 +7,7 @@
 
 // vòng lập
 void GameManager::runGameLoop() {
+    map.map1(window, menuFont, backgroundSprite, sunSprite, treeSprite, ground, ground2);
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
         playerManager.setPushV(-SCROLL_SPEED * deltaTime);
@@ -26,11 +27,6 @@ void GameManager::runGameLoop() {
         //============================================================================================================
     }
 }
-
-// In gameloop.cpp, sửa handleEvents(): XÓA phần deactivate input (nếu có), chỉ giữ TextEntered và KeyPressed Enter.
-// ĐẶC BIỆT: Không dùng mousePos ở đây, vì mousePos chỉ có trong handleHighScoresEvent.
-
-// In gameloop.cpp, sửa handleEvents(): Đổi Return thành Enter.
 
 void GameManager::handleEvents() {
     while (auto eventOpt = window.pollEvent()) {
@@ -52,7 +48,7 @@ void GameManager::handleEvents() {
             }
             // Bắt phím Enter để kết thúc nhập (dùng event trực tiếp, không cần inputManager cho Enter)
             if (event.is<sf::Event::KeyPressed>() &&
-                event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Enter) { // SỬA: Enter thay vì Return
+                event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Enter) {
                 highScoresUI.handleInputFinished(highScoresUI.scoresList);
             }
         }
@@ -106,8 +102,10 @@ void GameManager::update(float dt) {
         break;
     }
 }
+
 // Vẽ theo trạng thái game
 void GameManager::render() {
+
     window.clear(sf::Color::Black);
     switch (currentState) {
     case GameState::MainMenu:
@@ -116,7 +114,7 @@ void GameManager::render() {
         break;
 
     case GameState::Playing:
-        // Nền và hiệu ứng
+        
         window.draw(backgroundSprite);
         window.draw(sunSprite);
         window.draw(ground);
@@ -130,11 +128,6 @@ void GameManager::render() {
         // Vẽ player
        playerManager.Render(window);
         // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
-        /*drawSpriteBounds(window, *playerManager.animation);*/
-        for (auto& bullet : bullets) {
-            bullet->Render(window);
-        }
-         // --- VẼ KHỦNG LONG (THÊM VÀO ĐÂY) ---
         for (auto &dino_ptr : dinosaurs) {
             dino_ptr->Render(window);
             // (Nếu bạn dùng debug):
