@@ -1,3 +1,5 @@
+#include "Core/Audio/Audio.h"
+#include "Core/Audio/MusicManager.h"
 #include "Core/GameLoop/game.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
@@ -77,7 +79,7 @@ void GameManager::handleEvents() {
             break;
         case GameState::Help:
         case GameState::Settings:
-            handleReturnToMenu();
+            handleSettingsEvent();
             break;
         }
     }
@@ -106,7 +108,6 @@ void GameManager::update(float dt) {
 // Vẽ theo trạng thái game
 void GameManager::render() {
     window.clear(sf::Color::Black);
-
     switch (currentState) {
     case GameState::MainMenu:
         mainMenu.Render(window, menuFont);
@@ -163,7 +164,9 @@ void GameManager::render() {
 void GameManager::handleReturnToMenu() {
     // bấm Q quay về menu
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Q)) {
+        Audio::Get().Play("click_off");
         currentState = GameState::MainMenu;
+
         return;
     }
 
@@ -171,14 +174,15 @@ void GameManager::handleReturnToMenu() {
     if (inputManager.IsMousePressed(sf::Mouse::Button::Left)) {
         sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
         if (btnHomeSprite.getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click_off");
+            MusicManager::Get().Play("menu");
             currentState = GameState::MainMenu;
         }
     }
+    // Phát âm thanh click
 }
 
 void GameManager::handleMainMenuEvent() {
-
-    // Enter
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
         playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
         playerManager.setVelocity(0, 0);
@@ -197,14 +201,27 @@ void GameManager::handleMainMenuEvent() {
 
         if (mainMenu.getBtnNewSprite().getGlobalBounds().contains(mousePos)) {
             playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-           playerManager.setVelocity(0, 0);
+            playerManager.setVelocity(0, 0);
             playerManager.setIsOnGround(false);
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
             currentState = GameState::Playing;
         } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
+            MusicManager::Get().Play("HighScores");
+
             currentState = GameState::HighScores;
         } else if (mainMenu.getBtnHelpSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
+            MusicManager::Get().Play("Help");
             currentState = GameState::Help;
         } else if (mainMenu.getBtnSettingsSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
+            // Có chưa có nhạc hehe
+            // MusicManager::Get().Play("Settings");
             currentState = GameState::Settings;
         }
     }
@@ -213,7 +230,6 @@ void GameManager::handleMainMenuEvent() {
 // lúc chơi
 void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
-    // nhẩy
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && playerManager.getJump() > 0) {
         playerManager.jump(MAX_JUMPS);
     }
@@ -225,6 +241,7 @@ void GameManager::handleHighScoresEvent() {
         if (highScoresUI.getIsNotFoundVisible()) {
             // Nếu đang hiện ảnh Not Found -> Click để tắt nó đi
             highScoresUI.setIsNotFoundVisible(false);
+            Audio::Get().Play("click_off");
             return; // Dừng hàm luôn, không xử lý các nút khác bên dưới
         }
         sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
@@ -252,21 +269,76 @@ void GameManager::handleHighScoresEvent() {
         if (highScoresUI.getBtnDecreasingScore().getGlobalBounds().contains(mousePos)) {
             decreasingScore(currentList);
             highScoresUI.resetScroll();
+            Audio::Get().Play("switch_task");
         }
         // 2. Điểm tăng dần
         else if (highScoresUI.getBtnIncreasingScore().getGlobalBounds().contains(mousePos)) {
             increasingScore(currentList);
             highScoresUI.resetScroll();
+            Audio::Get().Play("switch_task");
         }
         // 3. Thời gian giảm dần
         else if (highScoresUI.getBtnDecreasingTime().getGlobalBounds().contains(mousePos)) {
             decreasingTime(currentList);
             highScoresUI.resetScroll();
+            Audio::Get().Play("switch_task");
         }
         // 4. Thời gian tăng dần
         else if (highScoresUI.getBtnIncreasingTime().getGlobalBounds().contains(mousePos)) {
             increasingTime(currentList);
             highScoresUI.resetScroll();
+            Audio::Get().Play("switch_task");
+        }
+    }
+}
+
+void GameManager::handleSettingsEvent() {
+    // Bấm Q quay về menu
+    if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Q)) {
+        Audio::Get().Play("click_off");
+        MusicManager::Get().Play("menu");
+        currentState = GameState::MainMenu;
+        return;
+    }
+
+    // kiểm tra click trái
+    if (inputManager.IsMousePressed(sf::Mouse::Button::Left)) {
+        sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
+
+        // --- BỔ SUNG: Xử lý nút Home ---
+        if (settingsUI.getHomeButtonSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click_off");
+            MusicManager::Get().Play("menu");
+            currentState = GameState::MainMenu;
+            return;
+        }
+
+        // --- Xử lý nút Mute/Unmute ---
+        if (settingsUI.getMutedSprite().getGlobalBounds().contains(mousePos)) {
+            bool currentMuteState = Audio::Get().IsMuted();
+            bool newMuteState = !currentMuteState;
+
+            Audio::Get().SetMute(newMuteState);
+
+            if (!newMuteState) {
+                Audio::Get().Play("click");
+            } else {
+                Audio::Get().Play("click_off");
+            }
+        }
+
+        // --- Xử lý nút Music Mute/Unmute ---
+        if (settingsUI.getMusicMutedSprite().getGlobalBounds().contains(mousePos)) {
+            bool currentMusicMuteState = MusicManager::Get().IsMuted();
+            bool newMusicMuteState = !currentMusicMuteState;
+
+            MusicManager::Get().SetMute(newMusicMuteState);
+
+            if (!newMusicMuteState) {
+                Audio::Get().Play("click");
+            } else {
+                Audio::Get().Play("click_off");
+            }
         }
     }
 }
@@ -318,13 +390,13 @@ void GameManager::updatePlaying(float deltaTime) {
       
 // ==============================================================================================================
 void GameManager::updateScrollingBackground(float deltaTime) {
-   
+
     // Di chuyển cả 2 mảng đất sang trái
     ground.move({-SCROLL_SPEED * deltaTime, 0.f});
     ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
 
     // Lấy chiều rộng của mặt đất
-    const float groundWidth = WINDOW_WIDTH; 
+    const float groundWidth = WINDOW_WIDTH;
 
     // Kiểm tra mảng đất 1 (ground)
     if (ground.getPosition().x + groundWidth <= 0.f) {
@@ -340,7 +412,7 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     }
 
     // dịch chuyển lập lại vật cản
-     for (auto &obs : obstacles) {
+    for (auto &obs : obstacles) {
         // Di chuyển bằng đúng tốc độ cuộn của nền
         obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;

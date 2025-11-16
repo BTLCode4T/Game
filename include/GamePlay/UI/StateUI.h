@@ -79,25 +79,23 @@ class HighScoresUI : public IGameStateUI {
     std::unique_ptr<sf::Sprite> btnTextInputSprite;
     std::unique_ptr<sf::Sprite> notFoundSprite;
 
-
-
     // TEST NHẬP LIỆU
     std::unique_ptr<sf::Text> inputTextDisplay; // Text để hiển thị nội dung nhập
     std::string currentInput;                   // Chuỗi lưu trữ nội dung nhập liệu hiện tại
     bool isInputActive = false;                 // Cờ cho biết có đang nhập liệu hay không
 
     // --- THÊM: Biến cho con trỏ nhấp nháy ---
-    sf::Clock cursorBlinkClock;                 // Clock để tính thời gian nhấp nháy
-    sf::RectangleShape cursorShape;             // Hình chữ "|" (dùng RectangleShape thay vì Text để dễ control)
-    bool cursorVisible = true;                  // Trạng thái hiện/ẩn con trỏ
-    float blinkInterval = 0.5f;                 // Nhấp nháy mỗi 0.5 giây (có thể điều chỉnh)
+    sf::Clock cursorBlinkClock;     // Clock để tính thời gian nhấp nháy
+    sf::RectangleShape cursorShape; // Hình chữ "|" (dùng RectangleShape thay vì Text để dễ control)
+    bool cursorVisible = true;      // Trạng thái hiện/ẩn con trỏ
+    float blinkInterval = 0.5f;     // Nhấp nháy mỗi 0.5 giây (có thể điều chỉnh)
     // -- -THÊM : Prompt riêng biệt-- -
     std::unique_ptr<sf::Text> promptText;       // Text riêng cho prompt ("Tìm theo điểm"), không lẫn với input
     std::string promptString = "Tìm theo điểm"; // Prompt mặc định (bạn có thể đổi thành "Nhập điểm")
 
     bool isNotFoundVisible = false;
-    int scrollIndex = 0;        // Vị trí bắt đầu vẽ (dòng thứ mấy)
-    const int MAX_LINES = 5;    // Số dòng tối đa hiển thị 1 lúc
+    int scrollIndex = 0;     // Vị trí bắt đầu vẽ (dòng thứ mấy)
+    const int MAX_LINES = 5; // Số dòng tối đa hiển thị 1 lúc
 
   public:
     List scoresList;
@@ -109,18 +107,21 @@ class HighScoresUI : public IGameStateUI {
     void scrollDown();
     void resetScroll(); // Để reset về 0 khi tìm kiếm hoặc sắp xếp
 
-
     // >> THÊM PUBLIC SETTER / GETTER ĐỂ TRUY CẬP PRIVATE FIELDS <<
     void setInputActive(bool active);
-    
+
     bool isCurrentlyInputting() const {
         return isInputActive;
     }
     void addCharToInput(std::uint32_t unicode);
     void handleInputFinished(List &l);
 
-    bool getIsNotFoundVisible() const { return isNotFoundVisible; }
-    void setIsNotFoundVisible(bool visible) { isNotFoundVisible = visible; }
+    bool getIsNotFoundVisible() const {
+        return isNotFoundVisible;
+    }
+    void setIsNotFoundVisible(bool visible) {
+        isNotFoundVisible = visible;
+    }
 
     // Thêm các hàm để reset/cập nhật hiển thị từ GameManager
     void resetInputState(); // Hàm mới: Reset chuỗi nhập và hiển thị
@@ -143,8 +144,6 @@ class HighScoresUI : public IGameStateUI {
     const sf::Sprite &getNotFoundSprite() const {
         return *notFoundSprite;
     }
-
-
 };
 
 /* --- HELP --- */
@@ -167,11 +166,27 @@ class SettingsUI : public IGameStateUI {
     const sf::Sprite &backgroundSprite;
     const sf::Sprite &btnHomeSprite;
 
+    std::unique_ptr<sf::Text> AudioSettingText;
+    std::unique_ptr<sf::Text> MusicSettingText;
+
+    sf::Texture mutedTexture, unmutedTexture, btnNone, musicMutedTexture, musicUnmutedTexture;
+    std::unique_ptr<sf::Sprite> mutedSprite;
+    std::unique_ptr<sf::Sprite> unmutedSprite;
+    std::unique_ptr<sf::Sprite> btnNoneSprite;
+    std::unique_ptr<sf::Sprite> musicMutedSprite;
+    std::unique_ptr<sf::Sprite> musicUnmutedSprite;
+
+
+
   public:
     SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
+    const sf::Sprite &getMutedSprite() const { return *mutedSprite; }
+    const sf::Sprite &getHomeButtonSprite() const { return btnHomeSprite; }
+    const sf::Sprite &getMusicMutedSprite() const { return *musicMutedSprite; }
 };
 
-void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY, int startIndex);
+void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY,
+                    int startIndex);
 
 #endif // STATE_UI_H
