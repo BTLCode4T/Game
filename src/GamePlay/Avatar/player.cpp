@@ -94,13 +94,10 @@ void PlayerManager::DisplayStatus() const {
     std::cout << "-----------------------------" << std::endl;
 }
 void PlayerManager::Render(sf::RenderWindow &window) {
-    
-    // 1. Gọi hàm Render của lớp CHA (Entity)
-    //    để vẽ bản thân người chơi (animation)
+
     Entity::Render(window); 
 
-    // 2. Vẽ thêm súng (nếu có)
     if (currentGun) {
-        currentGun->Render(window); // Gun cũng là Entity nên nó có hàm Render
+        currentGun->Render(window); 
     }
 }

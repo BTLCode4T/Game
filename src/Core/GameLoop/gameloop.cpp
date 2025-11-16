@@ -4,7 +4,6 @@
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
 
-
 // vòng lập
 void GameManager::runGameLoop() {
     map.map1(window, menuFont, backgroundSprite, sunSprite, treeSprite, ground, ground2);
@@ -114,7 +113,7 @@ void GameManager::render() {
         break;
 
     case GameState::Playing:
-        
+
         window.draw(backgroundSprite);
         window.draw(sunSprite);
         window.draw(ground);
@@ -125,8 +124,13 @@ void GameManager::render() {
             window.draw(*obs.sprite);
         }
 
+        for (auto &bullet : bullets) {
+            if (!bullet->IsDestroyed()) {
+                window.draw(*bullet->animation);
+            }
+        }
         // Vẽ player
-       playerManager.Render(window);
+        playerManager.Render(window);
         // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
         for (auto &dino_ptr : dinosaurs) {
             dino_ptr->Render(window);
@@ -134,7 +138,7 @@ void GameManager::render() {
             // drawSpriteBounds(window, *dino_ptr->animation);
         }
 
-         // vẽ máu
+        // vẽ máu
         for (const auto &heart : heartSprites) {
             window.draw(heart);
         }
@@ -232,7 +236,7 @@ void GameManager::handlePlayingEvent() {
         Audio::Get().Play("jump");
     }
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::R)) {
-        if (Gun* gun = playerManager.GetGun()) {
+        if (Gun *gun = playerManager.GetGun()) {
             gun->Reload();
         }
     }
@@ -358,88 +362,81 @@ void GameManager::updatePlaying(float deltaTime) {
 
     playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
 
+    // ==============================================================================================================
     // Cập nhật khung hình animation của người chơi
     playerManager.animation->Update(deltaTime);
-
+    // ==============================================================================================================
     sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
-    
+
     // Lấy tâm của player (dùng globalBounds cho chính xác)
     sf::FloatRect playerBounds = playerManager.animation->getGlobalBounds();
-    sf::Vector2f playerCenter(
-        playerBounds.position.x + playerBounds.size.x / 2.f,
-        playerBounds.position.y + playerBounds.size.y / 2.f
-    );
+    sf::Vector2f playerCenter(playerBounds.position.x + playerBounds.size.x / 2.f,
+                              playerBounds.position.y + playerBounds.size.y / 2.f);
 
-    if (Gun* gun = playerManager.GetGun()) {
+    if (Gun *gun = playerManager.GetGun()) {
         // 1. Cập nhật vị trí và góc quay của súng
         gun->UpdateGun(playerCenter, mousePos);
-        
+
         // 2. Xử lý bắn (dùng IsMouseDown để giữ chuột)
         if (inputManager.IsMouseDown(sf::Mouse::Button::Left)) {
             if (gun->Shoot()) {
                 // Nếu bắn thành công (gun->Shoot() == true)
                 // Lấy vị trí đầu nòng
                 sf::Vector2f muzzlePos = gun->GetMuzzlePosition();
-                
+
                 // Lấy hướng bắn (từ đầu nòng tới chuột)
                 sf::Vector2f fireDirection = mousePos - muzzlePos;
-                
+
                 // Tạo đạn
                 CreateBullet(muzzlePos.x, muzzlePos.y, 1, fireDirection, 1500.f); // Tốc độ đạn 1500
             }
         }
     }
-    
-    // === CẬP NHẬT ĐẠN ===
+
     // === CẬP NHẬT ĐẠN VÀ KIỂM TRA VA CHẠM ===
-// === CẬP NHẬT ĐẠN VÀ KIỂM TRA VA CHẠM ===
-for (auto& bullet : bullets) {
-    // 1. Bỏ qua nếu đạn đã bị đánh dấu xóa
-    if (bullet->IsDestroyed()) continue;
+    for (auto &bullet : bullets) {
+        // 1. Bỏ qua nếu đạn đã bị đánh dấu xóa
+        if (bullet->IsDestroyed())
+            continue;
 
-    // 2. Cập nhật vị trí bay của đạn
-    bullet->UpdateBullet(deltaTime);
+        // 2. Cập nhật vị trí bay của đạn
+        bullet->UpdateBullet(deltaTime);
 
-    // 3. Lặp qua tất cả khủng long để kiểm tra va chạm
-    for (auto& dino_ptr : dinosaurs) { 
+        // 3. Lặp qua tất cả khủng long để kiểm tra va chạm
+        for (auto &dino_ptr : dinosaurs) {
 
-        // Lấy hitbox (hình chữ nhật) của đạn và khủng long
-        sf::FloatRect bulletBounds = bullet->animation->getGlobalBounds();
-        sf::FloatRect dinoBounds = dino_ptr->animation->getGlobalBounds();
+            // Lấy hitbox (hình chữ nhật) của đạn và khủng long
+            sf::FloatRect bulletBounds = bullet->animation->getGlobalBounds();
+            sf::FloatRect dinoBounds = dino_ptr->animation->getGlobalBounds();
 
-        // === LOGIC VA CHẠM AABB (CÚ PHÁP SFML 3) ===
+            // === LOGIC VA CHẠM AABB (CÚ PHÁP SFML 3) ===
 
-        // 1. Kiểm tra va chạm trục X
-        bool collisionX = bulletBounds.position.x + bulletBounds.size.x >= dinoBounds.position.x &&
-                          dinoBounds.position.x + dinoBounds.size.x >= bulletBounds.position.x;
+            // 1. Kiểm tra va chạm trục X
+            bool collisionX = bulletBounds.position.x + bulletBounds.size.x >= dinoBounds.position.x &&
+                              dinoBounds.position.x + dinoBounds.size.x >= bulletBounds.position.x;
 
-        // 2. Kiểm tra va chạm trục Y
-        bool collisionY = bulletBounds.position.y + bulletBounds.size.y >= dinoBounds.position.y &&
-                          dinoBounds.position.y + dinoBounds.size.y >= bulletBounds.position.y;
+            // 2. Kiểm tra va chạm trục Y
+            bool collisionY = bulletBounds.position.y + bulletBounds.size.y >= dinoBounds.position.y &&
+                              dinoBounds.position.y + dinoBounds.size.y >= bulletBounds.position.y;
 
-        // 3. Nếu va chạm trên cả hai trục
-        if (collisionX && collisionY) {
+            // 3. Nếu va chạm trên cả hai trục
+            if (collisionX && collisionY) {
 
-            // TRÚNG MỤC TIÊU!
-            dino_ptr->TakeDamage(bullet->GetDamage()); // Khủng long mất máu
+                // TRÚNG MỤC TIÊU!
+                dino_ptr->TakeDamage(bullet->GetDamage()); // Khủng long mất máu
 
-            bullet->Destroy(); // Đánh dấu đạn này để xóa
+                bullet->Destroy(); // Đánh dấu đạn này để xóa
 
-            // Đạn đã trúng 1 con, không cần check con khác
-            break; 
+                // Đạn đã trúng 1 con, không cần check con khác
+                break;
+            }
         }
     }
-}
 
-// === XÓA ĐẠN (HẾT HẠN HOẶC ĐÃ TRÚNG) ===
-bullets.erase(
-    std::remove_if(bullets.begin(), bullets.end(), 
-        [](const auto& b) {
-            return b->IsExpired() || b->IsDestroyed();
-        }
-    ),
-    bullets.end()
-);
+    // === XÓA ĐẠN (HẾT HẠN HOẶC ĐÃ TRÚNG) ===
+    bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
+                                 [](const auto &b) { return b->IsExpired() || b->IsDestroyed(); }),
+                  bullets.end());
 
     // Lấy vị trí người chơi để khủng long biết đường đuổi
     sf::Vector2f playerPos = playerManager.animation->getPosition();
@@ -449,7 +446,6 @@ bullets.erase(
         dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
         dino_ptr->animation->Update(deltaTime);
         PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, *dino_ptr);
-
     }
     int currentHealth = playerManager.GetHealth(); //
     for (int i = 0; i < heartSprites.size(); ++i) {
@@ -470,8 +466,7 @@ bullets.erase(
         }
     }
 }
-      
-// ==============================================================================================================
+
 void GameManager::updateScrollingBackground(float deltaTime) {
 
     // Di chuyển cả 2 mảng đất sang trái
@@ -503,7 +498,6 @@ void GameManager::updateScrollingBackground(float deltaTime) {
             obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
         }
     }
-    
 }
 void GameManager::updateHealthBarUI() {
     // 1. Lấy máu hiện tại của player

@@ -35,8 +35,6 @@ public:
     bool IsMusicMuted() const { return musicMuted; }
     bool IsSoundMuted() const { return soundMuted; }
 
-    // --- Setter ---
-    // Cập nhật giá trị và lưu vào file
     void SetMusicVolume(float v);
     void SetMusicMuted(bool m);
     void SetSoundMuted(bool m);
