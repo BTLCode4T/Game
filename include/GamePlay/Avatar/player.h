@@ -3,10 +3,12 @@
 
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
+#include "GamePlay/Gun/gun.h"
 
 class PlayerManager : public Entity {
   private:
     bool isAlive;
+    std::unique_ptr<Gun> currentGun;
 
   public:
     // Constructor
@@ -20,14 +22,22 @@ class PlayerManager : public Entity {
     bool CheckCollision(const Entity &other) const;    // va chạm
     void HandleDinosaurCollision(const Entity &other); // chạm vào khủng long
     // xóa GetLevel() vì chưa cần
+    void Render(sf::RenderWindow &window);
     void TakeDamage(int amount) override;
     void Die();
     bool IsAlive() const {
         return isAlive;
     }
+    void EquipGun(std::unique_ptr<Gun> gun);
+    Gun* GetGun() const { return currentGun.get(); }
     // AddExperience( vì chưa cần)
     int GetHealth();
+    int GetMaxHealth() const {
+        return Entity::getMaxHealth();
+    }
+    bool IsImmune() const;
     void DisplayStatus() const override;
+    void Render(sf::RenderWindow &window) override;
 };
 
 #endif // PlayerManager_H

@@ -9,7 +9,8 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
                              float frameTime)
     : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
-   isAlive(true)
+   isAlive(true),
+   currentGun(nullptr)
 {
   
 }
@@ -53,13 +54,15 @@ bool PlayerManager::CheckCollision(const Entity &other) const {
     if (!isAlive)
         return false;
 
-    float dx = GetX() - other.GetX();
-    float dy = GetY() - other.GetY();
-    float distance = std::sqrt(dx * dx + dy * dy);
+     // 1. Lấy khung hình chữ nhật của bản thân
+    sf::FloatRect playerBounds = this->getBounds();
 
-    const float COLLISION_THRESHOLD = 30.0f;
+    // 2. Lấy khung hình chữ nhật của đối tượng kia
+    sf::FloatRect otherBounds = other.getBounds();
 
-    return distance < COLLISION_THRESHOLD;
+    // 3. Kiểm tra xem 2 hình chữ nhật có giao nhau không
+    // findIntersection trả về std::optional, dùng .has_value() để kiểm tra có giao nhau không
+    return playerBounds.findIntersection(otherBounds).has_value();
 }
 
 // Hàm xử lý va chạm cụ thể với Khủng long: Gây 1 sát thương
@@ -67,13 +70,21 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
     if (!isAlive)
         return;
 
-    if (CheckCollision(other)) {
-        std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
-
-        TakeDamage(1);
+    // 1. Kiểm tra Cooldown TRƯỚC (để tiết kiệm hiệu năng)
+    if (damageCooldownClock.getElapsedTime().asSeconds() > damageCooldownTime) {
+        // 2. Nếu hết thời gian chờ -> Mới kiểm tra va chạm vật lý
+        if (CheckCollision(other)) {
+            std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
+            // 3. Trừ máu
+            TakeDamage(1);
+            // 4. Reset đồng hồ để bắt đầu đếm ngược lại từ đầu
+            damageCooldownClock.restart();
+        }
     }
 }
-
+void PlayerManager::EquipGun(std::unique_ptr<Gun> gun) {
+    currentGun = std::move(gun);
+}
 // Ghi đè hàm DisplayStatus
 void PlayerManager::DisplayStatus() const {
     Entity::DisplayStatus();
@@ -81,4 +92,15 @@ void PlayerManager::DisplayStatus() const {
   
     std::cout << "  Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
     std::cout << "-----------------------------" << std::endl;
+}
+void PlayerManager::Render(sf::RenderWindow &window) {
+    
+    // 1. Gọi hàm Render của lớp CHA (Entity)
+    //    để vẽ bản thân người chơi (animation)
+    Entity::Render(window); 
+
+    // 2. Vẽ thêm súng (nếu có)
+    if (currentGun) {
+        currentGun->Render(window); // Gun cũng là Entity nên nó có hàm Render
+    }
 }

@@ -61,7 +61,7 @@ class Entity {
      * @brief Hàm "hiện con nhân vật ra" - Vẽ nhân vật lên cửa sổ game.
      * @param window Cửa sổ RenderWindow mà bạn muốn vẽ lên.
      */
-    void Render(sf::RenderWindow &window); // MỚI
+    virtual void Render(sf::RenderWindow &window); // MỚI
 
     // --- Hàm cập nhật & Setters ---
     void AddSkill(const string &skillCode) {
@@ -131,8 +131,20 @@ class Entity {
         return velocity;
     }
 
+    int getMaxHealth() const {
+        return maxHealth;
+    }
+    sf::FloatRect getBounds() const {
+        // 'animation' của bạn cũng là một sf::Sprite
+        // nên nó có hàm getGlobalBounds()
+        if (animation) { // Kiểm tra xem con trỏ có hợp lệ không
+            return animation->getGlobalBounds();
+        }
+        return sf::FloatRect(); // Trả về 1 hình chữ nhật rỗng nếu có lỗi
+    }
     // Hàm hiển thị trạng thái
     virtual void DisplayStatus() const;
+
 };
 
 #endif // ENTITY_H
