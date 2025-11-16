@@ -9,8 +9,10 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
                              float frameTime)
     : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
-      isAlive(true), damageCooldownClock(), damageCooldownTime(1.5f) {
-    
+   isAlive(true),
+   currentGun(nullptr)
+{
+  
 }
 
 // Hàm xử lý Input
@@ -80,7 +82,9 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
         }
     }
 }
-
+void PlayerManager::EquipGun(std::unique_ptr<Gun> gun) {
+    currentGun = std::move(gun);
+}
 // Ghi đè hàm DisplayStatus
 void PlayerManager::DisplayStatus() const {
     Entity::DisplayStatus();
@@ -89,29 +93,14 @@ void PlayerManager::DisplayStatus() const {
     std::cout << "  Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
     std::cout << "-----------------------------" << std::endl;
 }
-bool PlayerManager::IsImmune() const {
-    return damageCooldownClock.getElapsedTime().asSeconds() <= damageCooldownTime;
-}
 void PlayerManager::Render(sf::RenderWindow &window) {
-    bool drawPlayer = true; // Mặc định là vẽ
+    
+    // 1. Gọi hàm Render của lớp CHA (Entity)
+    //    để vẽ bản thân người chơi (animation)
+    Entity::Render(window); 
 
-    // Dùng hàm vừa tạo ở Bước 1
-    if (IsImmune()) {
-        // Lấy thời gian đã trôi qua trong 1.5s miễn nhiễm
-        float immuneTime = damageCooldownClock.getElapsedTime().asSeconds();
-
-        // fmod: phép chia lấy dư
-        // 0.2f là tổng thời gian 1 chu kỳ (0.1s sáng, 0.1s tối)
-        float blinkCycle = std::fmod(immuneTime, 0.2f);
-
-        // Nếu thời gian trong chu kỳ > 0.1f (nửa sau) thì TẮT VẼ
-        if (blinkCycle > 0.1f) {
-            drawPlayer = false;
-        }
-    }
-
-    // 'animation' là biến public của class Entity (cha)
-    if (drawPlayer && animation) {
-        window.draw(*animation);
+    // 2. Vẽ thêm súng (nếu có)
+    if (currentGun) {
+        currentGun->Render(window); // Gun cũng là Entity nên nó có hàm Render
     }
 }

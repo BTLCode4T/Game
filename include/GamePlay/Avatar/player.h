@@ -3,13 +3,13 @@
 
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
-#include <SFML/System/Clock.hpp>
+#include "GamePlay/Gun/gun.h"
 
 class PlayerManager : public Entity {
   private:
     bool isAlive;
-    sf::Clock damageCooldownClock; 
-    float damageCooldownTime;
+    std::unique_ptr<Gun> currentGun;
+
   public:
     // Constructor
     PlayerManager(const string &name, float x, float y, int maxHealth, float speed, const string &texturePath,
@@ -28,6 +28,8 @@ class PlayerManager : public Entity {
     bool IsAlive() const {
         return isAlive;
     }
+    void EquipGun(std::unique_ptr<Gun> gun);
+    Gun* GetGun() const { return currentGun.get(); }
     // AddExperience( vì chưa cần)
     int GetHealth();
     int GetMaxHealth() const {
@@ -35,6 +37,7 @@ class PlayerManager : public Entity {
     }
     bool IsImmune() const;
     void DisplayStatus() const override;
+    void Render(sf::RenderWindow &window) override;
 };
 
 #endif // PlayerManager_H

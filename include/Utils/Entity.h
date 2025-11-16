@@ -57,7 +57,11 @@ class Entity {
      */
     void SetTexture(const string &texturePath); // MỚI
 
-    void Render(sf::RenderWindow &window); // MỚI
+    /**
+     * @brief Hàm "hiện con nhân vật ra" - Vẽ nhân vật lên cửa sổ game.
+     * @param window Cửa sổ RenderWindow mà bạn muốn vẽ lên.
+     */
+    virtual void Render(sf::RenderWindow &window); // MỚI
 
     // --- Hàm cập nhật & Setters ---
     void AddSkill(const string &skillCode) {
