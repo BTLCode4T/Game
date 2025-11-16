@@ -9,7 +9,8 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
                              float frameTime)
     : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
-   isAlive(true)
+   isAlive(true),
+   currentGun(nullptr)
 {
   
 }
@@ -73,7 +74,9 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
         TakeDamage(1);
     }
 }
-
+void PlayerManager::EquipGun(std::unique_ptr<Gun> gun) {
+    currentGun = std::move(gun);
+}
 // Ghi đè hàm DisplayStatus
 void PlayerManager::DisplayStatus() const {
     Entity::DisplayStatus();
@@ -81,4 +84,15 @@ void PlayerManager::DisplayStatus() const {
   
     std::cout << "  Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
     std::cout << "-----------------------------" << std::endl;
+}
+void PlayerManager::Render(sf::RenderWindow &window) {
+    
+    // 1. Gọi hàm Render của lớp CHA (Entity)
+    //    để vẽ bản thân người chơi (animation)
+    Entity::Render(window); 
+
+    // 2. Vẽ thêm súng (nếu có)
+    if (currentGun) {
+        currentGun->Render(window); // Gun cũng là Entity nên nó có hàm Render
+    }
 }

@@ -61,7 +61,7 @@ class Entity {
      * @brief Hàm "hiện con nhân vật ra" - Vẽ nhân vật lên cửa sổ game.
      * @param window Cửa sổ RenderWindow mà bạn muốn vẽ lên.
      */
-    void Render(sf::RenderWindow &window); // MỚI
+    virtual void Render(sf::RenderWindow &window); // MỚI
 
     // --- Hàm cập nhật & Setters ---
     void AddSkill(const string &skillCode) {

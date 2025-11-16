@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 # File nguồn
-add_executable (main 
+add_executable (main
                 src/game.cpp
                 src/Core/GameLoop/gameloop.cpp 
                 src/GamePlay/UI/UI.cpp 
@@ -28,6 +28,8 @@ add_executable (main
                 src/Core/Input/Input.cpp
                 src/Utils/Entity.cpp
                 src/GamePlay/Avatar/player.cpp
+                src/GamePlay/Gun/gun.cpp
+                src/GamePlay/Gun/bullet.cpp
                 src/GamePlay/Entity/Dinosaur.cpp
                   src/Core/Audio/Audio.cpp
                 src/Core/Audio/MusicManager.cpp

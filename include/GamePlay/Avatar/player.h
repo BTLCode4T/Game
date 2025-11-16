@@ -3,10 +3,12 @@
 
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
+#include "GamePlay/Gun/Gun.h"
 
 class PlayerManager : public Entity {
   private:
     bool isAlive;
+    std::unique_ptr<Gun> currentGun;
 
   public:
     // Constructor
@@ -25,9 +27,12 @@ class PlayerManager : public Entity {
     bool IsAlive() const {
         return isAlive;
     }
+    void EquipGun(std::unique_ptr<Gun> gun);
+    Gun* GetGun() const { return currentGun.get(); }
     // AddExperience( vì chưa cần)
     int GetHealth();
     void DisplayStatus() const override;
+    void Render(sf::RenderWindow &window) override;
 };
 
 #endif // PlayerManager_H
