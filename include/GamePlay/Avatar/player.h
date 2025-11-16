@@ -3,7 +3,7 @@
 
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
-#include "GamePlay/Gun/Gun.h"
+#include "GamePlay/Gun/gun.h"
 
 class PlayerManager : public Entity {
   private:
