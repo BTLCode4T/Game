@@ -51,6 +51,11 @@ class GameManager {
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
 
+    std::vector<sf::Sprite> heartSprites;
+
+    sf::Texture healthTexture_full;  // Texture cho tim đầy
+    sf::Texture healthTexture_empty; // Texture cho tim rỗng
+
     InputManager inputManager;
 
     GameState currentState; // Trạng thái hiện tại của game (Menu, Playing, v.v.)
@@ -75,7 +80,7 @@ class GameManager {
           ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
-          playerManager("Meo_bao", WINDOW_WIDTH / 2.f, WINDOW_HEIGHT / 2.f, 10, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
+          playerManager("Meo_bao", WINDOW_WIDTH / 2.f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
                         PLAYER_SIZE,        // Rộng, Cao
                         sf::Vector2i(6, 1), // <-- VÍ DỤ: Ảnh player ("a.png") có 6 khung hình ngang, 1 dọc
                         0.1f),              // <-- VÍ DỤ: 0.1 giây mỗi khung
@@ -99,6 +104,30 @@ class GameManager {
                                350.0f,                    //Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
                                sf::Vector2i(6, 1),             // <-- CHỈNH SỐ FRAME Ở ĐÂY
                                0.1f));
+        // 1. Load ảnh tim đầy
+        if (!healthTexture_full.loadFromFile("assets/Images/heart.png")) {
+            std::cerr << "Loi: Khong the tai 'assets/Images/Heart.png'" << std::endl;
+        }
+        // 2. Load ảnh tim rỗng
+        if (!healthTexture_empty.loadFromFile("assets/Images/border.png")) {
+            std::cerr << "Loi: Khong the tai 'assets/Images/Heart-empty.png'" << std::endl;
+        }
+
+        // 3. Tạo các sprite trái tim (Bạn có thể đã có đoạn này)
+        for (int i = 0; i < playerManager.GetMaxHealth(); ++i) {
+            // Sửa lỗi C2512: Cung cấp texture ngay khi tạo sprite
+            sf::Sprite heartSprite(healthTexture_full);
+
+            // Sửa lỗi C2660: Dùng dấu {} để tạo sf::Vector2f
+            float heartSpacing = 40.f; // Khoảng cách giữa các trái tim
+            float rightPadding = 40.f; // Khoảng cách từ lề phải (nên bằng hoặc lớn hơn heartSpacing)
+            int maxHearts = playerManager.GetMaxHealth();
+
+            heartSprite.setPosition({WINDOW_WIDTH - ((maxHearts - i) * heartSpacing) - rightPadding + heartSpacing, 20.f});
+            heartSprite.setScale({2.0f, 2.0f});
+
+            heartSprites.push_back(heartSprite);
+        }
     }
 
     // Hàm chính chạy vòng lặp game
@@ -124,6 +153,8 @@ class GameManager {
 
     // Hàm update cho từng trạng thái
     void updatePlaying(float deltaTime);
+
+    void updateHealthBarUI();
     // cuộn cuộn
     void updateScrollingBackground(float deltaTime);
 };

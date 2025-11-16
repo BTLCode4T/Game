@@ -9,9 +9,8 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
                              float frameTime)
     : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
-   isAlive(true)
-{
-  
+      isAlive(true), damageCooldownClock(), damageCooldownTime(1.5f) {
+    
 }
 
 // Hàm xử lý Input
@@ -53,13 +52,15 @@ bool PlayerManager::CheckCollision(const Entity &other) const {
     if (!isAlive)
         return false;
 
-    float dx = GetX() - other.GetX();
-    float dy = GetY() - other.GetY();
-    float distance = std::sqrt(dx * dx + dy * dy);
+     // 1. Lấy khung hình chữ nhật của bản thân
+    sf::FloatRect playerBounds = this->getBounds();
 
-    const float COLLISION_THRESHOLD = 30.0f;
+    // 2. Lấy khung hình chữ nhật của đối tượng kia
+    sf::FloatRect otherBounds = other.getBounds();
 
-    return distance < COLLISION_THRESHOLD;
+    // 3. Kiểm tra xem 2 hình chữ nhật có giao nhau không
+    // findIntersection trả về std::optional, dùng .has_value() để kiểm tra có giao nhau không
+    return playerBounds.findIntersection(otherBounds).has_value();
 }
 
 // Hàm xử lý va chạm cụ thể với Khủng long: Gây 1 sát thương
@@ -67,10 +68,16 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
     if (!isAlive)
         return;
 
-    if (CheckCollision(other)) {
-        std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
-
-        TakeDamage(1);
+    // 1. Kiểm tra Cooldown TRƯỚC (để tiết kiệm hiệu năng)
+    if (damageCooldownClock.getElapsedTime().asSeconds() > damageCooldownTime) {
+        // 2. Nếu hết thời gian chờ -> Mới kiểm tra va chạm vật lý
+        if (CheckCollision(other)) {
+            std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
+            // 3. Trừ máu
+            TakeDamage(1);
+            // 4. Reset đồng hồ để bắt đầu đếm ngược lại từ đầu
+            damageCooldownClock.restart();
+        }
     }
 }
 
@@ -81,4 +88,30 @@ void PlayerManager::DisplayStatus() const {
   
     std::cout << "  Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
     std::cout << "-----------------------------" << std::endl;
+}
+bool PlayerManager::IsImmune() const {
+    return damageCooldownClock.getElapsedTime().asSeconds() <= damageCooldownTime;
+}
+void PlayerManager::Render(sf::RenderWindow &window) {
+    bool drawPlayer = true; // Mặc định là vẽ
+
+    // Dùng hàm vừa tạo ở Bước 1
+    if (IsImmune()) {
+        // Lấy thời gian đã trôi qua trong 1.5s miễn nhiễm
+        float immuneTime = damageCooldownClock.getElapsedTime().asSeconds();
+
+        // fmod: phép chia lấy dư
+        // 0.2f là tổng thời gian 1 chu kỳ (0.1s sáng, 0.1s tối)
+        float blinkCycle = std::fmod(immuneTime, 0.2f);
+
+        // Nếu thời gian trong chu kỳ > 0.1f (nửa sau) thì TẮT VẼ
+        if (blinkCycle > 0.1f) {
+            drawPlayer = false;
+        }
+    }
+
+    // 'animation' là biến public của class Entity (cha)
+    if (drawPlayer && animation) {
+        window.draw(*animation);
+    }
 }
