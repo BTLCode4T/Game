@@ -3,6 +3,7 @@
 #include "Utils/Constants.h"
 #include "Core/GameLoop/json.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/SettingsManager.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
 #include "GamePlay/UI/UI.h"
@@ -81,7 +82,9 @@ int main() {
         std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
-   
+    
+    SettingsManager::Get();
+
     //============================================================================================================
 
     //============================================= Vào game =====================================================
