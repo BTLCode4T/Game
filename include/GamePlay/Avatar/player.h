@@ -1,14 +1,17 @@
 #ifndef PlayerManager_H
 #define PlayerManager_H
 
+#include "GamePlay/Gun/gun.h"
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
-#include "GamePlay/Gun/gun.h"
+#include <SFML/System/Clock.hpp>
 
 class PlayerManager : public Entity {
   private:
     bool isAlive;
     std::unique_ptr<Gun> currentGun;
+    sf::Clock damageCooldownClock;
+    float damageCooldownTime;
 
   public:
     // Constructor
@@ -19,18 +22,20 @@ class PlayerManager : public Entity {
     void HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,
                                   const std::vector<Obstacle> &obs, const int MAX_JUMPS);
 
-    bool CheckCollision(const Entity &other) const;    // va chạm
-    void HandleDinosaurCollision(const Entity &other); // chạm vào khủng long
-    // xóa GetLevel() vì chưa cần
-    void Render(sf::RenderWindow &window);
+    bool CheckCollision(const Entity &other) const;    
+    void HandleDinosaurCollision(const Entity &other); 
+
+
     void TakeDamage(int amount) override;
     void Die();
     bool IsAlive() const {
         return isAlive;
     }
     void EquipGun(std::unique_ptr<Gun> gun);
-    Gun* GetGun() const { return currentGun.get(); }
-    // AddExperience( vì chưa cần)
+    Gun *GetGun() const {
+        return currentGun.get();
+    }
+
     int GetHealth();
     int GetMaxHealth() const {
         return Entity::getMaxHealth();
