@@ -21,7 +21,7 @@
 #include "Utils/GameSate.h"
 
 #include "Core/Input/Input.h"
-#include "GamePlay/Gun/Bullet.h"
+#include "GamePlay/Gun/bullet.h"
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
 using namespace std;
@@ -94,7 +94,7 @@ class GameManager {
         50.f,25.f,                    // Rộng, Cao
         sf::Vector2i(1, 1), 0.1f,       // 1 frame
         1000,                             // 1000000 viên đạn
-        1.0f                            // Bắn 0.2 giây/viên
+        0.5f                            // Bắn 0.2 giây/viên
     );
     // Đưa súng cho player
     playerManager.EquipGun(std::move(myGun));
