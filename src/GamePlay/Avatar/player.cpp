@@ -10,7 +10,7 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
                              float frameTime)
     : Entity("PlayerManager", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
    isAlive(true),
-   currentGun(nullptr)
+   currentGun(nullptr), damageCooldownTime(2.0f)
 {
   
 }
