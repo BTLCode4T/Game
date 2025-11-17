@@ -6,7 +6,7 @@
 
 // vòng lập
 void GameManager::runGameLoop() {
-    map.map1(window, menuFont, backgroundSprite, sunSprite, treeSprite, ground, ground2);
+    map.map1(window, menuFont, backgroundSprite, backgroundSprite2, sunSprite, treeSprite, ground, ground2, obstacles);
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
         playerManager.setPushV(-SCROLL_SPEED * deltaTime);
@@ -115,6 +115,7 @@ void GameManager::render() {
     case GameState::Playing:
 
         window.draw(backgroundSprite);
+        window.draw(backgroundSprite2);
         window.draw(sunSprite);
         window.draw(ground);
         window.draw(ground2);
@@ -469,6 +470,30 @@ void GameManager::updatePlaying(float deltaTime) {
 
 void GameManager::updateScrollingBackground(float deltaTime) {
 
+    // --- PHẦN DI CHUYỂN BACKGROUND (PARALLAX) ---
+    // Tạo 1 tốc độ di chuyển chậm hơn cho background (ví dụ: 20% tốc độ của mặt đất)
+    const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f;
+
+    // Di chuyển cả 2 background sang trái
+    backgroundSprite.move({-PARALLAX_SPEED * deltaTime, 0.f});
+    backgroundSprite2.move({-PARALLAX_SPEED * deltaTime, 0.f});
+
+    // Lấy chiều rộng của background (chính là chiều rộng cửa sổ)
+    const float bgWidth = WINDOW_WIDTH;
+
+    // Kiểm tra background 1
+    if (backgroundSprite.getPosition().x + bgWidth <= 0.f) {
+        // Dịch chuyển nó ra phía sau background 2
+        backgroundSprite.setPosition({backgroundSprite2.getPosition().x + bgWidth - 1.0f, 0.f});
+    }
+
+    // Kiểm tra background 2
+    if (backgroundSprite2.getPosition().x + bgWidth <= 0.f) {
+        // Dịch chuyển nó ra phía sau background 1
+        backgroundSprite2.setPosition({backgroundSprite.getPosition().x + bgWidth - 1.0f, 0.f});
+    }
+
+    // --- PHẦN DI CHUYỂN MẶT ĐẤT (Đã có) ---
     // Di chuyển cả 2 mảng đất sang trái
     ground.move({-SCROLL_SPEED * deltaTime, 0.f});
     ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
@@ -479,7 +504,6 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     // Kiểm tra mảng đất 1 (ground)
     if (ground.getPosition().x + groundWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau mảng đất 2 (ground2)
-        // Trừ 1.0f để tạo overlap, tránh bị hở
         ground.setPosition({ground2.getPosition().x + groundWidth - 1.0f, GROUND_Y});
     }
 
@@ -489,13 +513,14 @@ void GameManager::updateScrollingBackground(float deltaTime) {
         ground2.setPosition({ground.getPosition().x + groundWidth - 1.0f, GROUND_Y});
     }
 
+    // --- PHẦN DI CHUYỂN VẬT CẢN (Đã có) ---
     // dịch chuyển lập lại vật cản
     for (auto &obs : obstacles) {
         // Di chuyển bằng đúng tốc độ cuộn của nền
         obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
-            obs.sprite->move({static_cast<float>(WINDOW_WIDTH), 0.f});
+            obs.sprite->move({static_cast<float>(WINDOW_WIDTH)+300.0f, 0.f});
         }
     }
 }

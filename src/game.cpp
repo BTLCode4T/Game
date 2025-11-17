@@ -48,6 +48,7 @@ int main() {
         return -1;
     }
     sf::Sprite backgroundSprite(backgroundTexture);
+    sf::Sprite backgroundSprite2(backgroundTexture);
     sf::FloatRect bgBounds = backgroundSprite.getLocalBounds();
     backgroundSprite.setScale(
         sf::Vector2f((float)WINDOW_WIDTH / bgBounds.size.x, (float)WINDOW_HEIGHT / bgBounds.size.y));
@@ -69,10 +70,7 @@ int main() {
     ground.setPosition({0.f, GROUND_Y});
 
     std::vector<Obstacle> obstacles; // chướng ngại vật
-    obstacles.emplace_back("assets/Images/dat1.png", 60.0f, 60.0f, 250.0f, 450.0f - 60.0f);
-    obstacles.emplace_back("assets/Images/dat2.png", 60.0f, 60.0f, 550.0f, 390.0f);
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 800.0f, 390.0f);
-    obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 0.0f, 450.0f - 138.0f);
+    
 
     sf::Texture btnHome; // nút home
     sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 50.0f, 50.0f, 15.0f, 15.0f);
@@ -115,7 +113,8 @@ int main() {
 
     //============================================= Vào game =====================================================
 
-    GameManager manager(window, menuFont, playerSprite, backgroundSprite, sunSprite, treeSprite, ground, btnHomeSprite,
+    GameManager manager(window, menuFont, playerSprite, backgroundSprite,backgroundSprite2, sunSprite, treeSprite,
+                        ground, btnHomeSprite,
                         obstacles); // truyền trước vào
    
     manager.runGameLoop(); // Bắt đầu vòng lặp game

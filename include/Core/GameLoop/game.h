@@ -35,11 +35,13 @@ class GameManager {
     sf::Font &menuFont;           // Font chữ dùng cho menu và UI
     sf::Sprite &playerSprite;     // Nhân vật người chơi
     sf::Sprite &backgroundSprite; // Nền của màn chơi
+    sf::Sprite &backgroundSprite2;
     sf::Sprite &sunSprite;        // Hình mặt trời (trang trí)
     sf::Sprite &treeSprite;       // Hình cây (trang trí)
     // cuộn
     sf::RectangleShape &ground; // Mặt đất
     sf::RectangleShape ground2; // Mặt đất thứ 2 để tạo hiệu ứng cuộn nền
+
 
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
@@ -68,9 +70,9 @@ class GameManager {
     SettingsUI settingsUI;     // Màn hình cài đặt
 
   public:
-    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg, sf::Sprite &sun,
+    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg,sf::Sprite &bg2, sf::Sprite &sun,
                 sf::Sprite &tree, sf::RectangleShape &gr, sf::Sprite &btnHome, std::vector<Obstacle> &obs)
-        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg), sunSprite(sun), treeSprite(tree),
+        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg) ,backgroundSprite2(bg2), sunSprite(sun), treeSprite(tree),
           ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
@@ -101,13 +103,13 @@ class GameManager {
         // Thêm định nghĩa hàm này vào gameloop.cpp
 
         dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
-                                                          0.0f, // Vị trí X
+                                                          -100.0f, // Vị trí X
                                                           WINDOW_HEIGHT / 2.f,
                                                           100,                             // Máu
-                                                          15.0f,                           // Tốc độ
+                                                          0.0f,                           // Tốc độ
                                                           "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
-                                                          250.0f,                          // Rộng
-                                                          350.0f,             // Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+                                                          500.0f,                          // Rộng
+                                                          600.0f,             // Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
                                                           sf::Vector2i(6, 1), // <-- CHỈNH SỐ FRAME Ở ĐÂY
                                                           0.1f));
         // 1. Load ảnh tim đầy
