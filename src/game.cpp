@@ -66,7 +66,7 @@ int main() {
 
 
     sf::RectangleShape ground(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT)); // mặt đất
-    ground.setFillColor(sf::Color(139, 69, 19));
+    ground.setFillColor(sf::Color::Transparent);
     ground.setPosition({0.f, GROUND_Y});
 
     std::vector<Obstacle> obstacles; // chướng ngại vật

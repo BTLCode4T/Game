@@ -1,15 +1,15 @@
 #pragma once
 
 // --- HẰNG SỐ CỬA SỔ (Lấy từ game.h) ---
-const unsigned int WINDOW_WIDTH = 1000;
-const unsigned int WINDOW_HEIGHT = 600;
+const unsigned int WINDOW_WIDTH = 1900;
+const unsigned int WINDOW_HEIGHT = 816;
 
 // --- HẰNG SỐ VẬT LÝ VÀ CHUYỂN ĐỘNG (Lấy từ game.cpp và PhysicsSystem.h) ---
 const float PLAYER_SIZE = 50.0f;
 const float PLAYER_START_X = 100.0f;
 const float PLAYER_START_Y = 500.0f;
 const float GROUND_HEIGHT = 50.0f;
-const float GROUND_Y = 450.0f;
+const float GROUND_Y = 650.0f;
 const float GRAVITY = 3200.0f;
 const float JUMP_VELOCITY = -1000.0f;
 const float MAX_FALL_VELOCITY = 1500.0f; // Tốc độ rơi tối đa (để tránh lỗi xuyên vật thể)

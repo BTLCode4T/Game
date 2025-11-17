@@ -1,4 +1,5 @@
 #include "GamePlay/Map/map.h"
+#include "GamePlay/UI/UI.h"
 
 void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgroundSprite,
                sf::Sprite &backgroundSprite2, sf::Sprite &sunSprite, sf::Sprite &treeSprite, sf::RectangleShape &ground,
@@ -14,7 +15,7 @@ void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgro
     int viewLeft = 0;
     int viewTop = 0;
     sf::IntRect viewRect(sf::Vector2i(viewLeft, viewTop),
-                         sf::Vector2i(static_cast<int>(WINDOW_WIDTH)*2.2, static_cast<int>(WINDOW_HEIGHT)*1.2));
+                         sf::Vector2i(static_cast<int>(WINDOW_WIDTH)*1.0, static_cast<int>(WINDOW_HEIGHT)*1.0));
     backgroundSprite.setTextureRect(viewRect);
 
     sf::Vector2u windowSize = window.getSize();

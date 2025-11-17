@@ -88,7 +88,7 @@ class GameManager {
 
           currentState(GameState::MainMenu) {
         ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
-        ground2.setFillColor(sf::Color(139, 69, 19));
+        ground2.setFillColor(sf::Color::Transparent);
         ground2.setPosition({WINDOW_WIDTH, GROUND_Y});
         auto myGun = std::make_unique<Gun>("Pistol",                                     // Tên súng
                                            "assets/Images/gun/hedgecutter_by_ashmo.png", // ĐƯỜNG DẪN ẢNH SÚNG
