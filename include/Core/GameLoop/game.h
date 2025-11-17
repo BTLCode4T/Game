@@ -35,11 +35,13 @@ class GameManager {
     sf::Font &menuFont;           // Font chữ dùng cho menu và UI
     sf::Sprite &playerSprite;     // Nhân vật người chơi
     sf::Sprite &backgroundSprite; // Nền của màn chơi
+    sf::Sprite &backgroundSprite2;
     sf::Sprite &sunSprite;        // Hình mặt trời (trang trí)
     sf::Sprite &treeSprite;       // Hình cây (trang trí)
     // cuộn
     sf::RectangleShape &ground; // Mặt đất
     sf::RectangleShape ground2; // Mặt đất thứ 2 để tạo hiệu ứng cuộn nền
+
 
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
@@ -70,9 +72,9 @@ class GameManager {
 
 
   public:
-    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg, sf::Sprite &sun,
+    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg,sf::Sprite &bg2, sf::Sprite &sun,
                 sf::Sprite &tree, sf::RectangleShape &gr, sf::Sprite &btnHome, std::vector<Obstacle> &obs)
-        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg), sunSprite(sun), treeSprite(tree),
+        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg) ,backgroundSprite2(bg2), sunSprite(sun), treeSprite(tree),
           ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
@@ -88,7 +90,7 @@ class GameManager {
 
           currentState(GameState::MainMenu) {
         ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
-        ground2.setFillColor(sf::Color(139, 69, 19));
+        ground2.setFillColor(sf::Color::Transparent);
         ground2.setPosition({WINDOW_WIDTH, GROUND_Y});
         auto myGun = std::make_unique<Gun>("Pistol",                                     // Tên súng
                                            "assets/Images/gun/hedgecutter_by_ashmo.png", // ĐƯỜNG DẪN ẢNH SÚNG
@@ -102,14 +104,14 @@ class GameManager {
         // 2. Sửa hàm CreateBullet (đã thêm ở game.h)
         // Thêm định nghĩa hàm này vào gameloop.cpp
 
-       /* dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
-                                                          0.0f, // Vị trí X
+        dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
+                                                          -100.0f, // Vị trí X
                                                           WINDOW_HEIGHT / 2.f,
                                                           100,                             // Máu
-                                                          15.0f,                           // Tốc độ
+                                                          0.0f,                           // Tốc độ
                                                           "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
-                                                          250.0f,                          // Rộng
-                                                          350.0f,             // Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+                                                          500.0f,                          // Rộng
+                                                          600.0f,             // Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
                                                           sf::Vector2i(6, 1), // <-- CHỈNH SỐ FRAME Ở ĐÂY
                                                           0.1f));
                                                           */
