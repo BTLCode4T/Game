@@ -181,6 +181,7 @@ void GameManager::handlGameoverEvent() {
         if (gameOverUI.getHomeButtonSprite().getGlobalBounds().contains(mousePos)) {
             Audio::Get().Play("click_off");
             MusicManager::Get().Play("menu");
+            Audio::Get().Stop("dinosaur");
             ResetGame(); // Reset game trước khi về menu
             currentState = GameState::MainMenu;
             return;
@@ -231,6 +232,8 @@ void GameManager::handleReturnToMenu() {
         Audio::Get().Play("click_off");
 
         if (currentState == GameState::Playing) {
+            Audio::Get().Stop("dinosaur");
+            MusicManager::Get().Play("menu");
             ResetGame();
         }
 
@@ -246,6 +249,7 @@ void GameManager::handleReturnToMenu() {
             Audio::Get().Play("click_off");
             MusicManager::Get().Play("menu");
             if (currentState == GameState::Playing) {
+                Audio::Get().Stop("dinosaur");
                 ResetGame();
             }
             currentState = GameState::MainMenu;

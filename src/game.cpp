@@ -104,7 +104,7 @@ int main() {
     }
 
     sf::Font menuFont; // phong chữ
-    if (!menuFont.openFromFile("assets/Images/font.ttf")) {
+    if (!menuFont.openFromFile("assets/barmeneb.ttf")) {
         std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
