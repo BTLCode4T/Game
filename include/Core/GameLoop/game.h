@@ -21,8 +21,8 @@
 #include "Utils/GameSate.h"
 
 #include "Core/Input/Input.h"
-#include "GamePlay/Gun/gun.h"
 #include "GamePlay/Gun/bullet.h"
+#include "GamePlay/Gun/gun.h"
 
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
@@ -36,12 +36,11 @@ class GameManager {
     sf::Sprite &playerSprite;     // Nhân vật người chơi
     sf::Sprite &backgroundSprite; // Nền của màn chơi
     sf::Sprite &backgroundSprite2;
-    sf::Sprite &sunSprite;        // Hình mặt trời (trang trí)
-    sf::Sprite &treeSprite;       // Hình cây (trang trí)
+    sf::Sprite &sunSprite;  // Hình mặt trời (trang trí)
+    sf::Sprite &treeSprite; // Hình cây (trang trí)
     // cuộn
     sf::RectangleShape &ground; // Mặt đất
     sf::RectangleShape ground2; // Mặt đất thứ 2 để tạo hiệu ứng cuộn nền
-
 
     sf::Sprite &btnHomeSprite;        // Nút trở về màn hình chính
     std::vector<Obstacle> &obstacles; // Danh sách các chướng ngại vật
@@ -61,7 +60,8 @@ class GameManager {
 
     std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
     Map map;
-
+    float timePassed = 0.f;         // Tích thời gian chơi
+    float daySpeedMultiplier = 1.f; // Hệ số tốc độ ngày
   public:
     // ui
     MainMenuUI mainMenu;       // Màn hình menu chính
@@ -70,16 +70,15 @@ class GameManager {
     SettingsUI settingsUI;     // Màn hình cài đặt
     GameOverUI gameOverUI;     // Màn hình gemOver
 
-
   public:
-    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg,sf::Sprite &bg2, sf::Sprite &sun,
-                sf::Sprite &tree, sf::RectangleShape &gr, sf::Sprite &btnHome, std::vector<Obstacle> &obs)
-        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg) ,backgroundSprite2(bg2), sunSprite(sun), treeSprite(tree),
-          ground(gr), btnHomeSprite(btnHome), obstacles(obs),
+    GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg, sf::Sprite &bg2,
+                sf::Sprite &sun, sf::Sprite &tree, sf::RectangleShape &gr, sf::Sprite &btnHome,
+                std::vector<Obstacle> &obs)
+        : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg), backgroundSprite2(bg2),
+          sunSprite(sun), treeSprite(tree), ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
-          playerManager("Meo_bao", 1000.f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png",
-                        PLAYER_SIZE,
+          playerManager("Meo_bao", 1000.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
                         PLAYER_SIZE,        // Rộng, Cao
                         sf::Vector2i(6, 1), // <-- VÍ DỤ: Ảnh player ("a.png") có 6 khung hình ngang, 1 dọc
                         0.1f),              // <-- VÍ DỤ: 0.1 giây mỗi khung
@@ -101,22 +100,8 @@ class GameManager {
         );
         // Đưa súng cho player
         playerManager.EquipGun(std::move(myGun));
-        // 2. Sửa hàm CreateBullet (đã thêm ở game.h)
-        // Thêm định nghĩa hàm này vào gameloop.cpp
 
-        dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
-                                                          -100.0f, // Vị trí X
-                                                          WINDOW_HEIGHT / 2.f,
-                                                          100,                             // Máu
-                                                          0.0f,                           // Tốc độ
-                                                          "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
-                                                          500.0f,                          // Rộng
-                                                          600.0f,             // Dàiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
-                                                          sf::Vector2i(6, 1), // <-- CHỈNH SỐ FRAME Ở ĐÂY
-                                                          0.1f));
-                                                          */
-        // >>>>>>>> ĐÃ CHUYỂN SANG gameLoop.cpp <<<<<<<< void GameManager::SpawnInitialEntities()                     
-
+        // khủng long chuyển sang GameManager::SpawnInitialEntities()
 
         // 1. Load ảnh tim đầy
         if (!healthTexture_full.loadFromFile("assets/Images/heart.png")) {
@@ -148,7 +133,7 @@ class GameManager {
         auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", // ĐƯỜNG DẪN ẢNH ĐẠN
                                                x, y, 30.f, 40.f,                  // vị trí, rộng, cao
                                                damage, direction, speed);
-                                               cout<<"hi";
+        cout << "hi";
         bullets.push_back(std::move(bullet));
     }
     // Hàm chính chạy vòng lặp game
@@ -173,7 +158,6 @@ class GameManager {
     void handleHighScoresEvent();
     void handleSettingsEvent();
     void handlGameoverEvent();
-
 
     // Hàm update cho từng trạng thái
     void updatePlaying(float deltaTime);

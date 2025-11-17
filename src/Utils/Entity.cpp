@@ -88,19 +88,7 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
 
 // MỚI: Định nghĩa hàm SetTexture (hàm "edit" ảnh)
 void Entity::SetTexture(const string &texturePath) {
-    //if (!texture.loadFromFile(texturePath)) {
-    //    cerr << "Loi: Khong tai duoc file ' " << texturePath << "' cho Entity '" << name << "'" << endl;
-    //} else {
-    //    // setTextur/e sẽ liên kết texture đã tải với sprite
-    //    sprite.setTexture(texture);
-    //    cout << name << " da tai anh: " << texturePath << endl;
 
-    //    // Tùy chọn: Đặt tâm của sprite vào giữa
-    //    sf::FloatRect bounds = sprite.getLocalBounds();
-
-    //    // setOrigin phải dùng sf::Vector2f trong SFML 3.x
-    //    sprite.setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f));
-    //}
 }
 
 // vẽ

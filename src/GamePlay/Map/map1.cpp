@@ -4,7 +4,7 @@
 void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgroundSprite,
                sf::Sprite &backgroundSprite2, sf::Sprite &sunSprite, sf::Sprite &treeSprite, sf::RectangleShape &ground,
                sf::RectangleShape &ground2, std::vector<Obstacle> &obstacles) {
-    if (!backgroundTexture.loadFromFile("assets/Images/bg_game/Previewx3.png")) {
+    if (!backgroundTexture.loadFromFile("assets/Images/bg_game/bg1.jpg")) {
         std::cerr << "Lỗi: Không thể tải 'assets/Images/bg_game/bgmap1.jpg'\n";
         return;
     } // ảnh 3500 * 2023 thi chỉnh làm sao thấy được phần muốn thấy bằng cách chỉnh tọa độ
@@ -34,10 +34,14 @@ void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgro
     backgroundSprite2.setScale(sf::Vector2f(scaleX, scaleY));
     // Đặt vị trí của sprite 2 ngay bên phải sprite 1
     backgroundSprite2.setPosition({(float)windowSize.x, 0.f});
+
+    // chỗ thêm vật cản =============================================================================
     obstacles.emplace_back("assets/Images/dat1.png", 60.0f, 60.0f, 250.0f, 450.0f - 60.0f);
     obstacles.emplace_back("assets/Images/dat2.png", 60.0f, 60.0f, 550.0f, 390.0f);
     obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 800.0f, 390.0f);
     obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 0.0f, 450.0f - 138.0f);
+    //===============================================================================================
+    
     ground.setFillColor(sf::Color(0, 0, 0, 0));
     ground2.setFillColor(sf::Color(0, 0, 0, 0));
 }
