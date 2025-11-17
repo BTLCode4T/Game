@@ -117,8 +117,8 @@ void GameManager::render() {
         window.draw(backgroundSprite);
         window.draw(backgroundSprite2);
         window.draw(sunSprite);
-        window.draw(ground);
-        window.draw(ground2);
+        //window.draw(ground);
+        //window.draw(ground2);
 
         // Vẽ obstacles
         for (const auto &obs : obstacles) {
@@ -484,13 +484,13 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     // Kiểm tra background 1
     if (backgroundSprite.getPosition().x + bgWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau background 2
-        backgroundSprite.setPosition({backgroundSprite2.getPosition().x + bgWidth - 1.0f, 0.f});
+        backgroundSprite.setPosition({backgroundSprite2.getPosition().x + bgWidth - 0.0f, 0.f});
     }
 
     // Kiểm tra background 2
     if (backgroundSprite2.getPosition().x + bgWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau background 1
-        backgroundSprite2.setPosition({backgroundSprite.getPosition().x + bgWidth - 1.0f, 0.f});
+        backgroundSprite2.setPosition({backgroundSprite.getPosition().x + bgWidth - 0.0f, 0.f});
     }
 
     // --- PHẦN DI CHUYỂN MẶT ĐẤT (Đã có) ---
@@ -504,13 +504,13 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     // Kiểm tra mảng đất 1 (ground)
     if (ground.getPosition().x + groundWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau mảng đất 2 (ground2)
-        ground.setPosition({ground2.getPosition().x + groundWidth - 1.0f, GROUND_Y});
+        ground.setPosition({ground2.getPosition().x + groundWidth - 0.0f, GROUND_Y});
     }
 
     // Kiểm tra mảng đất 2 (ground2)
     if (ground2.getPosition().x + groundWidth <= 0.f) {
         // Dịch chuyển nó ra phía sau mảng đất 1 (ground)
-        ground2.setPosition({ground.getPosition().x + groundWidth - 1.0f, GROUND_Y});
+        ground2.setPosition({ground.getPosition().x + groundWidth - 0.0f, GROUND_Y});
     }
 
     // --- PHẦN DI CHUYỂN VẬT CẢN (Đã có) ---
@@ -520,7 +520,7 @@ void GameManager::updateScrollingBackground(float deltaTime) {
         obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
-            obs.sprite->move({static_cast<float>(WINDOW_WIDTH)+300.0f, 0.f});
+            obs.sprite->move({static_cast<float>(WINDOW_WIDTH) + 300.0f, 0.f});
         }
     }
 }
