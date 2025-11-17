@@ -31,6 +31,11 @@ class PlayerManager : public Entity {
     bool IsAlive() const {
         return isAlive;
     }
+
+    void setIsAlive(bool alive) {
+        isAlive = alive;
+    }
+
     void EquipGun(std::unique_ptr<Gun> gun);
     Gun *GetGun() const {
         return currentGun.get();
@@ -43,6 +48,7 @@ class PlayerManager : public Entity {
     bool IsImmune() const;
     void DisplayStatus() const override;
     void Render(sf::RenderWindow &window) override;
+
 };
 
 #endif // PlayerManager_H

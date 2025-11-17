@@ -31,7 +31,7 @@ void addTail(List &l, Node *p) {
 void readFile(const std::string &filename, List &l) {
     std::ifstream fin(filename);
     if (!fin) {
-        std::cerr << "Không thể mở file: " << filename << std::endl;
+        std::cerr << "Khong the mo file: " << filename << std::endl;
         return;
     }
 

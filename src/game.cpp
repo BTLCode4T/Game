@@ -102,7 +102,7 @@ int main() {
     }
 
     sf::Font menuFont; // phong chữ
-    if (!menuFont.openFromFile("assets/Images/font.ttf")) {
+    if (!menuFont.openFromFile("assets/barmeneb.ttf")) {
         std::cerr << "Loi: Khong the tai 'assets/Images/font.ttf'" << std::endl;
         return -1;
     }
@@ -118,6 +118,6 @@ int main() {
                         obstacles); // truyền trước vào
    
     manager.runGameLoop(); // Bắt đầu vòng lặp game
-
+    SettingsManager::Get().SaveSettings();
     return 0;
 }
