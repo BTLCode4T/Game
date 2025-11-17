@@ -64,12 +64,14 @@ void SettingsManager::LoadSettings() {
 
 
 void SettingsManager::SaveSettingsInternal() {
+    std::cout << "Dang luu cai dat vao file...\n"; // THÊM DÒNG NÀY
     std::ofstream file(SETTINGS_FILE);
     if (file.is_open()) {
         file << "Volume: " << musicVolume << "\n";
         file << "MusicMuted: " << (musicMuted ? 1 : 0) << "\n";
         file << "SoundMuted: " << (soundMuted ? 1 : 0) << "\n";
         file.close();
+        std::cout << "Luu cai dat thanh cong.\n"; // THÊM DÒNG NÀY
     } else {
         std::cerr << "Failed to save settings file!" << std::endl;
     }

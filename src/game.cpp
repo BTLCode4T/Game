@@ -119,6 +119,6 @@ int main() {
                         obstacles); // truyền trước vào
    
     manager.runGameLoop(); // Bắt đầu vòng lặp game
-
+    SettingsManager::Get().SaveSettings();
     return 0;
 }

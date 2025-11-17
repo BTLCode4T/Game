@@ -5,5 +5,6 @@ enum class GameState {
     Playing,
     HighScores,
     Help,
-    Settings
+    Settings,
+    GameOver
 };
