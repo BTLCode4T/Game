@@ -92,10 +92,10 @@ void GameManager::handleEvents() {
 void GameManager::update(float dt) {
     switch (currentState) {
     // CHỈ Playing gọi updatePlaying(dt)
-    case GameState::Playing: 
+    case GameState::Playing:
         updatePlaying(dt);
         break;
-    
+
     // MainMenu, HighScores, Help, Settings, GameOver KHÔNG cần update logic game
     case GameState::MainMenu:
     case GameState::HighScores:
@@ -118,8 +118,8 @@ void GameManager::render() {
         window.draw(backgroundSprite);
         window.draw(backgroundSprite2);
         window.draw(sunSprite);
-        //window.draw(ground);
-        //window.draw(ground2);
+        // window.draw(ground);
+        // window.draw(ground2);
 
         // Vẽ obstacles
         for (const auto &obs : obstacles) {
@@ -568,11 +568,16 @@ void GameManager::updatePlaying(float deltaTime) {
 
 void GameManager::updateScrollingBackground(float deltaTime) {
 
+    timePassed += deltaTime;
+
+    daySpeedMultiplier = 1.f + (timePassed / 10.f) * 0.05f;
+
     // --- PHẦN DI CHUYỂN BACKGROUND (PARALLAX) ---
     // Tạo 1 tốc độ di chuyển chậm hơn cho background (ví dụ: 20% tốc độ của mặt đất)
-    const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f;
+    const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f*daySpeedMultiplier;
 
     // Di chuyển cả 2 background sang trái
+
     backgroundSprite.move({-PARALLAX_SPEED * deltaTime, 0.f});
     backgroundSprite2.move({-PARALLAX_SPEED * deltaTime, 0.f});
 
@@ -652,9 +657,9 @@ void GameManager::SpawnInitialEntities() {
                                                       0.0f, // Vị trí X
                                                       WINDOW_HEIGHT / 2.f,
                                                       100,                             // Máu
-                                                      15.0f,                           // Tốc độ
+                                                     0.0f,                           // Tốc độ
                                                       "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
-                                                      250.0f,                          // Rộng
+                                                      400.0f,                          // Rộng
                                                       350.0f, sf::Vector2i(6, 1),      // <-- CHỈNH SỐ FRAME Ở ĐÂY
                                                       0.1f));
     // Nếu có nhiều Khủng long hơn, hãy thêm chúng vào đây.
