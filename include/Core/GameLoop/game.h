@@ -78,7 +78,7 @@ class GameManager {
           sunSprite(sun), treeSprite(tree), ground(gr), btnHomeSprite(btnHome), obstacles(obs),
 
           // Khởi tạo playerManager tại đây nè 👇
-          playerManager("Meo_bao", 1000.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
+          playerManager("Meo_bao", 1700.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
                         PLAYER_SIZE,        // Rộng, Cao
                         sf::Vector2i(6, 1), // <-- VÍ DỤ: Ảnh player ("a.png") có 6 khung hình ngang, 1 dọc
                         0.1f),              // <-- VÍ DỤ: 0.1 giây mỗi khung

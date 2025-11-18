@@ -1,0 +1,3 @@
+Volume: 50
+MusicMuted: 0
+SoundMuted: 0
