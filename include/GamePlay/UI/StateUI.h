@@ -22,13 +22,17 @@ class MainMenuUI : public IGameStateUI {
   private:
     // Textures
     sf::Texture btnNewTexture, btnHighScoresTexture, btnSettingsTexture, btnHelpTexture;
-
+    sf::Texture btnExtraTexture;
+    sf::Texture myNewImageTexture;
+    sf::Texture logoTexture;
     // Sprites (dùng con trỏ để không cần constructor mặc định)
     std::unique_ptr<sf::Sprite> btnNewSprite;
     std::unique_ptr<sf::Sprite> btnHighScoresSprite;
     std::unique_ptr<sf::Sprite> btnSettingsSprite;
     std::unique_ptr<sf::Sprite> btnHelpSprite;
-
+    std::unique_ptr<sf::Sprite> btnExtraSprite;
+    std::unique_ptr<sf::Sprite> myNewImageSprite;
+    std::unique_ptr<sf::Sprite> logoSprite;
     std::unique_ptr<sf::Text> infoText;
     std::unique_ptr<sf::Text> versionText;
 
@@ -52,6 +56,9 @@ class MainMenuUI : public IGameStateUI {
     }
     const sf::Sprite &getBtnHelpSprite() const {
         return *btnHelpSprite;
+    }
+    const sf::Sprite &getBtnExtraSprite() const {
+        return *btnExtraSprite;
     }
 };
 
@@ -78,6 +85,8 @@ class HighScoresUI : public IGameStateUI {
     std::unique_ptr<sf::Sprite> btnNoneSprite4;
     std::unique_ptr<sf::Sprite> btnTextInputSprite;
     std::unique_ptr<sf::Sprite> notFoundSprite;
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
 
     // TEST NHẬP LIỆU
     std::unique_ptr<sf::Text> inputTextDisplay; // Text để hiển thị nội dung nhập
@@ -149,6 +158,8 @@ class HighScoresUI : public IGameStateUI {
 /* --- HELP --- */
 class HelpUI : public IGameStateUI {
   private:
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
     std::unique_ptr<sf::Text> helpText;
     std::unique_ptr<sf::Text> aboutText;
     const sf::Sprite &backgroundSprite;
@@ -162,6 +173,8 @@ class HelpUI : public IGameStateUI {
 /* --- SETTINGS --- */
 class SettingsUI : public IGameStateUI {
   private:
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
     std::unique_ptr<sf::Text> settingsText;
     const sf::Sprite &backgroundSprite;
     const sf::Sprite &btnHomeSprite;
