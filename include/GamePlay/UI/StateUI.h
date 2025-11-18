@@ -85,6 +85,8 @@ class HighScoresUI : public IGameStateUI {
     std::unique_ptr<sf::Sprite> btnNoneSprite4;
     std::unique_ptr<sf::Sprite> btnTextInputSprite;
     std::unique_ptr<sf::Sprite> notFoundSprite;
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
 
     // TEST NHẬP LIỆU
     std::unique_ptr<sf::Text> inputTextDisplay; // Text để hiển thị nội dung nhập
@@ -156,6 +158,8 @@ class HighScoresUI : public IGameStateUI {
 /* --- HELP --- */
 class HelpUI : public IGameStateUI {
   private:
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
     std::unique_ptr<sf::Text> helpText;
     std::unique_ptr<sf::Text> aboutText;
     const sf::Sprite &backgroundSprite;
@@ -169,6 +173,8 @@ class HelpUI : public IGameStateUI {
 /* --- SETTINGS --- */
 class SettingsUI : public IGameStateUI {
   private:
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
     std::unique_ptr<sf::Text> settingsText;
     const sf::Sprite &backgroundSprite;
     const sf::Sprite &btnHomeSprite;

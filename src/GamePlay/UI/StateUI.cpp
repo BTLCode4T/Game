@@ -19,11 +19,10 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
     // --- [1] Nút “New Game” ---
     // Dùng std::make_unique để tạo sprite, truyền texture và vị trí nút
     btnNewSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnNewTexture, "assets/Images/play.png", 250.0f, 150.0f, 780.f, 490.0f));
-
+        createSprite(btnNewTexture, "assets/Images/play.png", 250.0f, 150.0f, 810.f, 490.0f));
     // --- [2] Nút “High Scores” ---
     btnHighScoresSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnHighScoresTexture, "assets/Images/prize.png", 250.0f, 150.0f, 1660.0f, 650.0f));
+        createSprite(btnHighScoresTexture, "assets/Images/prize.png", 250.0f, 150.0f, 1630.0f, 650.0f));
 
     // --- [3] Nút “Settings” ---
     btnSettingsSprite = std::make_unique<sf::Sprite>(
@@ -64,7 +63,7 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
                      -20.0f                          // Vị trí Y (nhỏ hơn 200 để nằm PHÍA TRÊN nút Start)
                      ));
 }
-    
+
 /* --- Hàm Render của MainMenuUI ---
  * Nhiệm vụ: Vẽ toàn bộ các phần tử giao diện chính lên cửa sổ.
  */
@@ -165,7 +164,8 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
     initList(scoresList);
     readFile("Scores.txt", scoresList);
 
-
+    menuBgSprite = std::make_unique<sf::Sprite>(
+        createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // Phát nhạc
 
 
@@ -179,7 +179,8 @@ void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     // initList(l); // >> Bỏ dòng này
     // readFile("Scores.txt", l); // >> Bỏ dòng này
 
-    window.draw(backgroundSprite);
+    /*window.draw(backgroundSprite);*/
+    window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
     window.draw(*tableListSprite);
     window.draw(*titleText);
@@ -232,7 +233,8 @@ void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
  * ============================================================ */
 HelpUI::HelpUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
-
+    menuBgSprite = std::make_unique<sf::Sprite>(
+        createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text hướng dẫn điều khiển ---
     helpText = std::make_unique<sf::Text>(createText(font, L"Hướng dẫn:\n- Dùng mũi tên để di chuyển\n- Space để nhảy",
                                                      28, sf::Color::White, 500.0f, 200.0f));
@@ -246,7 +248,8 @@ HelpUI::HelpUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &
  * Vẽ màn hình hướng dẫn và nút trở về home.
  */
 void HelpUI::Render(sf::RenderWindow &window, const sf::Font &font) {
-    window.draw(backgroundSprite);
+   /* window.draw(backgroundSprite);*/
+    window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
     window.draw(*helpText);
     window.draw(*aboutText);
@@ -257,7 +260,8 @@ void HelpUI::Render(sf::RenderWindow &window, const sf::Font &font) {
  * ============================================================ */
 SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
-
+    menuBgSprite = std::make_unique<sf::Sprite>(
+        createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text thông báo đang phát triển ---
     settingsText = std::make_unique<sf::Text>(
         createText(font, L"Tùy chỉnh (đang phát triển)", 28, sf::Color::White, 500.0f, 250.0f));
@@ -295,7 +299,8 @@ SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf
  * Vẽ nền, nút home và thông tin placeholder.
  */
 void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
-    window.draw(backgroundSprite);
+    /*window.draw(backgroundSprite);*/
+    window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
     // window.draw(*settingsText);
     window.draw(*btnNoneSprite);
