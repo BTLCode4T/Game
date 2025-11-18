@@ -11,7 +11,7 @@ class Entity;
 struct Obstacle {
     // SỬA ĐỔI: Sử dụng unique_ptr cho cả Sprite VÀ Texture
     std::unique_ptr<sf::Sprite> sprite;
-    std::unique_ptr<sf::Texture> texture; // <--- THAY ĐỔI Ở ĐÂY
+    std::unique_ptr<sf::Texture> texture; 
 
     Obstacle(const std::string &texturePath, float width, float height, float x, float y) {
         // TẢI TEXTURE BẰNG CON TRỎ THÔNG MINH

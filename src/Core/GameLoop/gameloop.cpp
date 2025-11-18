@@ -217,7 +217,7 @@ void GameManager::ResetGame() {
     playerManager.setIsOnGround(false);
 
     // 2. ĐẶT LẠI VỊ TRÍ PLAYER (Sử dụng animation vì Entity.h có unique_ptr<Animation>)
-    playerManager.animation->setPosition({PLAYER_START_X, PLAYER_START_Y});
+    playerManager.animation->setPosition({1400.0f, 650.0f - 100.0f});
 
     // 3. Xóa sạch Đạn (Khắc phục lỗi đạn không reset)
     bullets.clear();
