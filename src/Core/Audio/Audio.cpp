@@ -14,7 +14,8 @@ Audio::Audio() {
         {"switch_task",   "assets/Sounds/switch_task.mp3"},
         {"run",   "assets/Sounds/run.wav"},
         {"dinosaur",   "assets/Sounds/dinosaur.mp3"},
-        {"jump", "assets/Sounds/jumb.mp3"},
+        {"jump", "assets/Sounds/jump.wav"},
+        {"gameOver", "assets/Sounds/game-over.mp3"},
     };
 
     for (const auto& snd : loadList) {

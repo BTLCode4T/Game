@@ -189,14 +189,43 @@ class SettingsUI : public IGameStateUI {
     std::unique_ptr<sf::Sprite> musicMutedSprite;
     std::unique_ptr<sf::Sprite> musicUnmutedSprite;
 
-
-
   public:
     SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
-    const sf::Sprite &getMutedSprite() const { return *mutedSprite; }
-    const sf::Sprite &getHomeButtonSprite() const { return btnHomeSprite; }
-    const sf::Sprite &getMusicMutedSprite() const { return *musicMutedSprite; }
+    const sf::Sprite &getMutedSprite() const {
+        return *mutedSprite;
+    }
+    const sf::Sprite &getHomeButtonSprite() const {
+        return btnHomeSprite;
+    }
+    const sf::Sprite &getMusicMutedSprite() const {
+        return *musicMutedSprite;
+    }
+};
+
+class GameOverUI : public IGameStateUI {
+  private:
+    const sf::Sprite &backgroundSprite;
+    sf::Texture btnNone, gameOverTexture, btnUndoTexture, btnHomeTexture;
+    std::unique_ptr<sf::Sprite> btnNoneSprite;
+
+    std::unique_ptr<sf::Sprite> btnHomeSprite;
+    std::unique_ptr<sf::Sprite> btnUndoSprite;
+
+
+
+
+    std::unique_ptr<sf::Text> gameOverText;
+
+  public:
+    GameOverUI(const sf::Sprite &bg, const sf::Font &font);
+    void Render(sf::RenderWindow &window, const sf::Font &font) override;
+    const sf::Sprite &getHomeButtonSprite() const {
+        return *btnHomeSprite;
+    }
+    const sf::Sprite &getUndoButtonSprite() const {
+        return *btnUndoSprite;
+    }
 };
 
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY,

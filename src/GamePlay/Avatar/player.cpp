@@ -12,6 +12,7 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
    isAlive(true),
    currentGun(nullptr), damageCooldownTime(2.0f)
 {
+    
   
 }
 

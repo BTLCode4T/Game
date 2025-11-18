@@ -25,7 +25,7 @@ public:
     void ChasePlayer(float playerX, float playerY);
     
     // Ghi đè hàm hiển thị trạng thái nếu cần
-    void DisplayStatus() const override; 
+    void DisplayStatus() const override;
 };
 
 #endif // DINOSAUR_H

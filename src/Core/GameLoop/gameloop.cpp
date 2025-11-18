@@ -1,8 +1,11 @@
 #include "Core/Audio/Audio.h"
 #include "Core/Audio/MusicManager.h"
 #include "Core/GameLoop/game.h"
+#include "GamePlay/Avatar/player.h"
+#include "GamePlay/Entity/Dinosaur.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
+#include "Utils/Entity.h"
 
 // vòng lập
 void GameManager::runGameLoop() {
@@ -77,6 +80,9 @@ void GameManager::handleEvents() {
         case GameState::Settings:
             handleSettingsEvent();
             break;
+        case GameState::GameOver:
+            handlGameoverEvent();
+            break;
         }
     }
 
@@ -84,41 +90,36 @@ void GameManager::handleEvents() {
 }
 
 void GameManager::update(float dt) {
-    // chứa các update
     switch (currentState) {
-    case GameState::MainMenu:
-        break;
+    // CHỈ Playing gọi updatePlaying(dt)
     case GameState::Playing:
         updatePlaying(dt);
-
         break;
+
+    // MainMenu, HighScores, Help, Settings, GameOver KHÔNG cần update logic game
+    case GameState::MainMenu:
     case GameState::HighScores:
-
-        break;
     case GameState::Help:
-        break;
     case GameState::Settings:
+    case GameState::GameOver:
+
         break;
     }
 }
-
 // Vẽ theo trạng thái game
 void GameManager::render() {
-
     window.clear(sf::Color::Black);
     switch (currentState) {
     case GameState::MainMenu:
         mainMenu.Render(window, menuFont);
-
         break;
 
     case GameState::Playing:
-
         window.draw(backgroundSprite);
         window.draw(backgroundSprite2);
         window.draw(sunSprite);
-        //window.draw(ground);
-        //window.draw(ground2);
+        // window.draw(ground);
+        // window.draw(ground2);
 
         // Vẽ obstacles
         for (const auto &obs : obstacles) {
@@ -135,8 +136,6 @@ void GameManager::render() {
         // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
         for (auto &dino_ptr : dinosaurs) {
             dino_ptr->Render(window);
-            // (Nếu bạn dùng debug):
-            // drawSpriteBounds(window, *dino_ptr->animation);
         }
 
         // vẽ máu
@@ -144,6 +143,13 @@ void GameManager::render() {
             window.draw(heart);
         }
 
+        // vẽ màn hình game over
+        // if (!playerManager.IsAlive()) {
+        //     currentState = GameState::GameOver;
+        //     // Có thể thêm hiệu ứng âm thanh hoặc pause music ở đây
+        //     MusicManager::Get().Stop();
+        //     // Audio::Get().Play("game_over");
+        // }
         break;
 
     case GameState::HighScores:
@@ -157,15 +163,81 @@ void GameManager::render() {
     case GameState::Settings:
         settingsUI.Render(window, menuFont);
         break;
+
+    case GameState::GameOver:
+        gameOverUI.Render(window, menuFont);
+        break;
+    }
+    window.display();
+}
+
+// Trong file gameloop.cpp, sửa đổi hàm handlGameoverEvent() như sau:
+
+void GameManager::handlGameoverEvent() {
+    // Xử lý click chuột trái cho Game Over
+    if (inputManager.IsMousePressed(sf::Mouse::Button::Left)) {
+        sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
+
+        // Nút Home: Quay về Main Menu
+        if (gameOverUI.getHomeButtonSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click_off");
+            MusicManager::Get().Play("menu");
+            Audio::Get().Stop("dinosaur");
+            ResetGame(); // Reset game trước khi về menu
+            currentState = GameState::MainMenu;
+            return;
+        }
+
+        // Nút Undo: Chơi lại (Reset game và quay về Playing)
+        if (gameOverUI.getUndoButtonSprite().getGlobalBounds().contains(mousePos)) {
+            Audio::Get().Play("click");
+            ResetGame();            // Reset game để chơi lại
+            SpawnInitialEntities(); // Tái tạo entities (như dinosaurs)
+            currentState = GameState::Playing;
+            return;
+        }
     }
 
-    window.display(); // Hiển thị frame vừa vẽ
+    // Nút Q: Quay về Main Menu (backup)
+    if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Q)) {
+        Audio::Get().Play("click_off");
+        MusicManager::Get().Play("menu");
+        ResetGame();
+        currentState = GameState::MainMenu;
+    }
+}
+
+void GameManager::ResetGame() {
+    std::cout << "RESET GAME\n";
+
+    // 1. Reset trạng thái Player
+    playerManager.setIsAlive(true);
+    playerManager.SetHealth(playerManager.getMaxHealth()); // Reset máu về tối đa
+    playerManager.setVelocity(0, 0);
+    playerManager.setIsOnGround(false);
+
+    // 2. ĐẶT LẠI VỊ TRÍ PLAYER (Sử dụng animation vì Entity.h có unique_ptr<Animation>)
+    playerManager.animation->setPosition({PLAYER_START_X, PLAYER_START_Y});
+
+    // 3. Xóa sạch Đạn (Khắc phục lỗi đạn không reset)
+    bullets.clear();
+
+    // KHÔNG cần dinosaurs.clear() ở đây, nó sẽ được gọi trong SpawnInitialEntities()
+    // Nếu bạn muốn chắc chắn, bạn có thể gọi nó:
+    dinosaurs.clear(); // Xóa tất cả Khủng long cũ
 }
 
 void GameManager::handleReturnToMenu() {
     // bấm Q quay về menu
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Q)) {
         Audio::Get().Play("click_off");
+
+        if (currentState == GameState::Playing) {
+            Audio::Get().Stop("dinosaur");
+            MusicManager::Get().Play("menu");
+            ResetGame();
+        }
+
         currentState = GameState::MainMenu;
 
         return;
@@ -177,6 +249,10 @@ void GameManager::handleReturnToMenu() {
         if (btnHomeSprite.getGlobalBounds().contains(mousePos)) {
             Audio::Get().Play("click_off");
             MusicManager::Get().Play("menu");
+            if (currentState == GameState::Playing) {
+                Audio::Get().Stop("dinosaur");
+                ResetGame();
+            }
             currentState = GameState::MainMenu;
         }
     }
@@ -185,6 +261,8 @@ void GameManager::handleReturnToMenu() {
 
 void GameManager::handleMainMenuEvent() {
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
+        ResetGame();
+        SpawnInitialEntities();
         playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
         playerManager.setVelocity(0, 0);
         playerManager.setIsOnGround(false);
@@ -201,6 +279,10 @@ void GameManager::handleMainMenuEvent() {
         sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
 
         if (mainMenu.getBtnNewSprite().getGlobalBounds().contains(mousePos)) {
+
+            ResetGame();
+            SpawnInitialEntities();
+
             playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
             playerManager.setVelocity(0, 0);
             playerManager.setIsOnGround(false);
@@ -229,7 +311,7 @@ void GameManager::handleMainMenuEvent() {
     }
 }
 
-// lúc chơi
+// lúc chơi game
 void GameManager::handlePlayingEvent() {
     handleReturnToMenu();
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Space) && playerManager.getJump() > 0) {
@@ -254,7 +336,7 @@ void GameManager::handleHighScoresEvent() {
         }
         sf::Vector2f mousePos = window.mapPixelToCoords(inputManager.GetMousePosition());
 
-        // Deactivate nếu click không phải input box (THÊM VÀO ĐÂY, sau mousePos)
+        // Deactivate nếu click không phải input box
         if (highScoresUI.isCurrentlyInputting() &&
             !highScoresUI.getBtnTextInputSprite().getGlobalBounds().contains(mousePos)) {
             highScoresUI.setInputActive(false);
@@ -466,15 +548,36 @@ void GameManager::updatePlaying(float deltaTime) {
             playerManager.HandleDinosaurCollision(*dino);
         }
     }
+
+    if (playerManager.IsAlive()) {
+        // Duyệt qua tất cả khủng long trong danh sách 'dinosaurs' (được định nghĩa trong game.h)
+        for (const auto &dino : dinosaurs) {
+
+            // *dino vì 'dinosaurs' là vector chứa unique_ptr
+            playerManager.HandleDinosaurCollision(*dino);
+        }
+    }
+
+    if (!playerManager.IsAlive()) {
+        currentState = GameState::GameOver;
+        // Có thể thêm hiệu ứng âm thanh hoặc pause music ở đây
+        MusicManager::Get().Stop();
+        Audio::Get().Play("gameOver");
+    }
 }
 
 void GameManager::updateScrollingBackground(float deltaTime) {
 
+    timePassed += deltaTime;
+
+    daySpeedMultiplier = 1.f + (timePassed / 10.f) * 0.05f;
+
     // --- PHẦN DI CHUYỂN BACKGROUND (PARALLAX) ---
     // Tạo 1 tốc độ di chuyển chậm hơn cho background (ví dụ: 20% tốc độ của mặt đất)
-    const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f;
+    const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f*daySpeedMultiplier;
 
     // Di chuyển cả 2 background sang trái
+
     backgroundSprite.move({-PARALLAX_SPEED * deltaTime, 0.f});
     backgroundSprite2.move({-PARALLAX_SPEED * deltaTime, 0.f});
 
@@ -543,4 +646,21 @@ void GameManager::updateHealthBarUI() {
             heartSprites[i].setTexture(healthTexture_empty);
         }
     }
+}
+
+void GameManager::SpawnInitialEntities() {
+    // Đảm bảo danh sách Khủng long trống trước khi tạo lại
+    dinosaurs.clear();
+
+    // Logic tạo Khủng long được lấy từ constructor của GameManager
+    dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
+                                                      0.0f, // Vị trí X
+                                                      WINDOW_HEIGHT / 2.f,
+                                                      100,                             // Máu
+                                                     0.0f,                           // Tốc độ
+                                                      "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
+                                                      400.0f,                          // Rộng
+                                                      350.0f, sf::Vector2i(6, 1),      // <-- CHỈNH SỐ FRAME Ở ĐÂY
+                                                      0.1f));
+    // Nếu có nhiều Khủng long hơn, hãy thêm chúng vào đây.
 }

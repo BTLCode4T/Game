@@ -8,7 +8,7 @@
 #include <sstream>
 #include "Core/Audio/Audio.h"
 #include "Core/Audio/MusicManager.h"
-
+#include "Core/GameLoop/game.h"
 
 /* ============================================================
  * CLASS: MainMenuUI — Giao diện chính của game
@@ -323,6 +323,31 @@ void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     }
 
 }
+
+GameOverUI::GameOverUI(const sf::Sprite &bg, const sf::Font &font) : backgroundSprite(bg) {
+
+    btnNoneSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 170.0f, 50.0f));
+
+    btnHomeSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnHomeTexture,"assets/Images/Home.png", 75.0f, 75.0f, 350.0f, 325.0f));
+
+    btnUndoSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnUndoTexture, "assets/Images/Undo.png", 75.0f, 75.0f, 550.0f, 325.0f));
+
+    gameOverText = std::make_unique<sf::Text>(
+        createText(font, L"Bạn đã thua!\nĐiểm: ******\nThời gian: **/**/*****", 28, sf::Color::White, 500.0f, 250.0f, true));
+
+}
+
+void GameOverUI::Render(sf::RenderWindow &window, const sf::Font &font){
+    window.draw(backgroundSprite);
+    window.draw(*btnNoneSprite);
+    window.draw(*gameOverText);
+    window.draw(*btnHomeSprite);
+    window.draw(*btnUndoSprite);
+}
+
 
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY, int startIndex) {
     Node *p = l.head;
