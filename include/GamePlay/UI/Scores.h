@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <chrono>
+#include <ctime>
 
 struct Time {
     int hour;
@@ -58,5 +60,7 @@ void decreasingTime(List &l);
 bool searchByPoint(List &l, int target);
 
 int countList(const List &l);
+
+void SaveCurrentScore(int point);
 
 #endif // SCORES_H

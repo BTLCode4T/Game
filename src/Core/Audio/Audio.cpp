@@ -16,6 +16,7 @@ Audio::Audio() {
         {"dinosaur",   "assets/Sounds/dinosaur.mp3"},
         {"jump", "assets/Sounds/jump.wav"},
         {"gameOver", "assets/Sounds/game-over.mp3"},
+        {"hit","assets/Sounds/laser-shot.mp3"},
     };
 
     for (const auto& snd : loadList) {

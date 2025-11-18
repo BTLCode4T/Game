@@ -8,13 +8,13 @@ private:
     float attackRange; 
 public:
     /**
-     * @brief Constructor cho Khủng long.
-     * * @param name Tên.
-     * @param x Tọa độ X ban đầu.
-     * @param y Tọa độ Y ban đầu.
-     * @param maxHealth Máu tối đa.
-     * @param speed Tốc độ di chuyển.
-     * @param texturePath Đường dẫn ảnh.
+     * Constructor cho Khủng long.
+     * name Tên.
+     * x Tọa độ X ban đầu.
+     * y Tọa độ Y ban đầu. 
+     * maxHealth Máu tối đa.
+     * speed Tốc độ di chuyển.
+     * texturePath Đường dẫn ảnh.
      */
   Dinosaur(const string &name, float x, float y, int maxHealth, float speed, const string &texturePath, float width,
            float height, sf::Vector2i frameNum, float frameTime);
@@ -26,6 +26,8 @@ public:
     
     // Ghi đè hàm hiển thị trạng thái nếu cần
     void DisplayStatus() const override;
+
+    
 };
 
 #endif // DINOSAUR_H

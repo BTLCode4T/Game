@@ -154,14 +154,14 @@ bool searchByPoint(List &l, int target) {
     Node *current = l.head;
     Node *newHead = nullptr;
     Node *newTail = nullptr;
-    
+
     bool found = false; // Biến cờ để kiểm tra
 
     while (current) {
         Node *next = current->next;
         if (current->point == target) {
             found = true; // Đã tìm thấy!
-            
+
             // ... (Giữ nguyên logic di chuyển Node lên đầu) ...
             if (!newHead) {
                 newHead = newTail = current;
@@ -180,7 +180,7 @@ bool searchByPoint(List &l, int target) {
         }
         current = next;
     }
-    
+
     // ... (Giữ nguyên logic cập nhật tail) ...
     if (newTail) {
         newTail->next = l.head;
@@ -216,4 +216,34 @@ int countList(const List &l) {
         p = p->next;
     }
     return count;
+}
+
+void SaveCurrentScore(int point) {
+    // 1. Lấy thời điểm hiện tại của hệ thống
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    // Chuyển đổi sang cấu trúc thời gian cục bộ (giờ địa phương)
+    std::tm *ltm = std::localtime(&now);
+
+    // 2. Tách các thành phần
+    int hour = ltm->tm_hour;
+    int minute = ltm->tm_min;
+    int day = ltm->tm_mday;
+    int month = ltm->tm_mon + 1;    // tm_mon chạy từ 0-11
+    int year = ltm->tm_year + 1900; // tm_year là số năm kể từ 1900
+
+    // 3. Mở file Scores.txt để ghi thêm
+    std::ofstream outfile("Scores.txt", std::ios::app);
+    if (outfile.is_open()) {
+       
+        // SỬA LỖI: Ghi ra định dạng có dấu `:` và `/` để khớp với sscanf trong readFile
+        // Ví dụ: 100 8:0 18/11/2025
+        outfile << point << " " 
+                << hour << ":" << minute << " "
+                << day << "/" << month << "/" << year << "\n"; // Đã thêm delimiter
+                
+        outfile.close();
+        std::cout << "Score saved: " << point << " at " << hour << ":" << minute << std::endl;
+    } else {
+        std::cerr << "Loi: Khong the mo file Scores.txt de ghi diem!" << std::endl;
+    }
 }

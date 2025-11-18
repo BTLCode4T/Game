@@ -6,7 +6,7 @@ MusicManager::MusicManager() {
     musicFiles = {
         {"menu",    "assets/music/menu.ogg"},
         {"HighScores",    "assets/music/HighScores.ogg"},
-        // {"Game",    "assets/music/Game.ogg"},
+        {"Game",    "assets/music/Gentle Dino Escape.mp3"},
         {"Help",    "assets/music/Help.ogg"},
         // {"Settings",    "assets/music/Settings.ogg"},
         {"run",   "assets/Sounds/run.wav"},

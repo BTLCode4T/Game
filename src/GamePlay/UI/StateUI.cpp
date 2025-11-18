@@ -9,7 +9,8 @@
 #include "Core/Audio/Audio.h"
 #include "Core/Audio/MusicManager.h"
 #include "Core/GameLoop/game.h"
-
+#include <chrono> 
+#include <ctime>
 /* ============================================================
  * CLASS: MainMenuUI — Giao diện chính của game
  * ============================================================ */
@@ -336,7 +337,9 @@ GameOverUI::GameOverUI(const sf::Sprite &bg, const sf::Font &font) : backgroundS
         createSprite(btnUndoTexture, "assets/Images/Undo.png", 75.0f, 75.0f, 550.0f, 325.0f));
 
     gameOverText = std::make_unique<sf::Text>(
-        createText(font, L"Bạn đã thua!\nĐiểm: ******\nThời gian: **/**/*****", 28, sf::Color::White, 500.0f, 250.0f, true));
+        createText(font, L"Bạn đã thua!\n\nDIEM CUA BAN: 0\n\nThời gian: **/**/****", 28, sf::Color::White, 450.0f, 220.0f, true));
+    
+    finalScore = 0; // Khởi tạo điểm
 
 }
 
@@ -346,6 +349,30 @@ void GameOverUI::Render(sf::RenderWindow &window, const sf::Font &font){
     window.draw(*gameOverText);
     window.draw(*btnHomeSprite);
     window.draw(*btnUndoSprite);
+}
+
+void GameOverUI::setScore(int score) {
+    finalScore = score;
+    
+    // 1. Lấy thời điểm hiện tại
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm *ltm = std::localtime(&now);
+
+    // 2. Định dạng chuỗi thời gian (HH:MM DD/MM/YYYY)
+    std::wstringstream time_ss;
+    // Dùng setw và setfill để thêm số 0 đứng đầu nếu cần
+    time_ss << std::setw(2) << std::setfill(L'0') << ltm->tm_hour << L":"
+            << std::setw(2) << std::setfill(L'0') << ltm->tm_min << L" "
+            << std::setw(2) << std::setfill(L'0') << ltm->tm_mday << L"/"
+            << std::setw(2) << std::setfill(L'0') << (ltm->tm_mon + 1) << L"/"
+            << (ltm->tm_year + 1900);
+            
+    // 3. Cập nhật chuỗi hiển thị
+    std::wstringstream wss;
+    wss << L"Bạn đã thua!\n\nĐiểm của bạn: " << finalScore << L"\n\nThời gian: " 
+        << time_ss.str(); // Dùng chuỗi đã định dạng
+        
+    gameOverText->setString(wss.str());
 }
 
 
@@ -402,6 +429,21 @@ HighScoresUI::~HighScoresUI() { // *** KHẮC PHỤC LỖI DESTUCTOR: Định ng
     deleteList(scoresList);     // Gọi hàm giải phóng danh sách
 }
 
+void HighScoresUI::LoadScores() {
+    // 1. Giải phóng danh sách cũ
+    deleteList(scoresList);
+    
+    // 2. Khởi tạo lại danh sách (initList cũng được gọi trong deleteList nếu head/tail là nullptr)
+    initList(scoresList); 
+    
+    // 3. Đọc dữ liệu mới từ file
+    readFile("Scores.txt", scoresList);
+    
+    // 4. Reset cuộn về đầu trang (quan trọng khi danh sách thay đổi)
+    resetScroll();
+    
+    std::cout << "High scores list reloaded from file." << std::endl;
+}
 // *** SỬA: Định nghĩa member function đúng cách ***
 void HighScoresUI::setInputActive(bool active) {
     isInputActive = active;
@@ -443,7 +485,6 @@ void HighScoresUI::addCharToInput(std::uint32_t unicode) {
         cursorShape.setPosition(sf::Vector2f(inputTextDisplay->getPosition().x + textBounds.size.x + 2.0f, inputTextDisplay->getPosition().y));
 }
 
-// Xử lý khi nhấn Enter (Giả định là tìm kiếm điểm) - THÊM: Đảm bảo caller pass scoresList
 void HighScoresUI::handleInputFinished(List &l) {
     if (!isInputActive)
         return;

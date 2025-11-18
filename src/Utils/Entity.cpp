@@ -101,6 +101,7 @@ void Entity::TakeDamage(int amount) {
     if (amount < 0)
         return;
     health -= amount;
+
     cout << name << " nhan " << amount << " sat thuong.";
 
     if (health <= 0) {
