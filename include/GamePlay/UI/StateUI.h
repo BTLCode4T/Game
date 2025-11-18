@@ -22,13 +22,17 @@ class MainMenuUI : public IGameStateUI {
   private:
     // Textures
     sf::Texture btnNewTexture, btnHighScoresTexture, btnSettingsTexture, btnHelpTexture;
-
+    sf::Texture btnExtraTexture;
+    sf::Texture myNewImageTexture;
+    sf::Texture logoTexture;
     // Sprites (dùng con trỏ để không cần constructor mặc định)
     std::unique_ptr<sf::Sprite> btnNewSprite;
     std::unique_ptr<sf::Sprite> btnHighScoresSprite;
     std::unique_ptr<sf::Sprite> btnSettingsSprite;
     std::unique_ptr<sf::Sprite> btnHelpSprite;
-
+    std::unique_ptr<sf::Sprite> btnExtraSprite;
+    std::unique_ptr<sf::Sprite> myNewImageSprite;
+    std::unique_ptr<sf::Sprite> logoSprite;
     std::unique_ptr<sf::Text> infoText;
     std::unique_ptr<sf::Text> versionText;
 
@@ -52,6 +56,9 @@ class MainMenuUI : public IGameStateUI {
     }
     const sf::Sprite &getBtnHelpSprite() const {
         return *btnHelpSprite;
+    }
+    const sf::Sprite &getBtnExtraSprite() const {
+        return *btnExtraSprite;
     }
 };
 

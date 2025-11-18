@@ -19,19 +19,23 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
     // --- [1] Nút “New Game” ---
     // Dùng std::make_unique để tạo sprite, truyền texture và vị trí nút
     btnNewSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnNewTexture, "assets/Images/new.png", 300.0f, 70.0f, 333.2f, 150.0f));
+        createSprite(btnNewTexture, "assets/Images/play.png", 250.0f, 150.0f, 780.f, 490.0f));
 
     // --- [2] Nút “High Scores” ---
     btnHighScoresSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnHighScoresTexture, "assets/Images/HighScores.png", 300.0f, 70.0f, 333.2f, 250.0f));
+        createSprite(btnHighScoresTexture, "assets/Images/prize.png", 250.0f, 150.0f, 1660.0f, 650.0f));
 
     // --- [3] Nút “Settings” ---
     btnSettingsSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnSettingsTexture, "assets/Images/Settings.png", 300.0f, 70.0f, 333.2f, 350.0f));
+        createSprite(btnSettingsTexture, "assets/Images/setting.png", 250.0f, 150.0f, 1630.f, 30.0f));
 
     // --- [4] Nút “Help” ---
     btnHelpSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnHelpTexture, "assets/Images/Help.png", 300.0f, 70.0f, 333.2f, 450.0f));
+        createSprite(btnHelpTexture, "assets/Images/faq.png", 250.0f, 150.0f, 30.f, 30.0f));
+    
+    // --- [4.5] Nút “about” ---
+    btnExtraSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnExtraTexture, "assets/Images/about.png", 250.0f, 150.0f, 30.0f, 650.0f));
 
     // --- [5] Text hiển thị tiêu đề / thông tin game ---
     infoText = std::make_unique<sf::Text>(
@@ -43,22 +47,42 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
 
     MusicManager::Get().Play("menu");
 
-
+    myNewImageSprite =
+        std::make_unique<sf::Sprite>(createSprite(myNewImageTexture,
+                                                  "assets/Images/bg.png", // 👈 THAY ĐƯỜNG DẪN
+                                                  WINDOW_WIDTH,                                   // 👈 Chiều rộng mong muốn
+                                                  WINDOW_HEIGHT,           // 👈 Chiều cao mong muốn
+                                                  0.0f,                                    // 👈 Vị trí X
+                                                  0.0f                                    // 👈 Vị trí Y
+                                                  ));
+    logoSprite = std::make_unique<sf::Sprite>(
+        createSprite(logoTexture,
+                     "assets/Images/LogoDino.png", // 👈 Nhớ thay tên file ảnh logo của bạn
+                     1000.0f,                        // Chiều rộng Logo (bằng chiều rộng nút start cho đẹp)
+                     590.0f,                        // Chiều cao Logo
+                     420.0f,                        // Vị trí X (bằng X của nút Start để thẳng hàng)
+                     -20.0f                          // Vị trí Y (nhỏ hơn 200 để nằm PHÍA TRÊN nút Start)
+                     ));
 }
-
+    
 /* --- Hàm Render của MainMenuUI ---
  * Nhiệm vụ: Vẽ toàn bộ các phần tử giao diện chính lên cửa sổ.
  */
 void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(backgroundSprite);
+    
     window.draw(sunSprite);
     window.draw(treeSprite);
+    window.draw(*myNewImageSprite);
+    window.draw(*logoSprite);
     window.draw(*btnNewSprite);
     window.draw(*btnHighScoresSprite);
     window.draw(*btnSettingsSprite);
     window.draw(*btnHelpSprite);
+    window.draw(*btnExtraSprite);
     window.draw(*infoText);
     window.draw(*versionText);
+   
 }
 
 /* ============================================================
