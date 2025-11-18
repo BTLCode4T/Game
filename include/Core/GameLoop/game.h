@@ -62,6 +62,10 @@ class GameManager {
     Map map;
     float timePassed = 0.f;         // Tích thời gian chơi
     float daySpeedMultiplier = 1.f; // Hệ số tốc độ ngày
+
+    int totalScore = 0;
+
+    sf::Text scoreDisplay;
   public:
     // ui
     MainMenuUI mainMenu;       // Màn hình menu chính
@@ -76,7 +80,7 @@ class GameManager {
                 std::vector<Obstacle> &obs)
         : window(win), menuFont(font), playerSprite(player), backgroundSprite(bg), backgroundSprite2(bg2),
           sunSprite(sun), treeSprite(tree), ground(gr), btnHomeSprite(btnHome), obstacles(obs),
-
+          scoreDisplay(menuFont, sf::String("Điểm: 0"), 24),
           // Khởi tạo playerManager tại đây nè 👇
           playerManager("Meo_bao", 1700.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
                         PLAYER_SIZE,        // Rộng, Cao
@@ -88,6 +92,18 @@ class GameManager {
           settingsUI(backgroundSprite, btnHomeSprite, menuFont), gameOverUI(backgroundSprite, menuFont),
 
           currentState(GameState::MainMenu) {
+
+            // THÊM: Khởi tạo scoreDisplay
+        scoreDisplay.setFont(menuFont);
+        scoreDisplay.setCharacterSize(24);
+        scoreDisplay.setFillColor(sf::Color::Yellow);
+        // Đặt vị trí dưới thanh máu (ví dụ: cách lề phải 200px, cách lề trên 60px)
+        scoreDisplay.setPosition({WINDOW_WIDTH - 100.f, 60.f}); 
+        scoreDisplay.setString("DIEM: 0"); // Giá trị khởi tạo
+
+
+
+
         ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
         ground2.setFillColor(sf::Color::Transparent);
         ground2.setPosition({WINDOW_WIDTH, GROUND_Y});
@@ -133,7 +149,6 @@ class GameManager {
         auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", // ĐƯỜNG DẪN ẢNH ĐẠN
                                                x, y, 30.f, 40.f,                  // vị trí, rộng, cao
                                                damage, direction, speed);
-        cout << "hi";
         bullets.push_back(std::move(bullet));
     }
     // Hàm chính chạy vòng lặp game

@@ -91,7 +91,7 @@ void PlayerManager::DisplayStatus() const {
     Entity::DisplayStatus();
 
   
-    std::cout << "  Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
+    std::cout << "Trang thai: " << (isAlive ? "**Song**" : "**Chet**") << std::endl;
     std::cout << "-----------------------------" << std::endl;
 }
 void PlayerManager::Render(sf::RenderWindow &window) {

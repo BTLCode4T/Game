@@ -60,6 +60,8 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &getBtnExtraSprite() const {
         return *btnExtraSprite;
     }
+
+
 };
 
 /* --- HIGH SCORES --- */
@@ -111,6 +113,8 @@ class HighScoresUI : public IGameStateUI {
     HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
     virtual ~HighScoresUI();
+
+    void LoadScores();
 
     void scrollUp();
     void scrollDown();
@@ -206,20 +210,23 @@ class SettingsUI : public IGameStateUI {
 class GameOverUI : public IGameStateUI {
   private:
     const sf::Sprite &backgroundSprite;
-    sf::Texture btnNone, gameOverTexture, btnUndoTexture, btnHomeTexture;
+    sf::Texture btnNone, btnUndoTexture, btnHomeTexture;
     std::unique_ptr<sf::Sprite> btnNoneSprite;
 
     std::unique_ptr<sf::Sprite> btnHomeSprite;
     std::unique_ptr<sf::Sprite> btnUndoSprite;
 
 
-
-
     std::unique_ptr<sf::Text> gameOverText;
+
+    int finalScore = 0;
+
+
 
   public:
     GameOverUI(const sf::Sprite &bg, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
+    void setScore(int score);
     const sf::Sprite &getHomeButtonSprite() const {
         return *btnHomeSprite;
     }
