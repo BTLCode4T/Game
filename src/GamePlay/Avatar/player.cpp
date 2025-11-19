@@ -107,10 +107,28 @@ void PlayerManager::DisplayStatus() const {
     std::cout << "-----------------------------" << std::endl;
 }
 void PlayerManager::Render(sf::RenderWindow &window) {
+    // 1. Mặc định là sẽ vẽ
+    bool isVisible = true;
 
-    Entity::Render(window); 
+    // 2. Kiểm tra xem có đang trong thời gian "Bất tử" (Cooldown) không
+    // Nếu chưa hết thời gian cooldown thì xử lý chớp tắt
+    float elapsed = damageCooldownClock.getElapsedTime().asSeconds();
+    if (isAlive && elapsed < damageCooldownTime) {
+        // Logic chớp tắt:
+        // Chia thời gian cho 0.1s (tốc độ chớp).
+        // Nếu kết quả là số lẻ thì ẩn đi (isVisible = false), số chẵn thì hiện.
+        // Ví dụ: 0.1s -> ẩn, 0.2s -> hiện, 0.3s -> ẩn...
+        if (static_cast<int>(elapsed / 0.1f) % 2 != 0) {
+            isVisible = false;
+        }
+    }
 
-    if (currentGun) {
-        currentGun->Render(window); 
+    // 3. Chỉ vẽ nếu isVisible == true
+    if (isVisible) {
+        Entity::Render(window); // Vẽ nhân vật (Animation)
+
+        if (currentGun) {
+            currentGun->Render(window); // Vẽ súng
+        }
     }
 }
