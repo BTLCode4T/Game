@@ -6,6 +6,7 @@
 #include "GamePlay/Physics/PhysicsSystem.h"
 #include "GamePlay/UI/StateUI.h"
 #include "Utils/Entity.h"
+#include <sstream>
 
 // vòng lập
 void GameManager::runGameLoop() {
