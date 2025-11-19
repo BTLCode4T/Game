@@ -39,7 +39,8 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &backgroundSprite;
     const sf::Sprite &sunSprite;
     const sf::Sprite &treeSprite;
-
+    std::unique_ptr<sf::Text> githubLinkText;
+    bool isLinkVisible = false;
   public:
     MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sprite &tree, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
@@ -60,7 +61,9 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &getBtnExtraSprite() const {
         return *btnExtraSprite;
     }
-
+    void toggleLink() {
+        isLinkVisible = !isLinkVisible;
+    }
 
 };
 
@@ -248,6 +251,9 @@ class GameInfoUI : public IGameStateUI {
   public:
     GameInfoUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
+    const sf::Sprite &getHomeButtonSprite() const {
+        return btnHomeSprite;
+    }
 };
 
 
