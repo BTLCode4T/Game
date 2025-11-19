@@ -79,8 +79,8 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*btnSettingsSprite);
     window.draw(*btnHelpSprite);
     window.draw(*btnExtraSprite);
-    window.draw(*infoText);
-    window.draw(*versionText);
+    // window.draw(*infoText);
+    // window.draw(*versionText);
 }
 
 /* ============================================================
