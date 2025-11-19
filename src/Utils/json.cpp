@@ -1,101 +1,81 @@
-// json_manager.cpp
+// File: json.cpp
 
 #include "../../include/Core/GameLoop/json.h"
-#include <iostream>
+#include "GamePlay/Avatar/player.h"
+#include "GamePlay/Gun/bullet.h"
 #include <fstream>
+#include <iostream>
+#include <cstdio> // Thư viện cho std::remove
 
-// ================================
-// ĐỊNH NGHĨA CÁC HÀM
-// ================================
+using json = nlohmann::json;
+using namespace std;
 
-json LoadJSON(const string& filename) {
-    ifstream f(filename);
-    json data;
-    if (!f.is_open()) {
-        cerr << "[!] File khong ton tai. Khoi tao cau truc.\n";
-        data[ROOT_KEY] = json::object();
-        return data;
-    }
-    try {
-        f >> data;
-        if (!data.contains(ROOT_KEY))
-            data[ROOT_KEY] = json::object();
-    } catch (...) {
-        cerr << "[!] Loi khi doc JSON, tao moi.\n";
-        data[ROOT_KEY] = json::object();
-    }
-    return data;
-}
+// Tên file và key gốc (đặt trong file cpp để ẩn chi tiết)
+const string SAVE_FILE = "data.json";
+const string ROOT_KEY = "DinoSurvivalData";
 
-void SaveJSON(const json& data, const string& filename) {
-    ofstream o(filename);
-    if (!o.is_open()) {
-        cerr << "[!] Khong the ghi file " << filename << endl;
-        return;
-    }
-    o << data.dump(4);
-    cout << "[+] Da luu vao file " << filename << endl;
-}
+// --------------------------------------------------------
+// 1. LƯU GAME
+// --------------------------------------------------------
+void SaveGame(const PlayerManager& player, const std::vector<std::unique_ptr<Bullet>>& bullets) {
+    
+    if (!player.IsAlive()) return;
 
-void SaveFullData(const json& full_data, const string& filename) {
-    ofstream o(filename);
-    if (!o.is_open()) {
-        cerr << "[!] Khong the ghi file " << filename << endl;
-        return;
-    }
-    o << full_data.dump(4);
-    cout << "[+] Da luu toan bo du lieu Save Game vao file " << filename << endl;
-}
+    json root;
+    root["Player"] = player.SaveState();
 
-void CreateBranch(json& data, const string& parent_name, const string& new_branch) {
-    json& root = data[ROOT_KEY];
-    if (parent_name.empty()) {
-        root[new_branch] = json::object();
-        return;
-    }
-    if (root.contains(parent_name) && root[parent_name].is_object()) {
-        root[parent_name][new_branch] = json::object();
-    } else {
-        cerr << "[!] Thu muc cha '" << parent_name << "' khong ton tai.\n";
-    }
-}
-
-void AddOrUpdateObject(json& data, const string& parent_branch, const string& object_name, const json& properties) {
-    json& root = data[ROOT_KEY];
-
-    if (!root.contains(parent_branch) || !root[parent_branch].is_object()) {
-        cerr << "[!] Loi: Nhanh cha '" << parent_branch << "' khong ton tai hoac khong hop le.\n";
-        return;
-    }
-
-    json& parent = root[parent_branch];
-
-    if (parent.contains(object_name)) {
-        for (auto& [key, value] : properties.items()) {
-            parent[object_name][key] = value;
+    json bullet_arr = json::array();
+    
+    // Duyệt qua danh sách con trỏ
+    for (const auto& b : bullets) {
+        // SỬA DÒNG NÀY: Dùng dấu mũi tên (->) thay vì dấu chấm (.)
+        if (!b->IsDestroyed() && !b->IsExpired()) {
+            bullet_arr.push_back(b->SaveState());
         }
-        cout << "[~] Da cap nhat doi tuong '" << object_name << "' trong '" << parent_branch << "'.\n";
-    } else {
-        parent[object_name] = properties;
-        cout << "[+] Da them moi '" << object_name << "' trong '" << parent_branch << "'.\n";
+    }
+    root["Bullets"] = bullet_arr;
+
+    json final_save;
+    final_save[ROOT_KEY] = root;
+
+    ofstream o(SAVE_FILE);
+    if (o.is_open()) {
+        o << final_save.dump(4);
+        cout << "[System] Game Saved.\n";
     }
 }
 
-void DisplayJSON(const json& data, const string& branch_name) {
-    if (!data.contains(ROOT_KEY)) {
-        cerr << "[!] Khong co du lieu de hien thi.\n";
-        return;
+// --------------------------------------------------------
+// 2. TẢI GAME
+// --------------------------------------------------------
+json LoadGame() {
+    ifstream f(SAVE_FILE);
+    if (!f.is_open()) {
+        cout << "[System] No save file found. New Game.\n";
+        return json::object(); 
     }
 
-    const json& root = data[ROOT_KEY];
+    json raw_data;
+    try {
+        f >> raw_data;
+    } catch (...) {
+        cerr << "[Error] Save file corrupted. New Game.\n";
+        return json::object();
+    }
 
-    if (branch_name.empty()) {
-        cout << "\n===== TOAN BO DU LIEU JSON =====\n";
-        cout << root.dump(4) << endl;
-    } else if (root.contains(branch_name)) {
-        cout << "\n--- Nhanh '" << branch_name << "' ---\n";
-        cout << root[branch_name].dump(4) << endl;
-    } else {
-        cerr << "[!] Khong tim thay nhanh '" << branch_name << "'.\n";
+    if (raw_data.contains(ROOT_KEY)) {
+        cout << "[System] Save file loaded.\n";
+        return raw_data[ROOT_KEY];
+    }
+    
+    return json::object();
+}
+
+// --------------------------------------------------------
+// 3. XÓA FILE (KHI CHẾT)
+// --------------------------------------------------------
+void DeleteSaveFile() {
+    if (std::remove(SAVE_FILE.c_str()) == 0) {
+        cout << "[System] You Died. Save file deleted.\n";
     }
 }

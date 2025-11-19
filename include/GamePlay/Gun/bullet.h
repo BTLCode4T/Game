@@ -2,7 +2,7 @@
 #define BULLET_H
 
 #include "Utils/Entity.h"
-
+#include "Core/GameLoop/json.hpp"
 class Bullet : public Entity {
   private:
     int damage;
@@ -30,6 +30,8 @@ class Bullet : public Entity {
     int GetDamage() const { return damage; }
     void Destroy() { isDestroyed = true; }
     bool IsDestroyed() const { return isDestroyed; }
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& j);
 };
 
 #endif // BULLET_H

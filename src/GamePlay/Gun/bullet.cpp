@@ -32,3 +32,55 @@ void Bullet::UpdateBullet(float deltaTime) {
 bool Bullet::IsExpired() const {
     return lifeTimer.getElapsedTime().asSeconds() >= lifetime;
 }
+// ===============================================
+// ĐỊNH NGHĨA HÀM LƯU/TẢI TRẠNG THÁI
+// ===============================================
+
+nlohmann::json Bullet::SaveState() const {
+    nlohmann::json j;
+    
+    j["damage"] = damage;
+    j["is_destroyed"] = isDestroyed;
+    
+    if (animation) {
+        j["position_x"] = animation->getPosition().x;
+        j["position_y"] = animation->getPosition().y;
+    } else {
+        j["position_x"] = 0.0f;
+        j["position_y"] = 0.0f;
+    }
+    
+    j["velocity_x"] = velocity.x;
+    j["velocity_y"] = velocity.y;
+    
+    float remainingTime = lifetime - lifeTimer.getElapsedTime().asSeconds();
+    if (remainingTime < 0) remainingTime = 0;
+    j["remaining_lifetime"] = remainingTime;
+    
+    return j;
+}
+
+void Bullet::LoadState(const nlohmann::json& j) {
+    damage = j.at("damage").get<int>();
+    isDestroyed = j.at("is_destroyed").get<bool>();
+    
+    float x = j.at("position_x").get<float>();
+    float y = j.at("position_y").get<float>();
+    
+    // --- SỬA LỖI SFML 3.0.2: Dùng sf::Vector2f(x, y) ---
+    if (animation) {
+        animation->setPosition(sf::Vector2f(x, y));
+    }
+    
+    velocity.x = j.at("velocity_x").get<float>();
+    velocity.y = j.at("velocity_y").get<float>();
+    
+    // Cập nhật góc xoay
+    if (animation) {
+        float angleDeg = std::atan2(velocity.y, velocity.x) * 180.f / M_PI;
+        animation->setRotation(sf::degrees(angleDeg));
+    }
+
+    lifetime = j.at("remaining_lifetime").get<float>();
+    lifeTimer.restart(); 
+}

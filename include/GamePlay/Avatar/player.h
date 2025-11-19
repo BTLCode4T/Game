@@ -52,7 +52,8 @@ class PlayerManager : public Entity {
     bool IsImmune() const;
     void DisplayStatus() const override;
     void Render(sf::RenderWindow &window) override;
-
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& j);
 };
 
 #endif // PlayerManager_H

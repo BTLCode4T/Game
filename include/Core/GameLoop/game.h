@@ -149,6 +149,8 @@ class GameManager {
 
             heartSprites.push_back(heartSprite);
         }
+        SpawnInitialEntities(); // Luôn tạo quái mới khi mở game
+        mainMenu.checkContinueAvailable(); // Kiểm tra save để hiện nút Continue (nếu có)
     }
     void CreateBullet(float x, float y, int damage, sf::Vector2f direction, float speed) {
         auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", // ĐƯỜNG DẪN ẢNH ĐẠN
