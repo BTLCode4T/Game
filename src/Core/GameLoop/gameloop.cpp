@@ -79,6 +79,7 @@ void GameManager::handleEvents() {
             break;
         case GameState::Help:
         case GameState::Settings:
+        case GameState::GameInfo:
             handleSettingsEvent();
             break;
         case GameState::GameOver:
@@ -166,6 +167,10 @@ void GameManager::render() {
 
     case GameState::Settings:
         settingsUI.Render(window, menuFont);
+        break;
+
+    case GameState::GameInfo:   // <- THÊM: render GameInfo
+        gameInfoUI.Render(window, menuFont);
         break;
 
     case GameState::GameOver:
@@ -320,6 +325,11 @@ void GameManager::handleMainMenuEvent() {
             Audio::Get().Play("click");
             MusicManager::Get().Stop();
             currentState = GameState::Settings;
+        } else if (mainMenu.getBtnExtraSprite().getGlobalBounds().contains(mousePos)) { // <- THÊM
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
+            // MusicManager::Get().Play("Info"); //Tạo tài nguyên nhạc 'Info' nếu muốn
+            currentState = GameState::GameInfo;
         }
     }
 }
