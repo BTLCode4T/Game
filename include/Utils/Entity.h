@@ -13,6 +13,7 @@
 #include "GamePlay/UI/Animation.h" 
 #include <memory>//cho unique_ptr
 using namespace std;
+class Dinosaur;
 
 class Entity {
   private:
@@ -47,8 +48,9 @@ class Entity {
     virtual ~Entity() = default;
 
     // --- Hàm chức năng ---
-    void Move(bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
-              const int MAX_JUMPS); // Sẽ được cập nhật để di chuyển sprite
+    void Move(bool left, bool right, float deltaTime, const std::vector<Obstacle> &obstacles,
+              const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, // <--- THÊM Ở ĐÂY
+              int maxJump);
     void jump(const int MAX_JUMPS);
     virtual void TakeDamage(int amount);
     /**

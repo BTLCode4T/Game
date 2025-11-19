@@ -17,9 +17,12 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
 }
 
 // Hàm xử lý Input
-void PlayerManager::HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,
-                                             const std::vector<Obstacle> &obs, const int MAX_JUMPS) {
-    this->Move(leftPressed, rightPressed, deltaTime, obs, MAX_JUMPS);
+void PlayerManager::HandleInputPlayerManager(
+    bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
+    const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, 
+    const int MAX_JUMPS) {
+
+    this->Move(leftPressed, rightPressed, deltaTime, obs, dinosaurs, MAX_JUMPS);
 }
 int PlayerManager::GetHealth() {
     return Entity::getHealth();
@@ -58,6 +61,11 @@ bool PlayerManager::CheckCollision(const Entity &other) const {
      // 1. Lấy khung hình chữ nhật của bản thân
     sf::FloatRect playerBounds = this->getBounds();
 
+    // Mở rộng sang trái phải mỗi bên 5 pixel
+    // Điều này đảm bảo dù PhysicsSystem đã đẩy ra, ta vẫn phát hiện được va chạm
+    playerBounds.position.x -= 5.0f;
+    playerBounds.size.x += 10.0f;
+
     // 2. Lấy khung hình chữ nhật của đối tượng kia
     sf::FloatRect otherBounds = other.getBounds();
 
@@ -78,6 +86,10 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
             std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
             // 3. Trừ máu
             TakeDamage(1);
+
+            this->setVelocity(-500.0f, -300.0f);
+            this->setIsOnGround(false);
+
             // 4. Reset đồng hồ để bắt đầu đếm ngược lại từ đầu
             damageCooldownClock.restart();
         }

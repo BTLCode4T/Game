@@ -471,7 +471,7 @@ void GameManager::updatePlaying(float deltaTime) {
     bool rightPressed =
         inputManager.IsKeyDown(sf::Keyboard::Scancode::Right) || inputManager.IsKeyDown(sf::Keyboard::Scancode::D);
 
-    playerManager.Move(leftPressed, rightPressed, deltaTime, obstacles, MAX_JUMPS);
+    playerManager.HandleInputPlayerManager(leftPressed, rightPressed, deltaTime, obstacles, dinosaurs, MAX_JUMPS);
 
     // ==============================================================================================================
     // Cập nhật khung hình animation của người chơi
@@ -565,7 +565,7 @@ void GameManager::updatePlaying(float deltaTime) {
     for (auto &dino_ptr : dinosaurs) {
         dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
         dino_ptr->animation->Update(deltaTime);
-        PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, *dino_ptr);
+        PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, dinosaurs, *dino_ptr);
     }
 
     // === CẬP NHẬT MÁU (Hiển thị trái tim) ===

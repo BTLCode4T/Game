@@ -1,5 +1,5 @@
 ﻿#include "Utils/Entity.h"
-
+#include "GamePlay/Entity/Dinosaur.h"
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 
@@ -40,6 +40,7 @@ void Entity::jump(const int MAX_JUMPS) {
 
 // Hàm di chuyển (Move) (CẬP NHẬT: Di chuyển cả sprite)
 void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
+                  const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, // <--- THÊM THAM SỐ NÀY
                   const int MAX_JUMPS) {
    
     if (leftPressed) {
@@ -71,7 +72,7 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
         velocity.x = -MAX_MOVE_SPEED;
     }
     
-    PhysicsSystem::Update(*animation, deltaTime, obs, *this);
+    PhysicsSystem::Update(*animation, deltaTime, obs, dinosaurs, *this);
     // Reset số lần nhảy nếu chạm đất
     if (isOnGround) {
         jumpsRemaining = MAX_JUMPS;

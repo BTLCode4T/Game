@@ -1,11 +1,12 @@
-#ifndef PlayerManager_H
+﻿#ifndef PlayerManager_H
 #define PlayerManager_H
 
 #include "GamePlay/Gun/gun.h"
 #include "Utils/Entity.h"
 #include <SFML/Window.hpp>
 #include <SFML/System/Clock.hpp>
-
+#include <vector>
+#include <memory>
 class PlayerManager : public Entity {
   private:
     bool isAlive;
@@ -20,7 +21,9 @@ class PlayerManager : public Entity {
     virtual ~PlayerManager() = default;
 
     void HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,
-                                  const std::vector<Obstacle> &obs, const int MAX_JUMPS);
+                                  const std::vector<Obstacle> &obs,
+                                  const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, // <--- THÊM THAM SỐ NÀY
+                                  const int MAX_JUMPS);
 
     bool CheckCollision(const Entity &other) const;    
     void HandleDinosaurCollision(const Entity &other); 

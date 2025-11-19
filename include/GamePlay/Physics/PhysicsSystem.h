@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+class Dinosaur;
+
 class Entity;
 
 struct Obstacle {
@@ -60,6 +62,7 @@ class PhysicsSystem {
     // 4. Danh sách các chướng ngại vật (std::vector<Obstacle>)
     // 5. Biến cờ kiểm tra đang trên mặt đất (bool& isOnGround)
     static void Update(sf::Sprite &playerSprite, float deltaTime, const std::vector<Obstacle> &obstacles,
+                       const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs,
                        Entity &entity);
 
   private:
