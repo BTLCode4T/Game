@@ -2,9 +2,9 @@
 #include "../../include/Core/GameLoop/json.h"
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Gun/bullet.h"
+#include <cstdio> // Thư viện cho std::remove
 #include <fstream>
 #include <iostream>
-#include <cstdio> // Thư viện cho std::remove
 
 using json = nlohmann::json;
 using namespace std;
@@ -17,15 +17,16 @@ const string ROOT_KEY = "DinoSurvivalData";
 // 1. LƯU GAME
 // ============================================================
 // [QUAN TRỌNG]: Tham số bullets phải là vector<unique_ptr<...>>
-void SaveGame(const PlayerManager& player, const std::vector<std::unique_ptr<Bullet>>& bullets, int score) {
-    if (!player.IsAlive()) return;
+void SaveGame(const PlayerManager &player, const std::vector<std::unique_ptr<Bullet>> &bullets, int score) {
+    if (!player.IsAlive())
+        return;
 
     json root;
     root["Player"] = player.SaveState();
     root["GameData"]["score"] = score;
 
     json bullet_arr = json::array();
-    for (const auto& b : bullets) {
+    for (const auto &b : bullets) {
         // [QUAN TRỌNG]: Dùng mũi tên (->) vì b là con trỏ
         if (b && !b->IsDestroyed() && !b->IsExpired()) {
             bullet_arr.push_back(b->SaveState());
@@ -47,9 +48,10 @@ void SaveGame(const PlayerManager& player, const std::vector<std::unique_ptr<Bul
 // 2. TẢI GAME
 // ============================================================
 // [QUAN TRỌNG]: Tham số bullets phải là vector<unique_ptr<...>>
-bool LoadGame(PlayerManager& player, std::vector<std::unique_ptr<Bullet>>& bullets, int& score) {
+bool LoadGame(PlayerManager &player, std::vector<std::unique_ptr<Bullet>> &bullets, int &score) {
     ifstream f(SAVE_FILE);
-    if (!f.is_open()) return false;
+    if (!f.is_open())
+        return false;
 
     json raw_data;
     try {
@@ -58,7 +60,8 @@ bool LoadGame(PlayerManager& player, std::vector<std::unique_ptr<Bullet>>& bulle
         return false;
     }
 
-    if (!raw_data.contains(ROOT_KEY)) return false;
+    if (!raw_data.contains(ROOT_KEY))
+        return false;
 
     json data = raw_data[ROOT_KEY];
 
@@ -74,14 +77,20 @@ bool LoadGame(PlayerManager& player, std::vector<std::unique_ptr<Bullet>>& bulle
 
     bullets.clear();
     if (data.contains("Bullets")) {
-        for (auto& b_json : data["Bullets"]) {
+        for (auto &b_json : data["Bullets"]) {
             // Tạo con trỏ unique_ptr mới
-            auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", 0, 0, 30.f, 40.f, 1, sf::Vector2f(0,0), 0);
+            auto bullet =
+                std::make_unique<Bullet>("assets/Images/bullet/image6.png",
+                                         0.f,                                   
+                                         0.f,                                   
+                                         30.f, 40.f, 1, sf::Vector2f(0.f, 0.f), 
+                                         0.f 
+                );
             bullet->LoadState(b_json);
             bullets.push_back(std::move(bullet));
         }
     }
-    
+
     cout << "[System] Game Loaded Successfully.\n";
     return true;
 }
@@ -91,7 +100,8 @@ bool LoadGame(PlayerManager& player, std::vector<std::unique_ptr<Bullet>>& bulle
 // ============================================================
 bool IsSaveFileValid() {
     ifstream f(SAVE_FILE);
-    if (!f.is_open()) return false;
+    if (!f.is_open())
+        return false;
 
     json raw_data;
     try {
@@ -100,10 +110,11 @@ bool IsSaveFileValid() {
         return false;
     }
 
-    if (!raw_data.contains(ROOT_KEY)) return false;
-    
+    if (!raw_data.contains(ROOT_KEY))
+        return false;
+
     json data = raw_data[ROOT_KEY];
-    
+
     // 1. Kiểm tra nhân vật còn sống không
     bool isAlive = false;
     if (data.contains("Player") && data["Player"].value("is_alive", false)) {
@@ -114,8 +125,8 @@ bool IsSaveFileValid() {
     bool hasScore = false;
     if (data.contains("GameData") && data["GameData"].contains("score")) {
         int score = data["GameData"]["score"].get<int>();
-        if (score > 0) { 
-            hasScore = true; 
+        if (score > 0) {
+            hasScore = true;
         }
     }
 

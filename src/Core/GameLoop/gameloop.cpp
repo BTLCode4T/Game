@@ -14,7 +14,7 @@ void GameManager::runGameLoop() {
     map.map1(window, menuFont, backgroundSprite, backgroundSprite2, sunSprite, treeSprite, ground, ground2, obstacles);
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
-        playerManager.setPushV(-SCROLL_SPEED * deltaTime);
+        playerManager.setPushV(-SCROLL_SPEED * deltaTime*daySpeedMultiplier);
 
         //============================================================================================================
         // 1. Xử lý Sự kiện (Input) // bắt buộc có, nếu  k sẽ k chạy đc :-)
@@ -660,7 +660,7 @@ void GameManager::updatePlaying(float deltaTime) {
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
                                  [](const auto &b) { return b->IsExpired() || b->IsDestroyed(); }),
                   bullets.end());
-    float pushX = -SCROLL_SPEED * deltaTime;
+    float pushX = -SCROLL_SPEED * deltaTime*daySpeedMultiplier;
 
     for (auto &trap : traps) {
         // 1. Cập nhật animation (chạy animation sập bẫy nếu đã triggered)
@@ -744,7 +744,7 @@ void GameManager::updateScrollingBackground(float deltaTime) {
 
     timePassed += deltaTime;
 
-    daySpeedMultiplier = 1.f + (timePassed / 10.f) * 0.05f;
+    daySpeedMultiplier = 1.f + (timePassed / 5.f) * 0.05f;
 
     // --- PHẦN DI CHUYỂN BACKGROUND (PARALLAX) ---
     // Tạo 1 tốc độ di chuyển chậm hơn cho background (ví dụ: 20% tốc độ của mặt đất)
@@ -772,8 +772,8 @@ void GameManager::updateScrollingBackground(float deltaTime) {
 
     // --- PHẦN DI CHUYỂN MẶT ĐẤT (Đã có) ---
     // Di chuyển cả 2 mảng đất sang trái
-    ground.move({-SCROLL_SPEED * deltaTime, 0.f});
-    ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
+    ground.move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
+    ground2.move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
 
     // Lấy chiều rộng của mặt đất
     const float groundWidth = WINDOW_WIDTH;
@@ -794,7 +794,7 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     // dịch chuyển lập lại vật cản
     for (auto &obs : obstacles) {
         // Di chuyển bằng đúng tốc độ cuộn của nền
-        obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
+        obs.sprite->move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
             obs.sprite->move({static_cast<float>(WINDOW_WIDTH) + 300.0f, 0.f});
@@ -830,7 +830,7 @@ void GameManager::SpawnInitialEntities() {
     dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
                                                       0.0f, // Vị trí X
                                                       WINDOW_HEIGHT / 2.f,
-                                                      1,                             // Máu
+                                                      300,                             // Máu
                                                       0.0f,                            // Tốc độ
                                                       "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
                                                       400.0f,                          // Rộng
