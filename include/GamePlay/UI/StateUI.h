@@ -241,6 +241,23 @@ class GameOverUI : public IGameStateUI {
     }
 };
 
+
+class GameInfoUI : public IGameStateUI {
+   private:
+    sf::Texture menuBgTexture;
+    std::unique_ptr<sf::Sprite> menuBgSprite;
+    std::unique_ptr<sf::Text> helpText;
+    std::unique_ptr<sf::Text> aboutText;
+    const sf::Sprite &backgroundSprite;
+    const sf::Sprite &btnHomeSprite;
+
+  public:
+    GameInfoUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font);
+    void Render(sf::RenderWindow &window, const sf::Font &font) override;
+};
+
+
+
 void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &font, float startX, float startY,
                     int startIndex);
 

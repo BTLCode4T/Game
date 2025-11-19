@@ -14,7 +14,7 @@ void GameManager::runGameLoop() {
     map.map1(window, menuFont, backgroundSprite, backgroundSprite2, sunSprite, treeSprite, ground, ground2, obstacles);
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
-        playerManager.setPushV(-SCROLL_SPEED * deltaTime);
+        playerManager.setPushV(-SCROLL_SPEED * deltaTime*daySpeedMultiplier);
 
         //============================================================================================================
         // 1. Xử lý Sự kiện (Input) // bắt buộc có, nếu  k sẽ k chạy đc :-)
@@ -86,6 +86,7 @@ void GameManager::handleEvents() {
             break;
         case GameState::Help:
         case GameState::Settings:
+        case GameState::GameInfo:
             handleSettingsEvent();
             break;
         case GameState::GameOver:
@@ -175,6 +176,10 @@ void GameManager::render() {
         settingsUI.Render(window, menuFont);
         break;
 
+    case GameState::GameInfo: // <- THÊM: render GameInfo
+        gameInfoUI.Render(window, menuFont);
+        break;
+
     case GameState::GameOver:
         gameOverUI.Render(window, menuFont);
         break;
@@ -242,6 +247,7 @@ void GameManager::ResetGame() {
 
     // 4. Đặt điểm trở về 0
     totalScore = 0;
+    timePassed = 0;
 
     // KHÔNG cần dinosaurs.clear() ở đây, nó sẽ được gọi trong SpawnInitialEntities()
     // Nếu bạn muốn chắc chắn, bạn có thể gọi nó:
@@ -353,6 +359,11 @@ void GameManager::handleMainMenuEvent() {
             Audio::Get().Play("click");
             MusicManager::Get().Stop();
             currentState = GameState::Settings;
+        } else if (mainMenu.getBtnExtraSprite().getGlobalBounds().contains(mousePos)) { // <- THÊM
+            Audio::Get().Play("click");
+            MusicManager::Get().Stop();
+            // MusicManager::Get().Play("Info"); //Tạo tài nguyên nhạc 'Info' nếu muốn
+            currentState = GameState::GameInfo;
         }
     }
 }
@@ -560,7 +571,6 @@ void GameManager::updatePlaying(float deltaTime) {
 
                 Audio::Get().Play("hit");
 
-
                 // Đạn đã trúng 1 con, không cần check con khác
                 break;
             }
@@ -616,12 +626,11 @@ void GameManager::updateScrollingBackground(float deltaTime) {
 
     timePassed += deltaTime;
 
-    daySpeedMultiplier = 1.f + (timePassed / 10.f) * 0.05f;
+    daySpeedMultiplier = 1.f + (timePassed / 2.f) * 0.2f;
 
     // --- PHẦN DI CHUYỂN BACKGROUND (PARALLAX) ---
     // Tạo 1 tốc độ di chuyển chậm hơn cho background (ví dụ: 20% tốc độ của mặt đất)
     const float PARALLAX_SPEED = SCROLL_SPEED * 0.2f * daySpeedMultiplier;
-
     // Di chuyển cả 2 background sang trái
 
     backgroundSprite.move({-PARALLAX_SPEED * deltaTime, 0.f});
@@ -644,8 +653,8 @@ void GameManager::updateScrollingBackground(float deltaTime) {
 
     // --- PHẦN DI CHUYỂN MẶT ĐẤT (Đã có) ---
     // Di chuyển cả 2 mảng đất sang trái
-    ground.move({-SCROLL_SPEED * deltaTime, 0.f});
-    ground2.move({-SCROLL_SPEED * deltaTime, 0.f});
+    ground.move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
+    ground2.move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
 
     // Lấy chiều rộng của mặt đất
     const float groundWidth = WINDOW_WIDTH;
@@ -666,7 +675,7 @@ void GameManager::updateScrollingBackground(float deltaTime) {
     // dịch chuyển lập lại vật cản
     for (auto &obs : obstacles) {
         // Di chuyển bằng đúng tốc độ cuộn của nền
-        obs.sprite->move({-SCROLL_SPEED * deltaTime, 0.f});
+        obs.sprite->move({-SCROLL_SPEED * deltaTime*daySpeedMultiplier, 0.f});
         const float obsWidth = obs.sprite->getGlobalBounds().size.x;
         if (obs.sprite->getPosition().x + obsWidth <= 0.f) {
             obs.sprite->move({static_cast<float>(WINDOW_WIDTH) + 300.0f, 0.f});
