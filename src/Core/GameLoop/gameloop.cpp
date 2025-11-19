@@ -7,7 +7,7 @@
 #include "GamePlay/UI/StateUI.h"
 #include "Utils/Entity.h"
 #include <sstream>
-
+#include "GamePlay/Gun/Trap.h" // <--- THÊM DÒNG NÀY
 // vòng lập
 void GameManager::runGameLoop() {
     map.map1(window, menuFont, backgroundSprite, backgroundSprite2, sunSprite, treeSprite, ground, ground2, obstacles);
@@ -70,6 +70,22 @@ void GameManager::handleEvents() {
         switch (currentState) {
         case GameState::MainMenu:
             handleMainMenuEvent();
+            if (const auto *keyEvent = event.getIf<sf::Event::KeyPressed>()) {
+                if (keyEvent->scancode == sf::Keyboard::Scancode::Enter) {
+                    // Logic vào game
+                    ResetGame();
+                    SpawnInitialEntities();
+                    playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
+                    playerManager.setVelocity(0, 0);
+                    playerManager.setIsOnGround(false);
+
+                    MusicManager::Get().Stop();
+                    Audio::Get().PlayLoopVol("dinosaur", 5.0f);
+                    MusicManager::Get().Play("Game");
+
+                    currentState = GameState::Playing;
+                }
+            }
             break;
         case GameState::Playing:
             handlePlayingEvent();
@@ -84,6 +100,22 @@ void GameManager::handleEvents() {
         case GameState::GameInfo:
             handleSettingsEvent();
             break;
+        case GameState::Victory: 
+            if (const auto *keyEvent = event.getIf<sf::Event::KeyPressed>()) {
+
+                // Kiểm tra nếu phím đó là Enter
+                if (keyEvent->scancode == sf::Keyboard::Scancode::Enter) {
+
+                    std::cout << "Da bam Enter -> Ve Menu" << std::endl; // Dòng debug để kiểm tra
+
+                    Audio::Get().Play("click");
+                    MusicManager::Get().Play("menu");
+
+                    ResetGame();
+                    currentState = GameState::MainMenu;
+                }
+            }
+            break; 
         case GameState::GameOver:
             handlGameoverEvent();
             break;
@@ -137,6 +169,11 @@ void GameManager::render() {
                 window.draw(*bullet->animation);
             }
         }
+        for (const auto &trap : traps) {
+            if (trap) {
+                trap->Render(window);
+            }
+        }
         // Vẽ player
         playerManager.Render(window);
         // (Tùy chọn: Bật dòng dưới để vẽ hitbox debug)
@@ -176,7 +213,41 @@ void GameManager::render() {
     case GameState::GameInfo: // <- THÊM: render GameInfo
         gameInfoUI.Render(window, menuFont);
         break;
+    case GameState::Victory:
+        window.draw(backgroundSprite);
+        window.draw(backgroundSprite2);
+        playerManager.Render(window);
 
+        // Dùng GameOverUI tạm thời (hoặc bạn tạo riêng VictoryUI)
+        // Nếu bạn có ảnh "You Win", hãy tạo Sprite và vẽ nó ở đây
+
+       /* gameOverUI.Render(window, menuFont);*/
+        {
+            sf::Text winText(menuFont);
+            winText.setString("CHIEN THANG!"); 
+            winText.setCharacterSize(80);
+            winText.setFillColor(sf::Color::Yellow);
+            winText.setOutlineColor(sf::Color::Red);
+            winText.setOutlineThickness(3.0f);
+            // Canh giữa màn hình
+            sf::FloatRect textRect = winText.getLocalBounds();
+            winText.setOrigin(
+                {textRect.position.x + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f});
+            winText.setPosition({(float)WINDOW_WIDTH / 2.0f, (float)WINDOW_HEIGHT / 2.0f});
+            window.draw(winText);
+            sf::Text guideText(menuFont); // Nhớ truyền font
+            guideText.setString("Press ENTER to Menu");
+            guideText.setCharacterSize(30);
+            guideText.setFillColor(sf::Color::White);
+            sf::FloatRect guideRect = guideText.getLocalBounds();
+            guideText.setOrigin(
+                {guideRect.position.x + guideRect.size.x / 2.0f, guideRect.position.y + guideRect.size.y / 2.0f});
+
+            guideText.setPosition({(float)WINDOW_WIDTH / 2.0f, (float)WINDOW_HEIGHT / 2.0f + 80.0f});
+            window.draw(guideText);
+        }
+        
+        break;
     case GameState::GameOver:
         gameOverUI.Render(window, menuFont);
         break;
@@ -283,17 +354,18 @@ void GameManager::handleReturnToMenu() {
 }
 
 void GameManager::handleMainMenuEvent() {
-    if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
-        ResetGame();
-        SpawnInitialEntities();
-        playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
-        playerManager.setVelocity(0, 0);
-        playerManager.setIsOnGround(false);
-        MusicManager::Get().Stop();
-        Audio::Get().PlayLoopVol("dinosaur", 5.0f);
-        MusicManager::Get().Play("Game"); // <-- THÊM NHẠC GAME
-        currentState = GameState::Playing;
-    } else if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::H)) {
+    //if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
+    //    ResetGame();
+    //    SpawnInitialEntities();
+    //    playerSprite.setPosition({PLAYER_START_X, PLAYER_START_Y});
+    //    playerManager.setVelocity(0, 0);
+    //    playerManager.setIsOnGround(false);
+    //    MusicManager::Get().Stop();
+    //    Audio::Get().PlayLoopVol("dinosaur", 5.0f);
+    //    MusicManager::Get().Play("Game"); // <-- THÊM NHẠC GAME
+    //    currentState = GameState::Playing;
+    //} else 
+        if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::H)) {
         currentState = GameState::HighScores;
     } else if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Escape)) {
         window.close();
@@ -557,7 +629,38 @@ void GameManager::updatePlaying(float deltaTime) {
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
                                  [](const auto &b) { return b->IsExpired() || b->IsDestroyed(); }),
                   bullets.end());
+    float pushX = -SCROLL_SPEED * deltaTime;
 
+    for (auto &trap : traps) {
+        // 1. Cập nhật animation (chạy animation sập bẫy nếu đã triggered)
+        trap->Update(deltaTime);
+
+        if (auto *ani = trap->getAnimation()) {
+            // 2. DI CHUYỂN BẪY: (Cuộn màn hình)
+            ani->move({pushX, 0.f});
+
+            // *** FIX CỰC KỲ QUAN TRỌNG ***
+            // Đồng bộ vị trí X của Entity (dùng cho va chạm) với vị trí mới của Sprite
+            trap->SetX(ani->getPosition().x); // <-- CẬP NHẬT VỊ TRÍ X CHO ENTITY
+
+            // 3. Tái sử dụng bẫy (Loop map logic)
+            if (ani->getPosition().x + 100.0f < 0) {
+                float newX = WINDOW_WIDTH + 500.0f; // Đặt ra ngoài màn hình để xuất hiện lại
+                float currentY = ani->getPosition().y;
+
+                ani->setPosition({newX, currentY});
+                trap->SetX(newX); // <-- Cập nhật VỊ TRÍ X MỚI CHO ENTITY
+                trap->Reset();
+                // Thêm hàm Reset() vào Trap.cpp/Trap.h nếu bạn muốn bẫy mở ra lại
+                // trap->Reset();
+            }
+        }
+    }
+
+    // === THÊM: XỬ LÝ VA CHẠM BẪY VỚI NGƯỜI CHƠI ===
+    if (playerManager.IsAlive()) {
+        playerManager.HandleTrapCollision(traps);
+    }
     // Lấy vị trí người chơi để khủng long biết đường đuổi
     sf::Vector2f playerPos = playerManager.animation->getPosition();
 
@@ -566,8 +669,21 @@ void GameManager::updatePlaying(float deltaTime) {
         dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
         dino_ptr->animation->Update(deltaTime);
         PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, dinosaurs, *dino_ptr);
-    }
+        if (dino_ptr->getHealth() <= 0) {
+            // 1. Chuyển trạng thái sang Chiến thắng
+            currentState = GameState::Victory;
 
+            // 2. Lưu điểm (nếu cần)
+            SaveCurrentScore(totalScore);
+
+            // 3. Dừng nhạc game và phát nhạc chiến thắng
+            MusicManager::Get().Stop();
+            Audio::Get().Play("victory"); // Bạn cần thêm file âm thanh victory vào Audio.cpp nếu chưa có
+            // Nhưng hiện tại code này sẽ thắng ngay khi có 1 con chết (phù hợp đánh Boss).
+            return; // Thoát hàm update ngay
+        }
+    }
+    
     // === CẬP NHẬT MÁU (Hiển thị trái tim) ===
     updateHealthBarUI();
 
@@ -682,13 +798,14 @@ void GameManager::SpawnInitialEntities() {
     dinosaurs.emplace_back(std::make_unique<Dinosaur>("Rex",
                                                       0.0f, // Vị trí X
                                                       WINDOW_HEIGHT / 2.f,
-                                                      100,                             // Máu
+                                                      1,                             // Máu
                                                       0.0f,                            // Tốc độ
                                                       "assets/Images/raptor-runn.png", // ĐƯỜNG DẪN ẢNH
                                                       400.0f,                          // Rộng
                                                       350.0f, sf::Vector2i(6, 1),      // <-- CHỈNH SỐ FRAME Ở ĐÂY
                                                       0.1f));
     // Nếu có nhiều Khủng long hơn, hãy thêm chúng vào đây.
+    initTraps();
 }
 void GameManager::handleGameInfoEvent() {
     // Xử lý nút Home để quay về
@@ -701,4 +818,18 @@ void GameManager::handleGameInfoEvent() {
             currentState = GameState::MainMenu; // Quay về menu
         }
     }
+}
+// Trong gameloop.cpp
+void GameManager::initTraps() {
+    traps.clear();
+    // Vị trí Y an toàn cho một vật thể đặt trên mặt đất
+    // WINDOW_HEIGHT - 60.0f (Giả sử chiều cao của bẫy là 60.0f theo Trap.cpp)
+    float groundY = WINDOW_HEIGHT - 60.0f; // <--- Dùng WINDOW_HEIGHT đã định nghĩa
+
+    // THÊM CODE TẠO BẪY NÀY VÀO TRAP.EMPLACE_BACK
+    traps.emplace_back(std::make_unique<Trap>(1500.0f, // Vị trí X (Bắt đầu ở ngoài màn hình và trôi vào)
+                                              605.f, // Vị trí Y (Mặt đất)
+                                              1       // Sát thương
+                                              // Các tham số khác của Entity đã được Trap::Trap() xử lý
+                                              ));
 }

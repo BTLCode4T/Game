@@ -7,5 +7,6 @@ enum class GameState {
     Help,
     Settings,
     GameOver,
+    Victory,
     GameInfo,
 };

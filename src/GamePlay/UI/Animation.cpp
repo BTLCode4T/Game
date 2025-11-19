@@ -1,4 +1,4 @@
-#include "GamePlay/UI/Animation.h"
+﻿#include "GamePlay/UI/Animation.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Rect.hpp>
 
@@ -32,6 +32,7 @@ void Animation::Update(float deltaTime) {
     m_frameTimeCurrent += deltaTime;
     if (m_frameTimeCurrent >= m_frameTime) {
         m_frameCurrent.x++;
+        m_frameCurrent.x++;
         if (m_frameCurrent.x == m_frameNum.x) {
             m_frameCurrent.x = 0;
         }
@@ -39,4 +40,10 @@ void Animation::Update(float deltaTime) {
         ApplyRect();
         m_frameTimeCurrent -= m_frameTime;
     }
+}
+void Animation::Reset() {
+    m_frameCurrent = sf::Vector2i(0, 0); // Quay về frame đầu tiên
+    m_frameTimeCurrent = 0.0f;           // Reset thời gian
+    calculateRectUV();                   // Tính lại vị trí cắt ảnh
+    ApplyRect();                         // Áp dụng lên Sprite
 }

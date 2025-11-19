@@ -80,7 +80,8 @@ class Entity {
     void SetHealth(int newHealth);
     void SetName(const string &newName);
     void SetSpeed(float newSpeed);
-
+    void SetX(float newX);
+    void SetY(float newY);
     void setIsOnGround(bool isOnGround2) {
         isOnGround = isOnGround2;
     }
@@ -128,7 +129,9 @@ class Entity {
     float getPushV(){
         return pushV;
     }
-
+    Animation *getAnimation() const {
+        return animation.get();
+    }
     sf::Vector2f getVelocity() const {
         return velocity;
     }
@@ -144,6 +147,13 @@ class Entity {
         }
         return sf::FloatRect(); // Trả về 1 hình chữ nhật rỗng nếu có lỗi
     }
+    float getX() const {
+        return x;
+    }
+    float getY() const {
+        return y;
+    }
+   
     // Hàm hiển thị trạng thái
     virtual void DisplayStatus() const;
 

@@ -144,3 +144,23 @@ void Entity::SetSpeed(float newSpeed) {
     speed = newSpeed;
     cout << name << " da thay doi toc do: " << newSpeed << endl;
 }
+void Entity::SetX(float newX) {
+    // 1. Cập nhật biến thành viên 'x' nội bộ
+    x = newX;
+
+    // 2. Cập nhật vị trí hiển thị của Animation/Sprite
+    // Rất quan trọng: Nếu không có bước này, sprite sẽ không di chuyển.
+    if (animation) {
+        animation->setPosition({x, y});
+    }
+}
+
+void Entity::SetY(float newY) {
+    // 1. Cập nhật biến thành viên 'y' nội bộ
+    y = newY;
+
+    // 2. Cập nhật vị trí hiển thị của Animation/Sprite
+    if (animation) {
+        animation->setPosition({x, y});
+    }
+}

@@ -7,6 +7,7 @@
 #include <SFML/System/Clock.hpp>
 #include <vector>
 #include <memory>
+class Trap;
 class PlayerManager : public Entity {
   private:
     bool isAlive;
@@ -27,7 +28,7 @@ class PlayerManager : public Entity {
 
     bool CheckCollision(const Entity &other) const;    
     void HandleDinosaurCollision(const Entity &other); 
-
+    void HandleTrapCollision(std::vector<std::unique_ptr<Trap>> &traps);
 
     void TakeDamage(int amount) override;
     void Die();

@@ -19,7 +19,7 @@
 
 #include "GamePlay/UI/StateUI.h"
 #include "Utils/GameSate.h"
-
+#include "GamePlay/Gun/Trap.h"
 #include "Core/Input/Input.h"
 #include "GamePlay/Gun/bullet.h"
 #include "GamePlay/Gun/gun.h"
@@ -57,7 +57,10 @@ class GameManager {
     sf::Clock clock; // Đồng hồ đo thời gian (cho deltaTime, animation, v.v.)
 
     PlayerManager playerManager;
+    std::vector<std::unique_ptr<Trap>> traps; // Danh sách bẫy
 
+    // Thêm hàm helper để tạo bẫy cho gọn
+    void initTraps();
     std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
     Map map;
     float timePassed = 0.f;         // Tích thời gian chơi

@@ -6,7 +6,13 @@ class Dinosaur : public Entity {
 private:
     // Thêm các thuộc tính riêng của Khủng long nếu cần (ví dụ: tầm nhìn, sát thương cơ bản)
     float attackRange; 
-public:
+    sf::RectangleShape healthBarBg;      // Thanh nền (Màu đỏ)
+    sf::RectangleShape healthBarCurrent; // Thanh máu hiện tại (Màu xanh)
+
+    // Hàm phụ để cập nhật vị trí và độ dài thanh máu
+    void UpdateHealthBar();
+
+  public:
     /**
      * Constructor cho Khủng long.
      * name Tên.
@@ -20,7 +26,7 @@ public:
            float height, sf::Vector2i frameNum, float frameTime);
 
     virtual ~Dinosaur() = default;
-
+  void Render(sf::RenderWindow &window) override;
     // Hàm riêng cho Khủng long (ví dụ: AI di chuyển, tấn công)
     void ChasePlayer(float playerX, float playerY);
     

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-
+#include "GamePlay/Gun/Trap.h"
 // Constructor của PlayerManager
 PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxHealth, float speed,
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
@@ -129,6 +129,32 @@ void PlayerManager::Render(sf::RenderWindow &window) {
 
         if (currentGun) {
             currentGun->Render(window); // Vẽ súng
+        }
+    }
+}
+// Trong player.cpp (viết ở cuối file hoặc bất kỳ đâu trong file)
+
+// Trong file src/GamePlay/Avatar/player.cpp
+
+// Trong file src/GamePlay/Avatar/player.cpp
+
+void PlayerManager::HandleTrapCollision(std::vector<std::unique_ptr<Trap>> &traps) {
+    if (!isAlive)
+        return;
+
+    for (auto &trap : traps) {
+        if (!trap->IsTriggered()) {
+
+            // ⚠️ SỬA LỖI GẠCH CHÂN ĐỎ: Dùng findIntersection().has_value()
+            if (this->getBounds().findIntersection(trap->getBounds()).has_value()) {
+
+                // Logic này là đúng và đã được kiểm tra:
+                trap->Trigger();
+                this->TakeDamage(trap->GetDamage());
+
+                // Áp dụng đẩy lùi
+                this->setVelocity(this->getPushV(), -400.0f);
+            }
         }
     }
 }
