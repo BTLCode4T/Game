@@ -27,7 +27,6 @@ void addTail(List &l, Node *p) {
 }
 
 // Đọc file và lưu vào danh sách
-// Đọc file và lưu vào danh sách
 void readFile(const std::string &filename, List &l) {
     std::ifstream fin(filename);
     if (!fin) {

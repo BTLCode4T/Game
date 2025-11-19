@@ -39,7 +39,7 @@ void GameManager::handleEvents() {
         if (event.is<sf::Event::Closed>()) {
             // Chỉ lưu khi nhân vật còn sống
     if (playerManager.IsAlive()) {
-        SaveGame(playerManager, bullets);
+        SaveGame(playerManager, bullets, totalScore);
     } else {
         DeleteSaveFile(); // Nếu chết thì xóa file 
     }
@@ -327,19 +327,11 @@ void GameManager::handleMainMenuEvent() {
         std::cout << ">>> CONTINUE GAME <<<\n";
         
         // Load Player
-        nlohmann::json savedData = LoadGame();
-        if (savedData.contains("Player")) {
-            playerManager.LoadState(savedData["Player"]);
-        }
-        
-        // Load Đạn
-        bullets.clear();
-        if (savedData.contains("Bullets")) {
-            for (auto& b_json : savedData["Bullets"]) {
-                auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", 0, 0, 30.f, 40.f, 1, sf::Vector2f(0,0), 0);
-                bullet->LoadState(b_json);
-                bullets.push_back(std::move(bullet));
-            }
+        if (LoadGame(playerManager, bullets, totalScore)) {
+             std::cout << "[System] Game loaded successfully. Score: " << totalScore << "\n";
+        } else {
+             std::cerr << "[Error] Failed to load game. Starting fresh.\n";
+             ResetGame(); // Fallback nếu file lỗi
         }
 
         SpawnInitialEntities(); // Luôn spawn quái mới

@@ -23,6 +23,7 @@
 #include "Core/Input/Input.h"
 #include "GamePlay/Gun/bullet.h"
 #include "GamePlay/Gun/gun.h"
+#include "Core/GameLoop/json.h"
 
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
@@ -144,6 +145,11 @@ class GameManager {
 
             heartSprites.push_back(heartSprite);
         }
+        if (LoadGame(playerManager, bullets, totalScore)) {
+        std::cout << ">>> RESUMED GAME <<<\n";
+    } else {
+        std::cout << ">>> NEW GAME <<<\n";
+    }
         SpawnInitialEntities(); // Luôn tạo quái mới khi mở game
         mainMenu.checkContinueAvailable(); // Kiểm tra save để hiện nút Continue (nếu có)
     }
