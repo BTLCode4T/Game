@@ -102,3 +102,65 @@ void PlayerManager::Render(sf::RenderWindow &window) {
         currentGun->Render(window); 
     }
 }
+// ===============================================
+// ĐỊNH NGHĨA HÀM LƯU/TẢI TRẠNG THÁI
+// ===============================================
+
+nlohmann::json PlayerManager::SaveState() const {
+    nlohmann::json j;
+
+    j["name"] = GetName();
+    j["current_health"] = Entity::getHealth(); 
+    j["max_health"] = Entity::getMaxHealth();
+    j["speed"] = GetSpeed();
+    
+    if (animation) {
+        j["position_x"] = animation->getPosition().x;
+        j["position_y"] = animation->getPosition().y;
+    } else {
+        j["position_x"] = 0.0f;
+        j["position_y"] = 0.0f;
+    }
+    
+    j["is_alive"] = isAlive;
+    j["damage_cooldown_time"] = damageCooldownTime;
+
+    if (currentGun) {
+        j["has_gun"] = true;
+        j["gun_name"] = currentGun->GetName();
+    } else {
+        j["has_gun"] = false;
+    }
+
+    return j;
+}
+
+void PlayerManager::LoadState(const nlohmann::json& j) {
+    // 1. Tải vị trí
+    float x = j.at("position_x").get<float>();
+    float y = j.at("position_y").get<float>();
+    if (animation) {
+        animation->setPosition(sf::Vector2f(x, y));
+    }
+
+    // 2. Tải máu
+    int savedHealth = j.at("current_health").get<int>();
+    int currentHP = Entity::getHealth();
+    
+    if (currentHP > savedHealth) {
+        Entity::TakeDamage(currentHP - savedHealth);
+    } 
+
+    // 3. Tải trạng thái sống
+    isAlive = j.at("is_alive").get<bool>();
+    if (j.contains("damage_cooldown_time")) {
+        damageCooldownTime = j.at("damage_cooldown_time").get<float>();
+    }
+
+    // 4. Tải súng
+    bool hasGun = j.at("has_gun").get<bool>();
+    if (hasGun) {
+        std::string gunName = j.at("gun_name").get<std::string>();
+        std::cout << "[LoadState] Player loaded with gun name: " << gunName << "\n";
+    }
+}
