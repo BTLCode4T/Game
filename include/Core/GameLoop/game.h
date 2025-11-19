@@ -73,6 +73,8 @@ class GameManager {
     HelpUI helpUI;             // Màn hình hướng dẫn
     SettingsUI settingsUI;     // Màn hình cài đặt
     GameOverUI gameOverUI;     // Màn hình gemOver
+    GameInfoUI gameInfoUI;
+
 
   public:
     GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg, sf::Sprite &bg2,
@@ -89,7 +91,9 @@ class GameManager {
           // Khởi tạo UI
           mainMenu(backgroundSprite, sunSprite, treeSprite, menuFont),
           highScoresUI(backgroundSprite, btnHomeSprite, menuFont), helpUI(backgroundSprite, btnHomeSprite, menuFont),
-          settingsUI(backgroundSprite, btnHomeSprite, menuFont), gameOverUI(backgroundSprite, menuFont),
+          settingsUI(backgroundSprite, btnHomeSprite, menuFont), gameOverUI(backgroundSprite, menuFont), 
+          
+          gameInfoUI(backgroundSprite, btnHomeSprite, menuFont),
 
           currentState(GameState::MainMenu) {
 
