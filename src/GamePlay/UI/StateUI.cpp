@@ -11,6 +11,12 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "Core/Audio/Audio.h"
+#include "Core/Audio/MusicManager.h"
+#include "Core/GameLoop/game.h"
+#include <chrono> 
+#include <ctime>
+#include "Core/GameLoop/json.h"
 /* ============================================================
  * CLASS: MainMenuUI — Giao diện chính của game
  * ============================================================ */
@@ -21,6 +27,9 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
     // Dùng std::make_unique để tạo sprite, truyền texture và vị trí nút
     btnNewSprite = std::make_unique<sf::Sprite>(
         createSprite(btnNewTexture, "assets/Images/play.png", 250.0f, 150.0f, 810.f, 490.0f));
+    // --- Nút “Continue”(Xuất hiện khi nhân vật chưa chết) ---
+    btnContinueSprite = std::make_unique<sf::Sprite>(
+        createSprite(btnContinueTexture, "assets/Images/continue.png", 250.0f, 150.0f, 810.0f,650.0f));
     // --- [2] Nút “High Scores” ---
     btnHighScoresSprite = std::make_unique<sf::Sprite>(
         createSprite(btnHighScoresTexture, "assets/Images/prize.png", 250.0f, 150.0f, 1630.0f, 650.0f));
@@ -42,10 +51,12 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
         createText(font, L"https://github.com/BTLCode4T/Game", 15, sf::Color::White, 850.0f, 25.0f));
 
     versionText = std::make_unique<sf::Text>(createText(font, L"v1.0.0", 15, sf::Color::White, 975.0f, 50.0f));
-
+    
     // --- [6] Mở nhạc nền
 
     MusicManager::Get().Play("menu");
+    
+    checkContinueAvailable();
 
     myNewImageSprite = std::make_unique<sf::Sprite>(createSprite(myNewImageTexture,
                                                                  "assets/Images/bg.png", // 👈 THAY ĐƯỜNG DẪN
@@ -67,6 +78,17 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
 /* --- Hàm Render của MainMenuUI ---
  * Nhiệm vụ: Vẽ toàn bộ các phần tử giao diện chính lên cửa sổ.
  */
+// --- CHỈNH SỬA HÀM NÀY: CHỈ CHECK TRẠNG THÁI, KHÔNG ĐỔI VỊ TRÍ ---
+void MainMenuUI::checkContinueAvailable() {
+    nlohmann::json data = LoadGame();
+    
+    // Kiểm tra điều kiện hiện nút Continue
+    if (data.contains("Player") && data["Player"].value("is_alive", false)) {
+        m_canContinue = true;
+    } else {
+        m_canContinue = false;
+    }
+}
 void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(backgroundSprite);
 
@@ -75,6 +97,11 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*myNewImageSprite);
     window.draw(*logoSprite);
     window.draw(*btnNewSprite);
+
+    if (m_canContinue) {
+        window.draw(*btnContinueSprite);
+    }
+
     window.draw(*btnHighScoresSprite);
     window.draw(*btnSettingsSprite);
     window.draw(*btnHelpSprite);

@@ -21,7 +21,7 @@ class IGameStateUI {
 class MainMenuUI : public IGameStateUI {
   private:
     // Textures
-    sf::Texture btnNewTexture, btnHighScoresTexture, btnSettingsTexture, btnHelpTexture;
+    sf::Texture btnNewTexture, btnHighScoresTexture, btnSettingsTexture, btnHelpTexture, btnContinueTexture;
     sf::Texture btnExtraTexture;
     sf::Texture myNewImageTexture;
     sf::Texture logoTexture;
@@ -30,6 +30,7 @@ class MainMenuUI : public IGameStateUI {
     std::unique_ptr<sf::Sprite> btnHighScoresSprite;
     std::unique_ptr<sf::Sprite> btnSettingsSprite;
     std::unique_ptr<sf::Sprite> btnHelpSprite;
+    std::unique_ptr<sf::Sprite> btnContinueSprite;
     std::unique_ptr<sf::Sprite> btnExtraSprite;
     std::unique_ptr<sf::Sprite> myNewImageSprite;
     std::unique_ptr<sf::Sprite> logoSprite;
@@ -40,10 +41,12 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &sunSprite;
     const sf::Sprite &treeSprite;
 
+    bool m_canContinue = false;// Biến lưu trạng thái có được Continue không
   public:
     MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sprite &tree, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
-
+    //Hàm kiểm tra file save để ẩn/hiện nút continue
+    void checkContinueAvailable();
     // Getters (trả về tham chiếu để dùng cho click detection)
     const sf::Sprite &getBtnNewSprite() const {
         return *btnNewSprite;
@@ -60,7 +63,10 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &getBtnExtraSprite() const {
         return *btnExtraSprite;
     }
-
+    const sf::Sprite& getBtnContinueSprite() { 
+        return *btnContinueSprite;
+    }
+    bool canContinue() const { return m_canContinue; }
 
 };
 

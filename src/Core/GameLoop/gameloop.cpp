@@ -1,6 +1,7 @@
 #include "Core/Audio/Audio.h"
 #include "Core/Audio/MusicManager.h"
 #include "Core/GameLoop/game.h"
+#include "Core/GameLoop/json.h"
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
 #include "GamePlay/Physics/PhysicsSystem.h"
@@ -36,6 +37,12 @@ void GameManager::handleEvents() {
         const auto &event = *eventOpt;
 
         if (event.is<sf::Event::Closed>()) {
+            // Chỉ lưu khi nhân vật còn sống
+    if (playerManager.IsAlive()) {
+        SaveGame(playerManager, bullets);
+    } else {
+        DeleteSaveFile(); // Nếu chết thì xóa file 
+    }
             window.close();
             continue;
         }
@@ -233,6 +240,8 @@ void GameManager::ResetGame() {
     // 2. ĐẶT LẠI VỊ TRÍ PLAYER (Sử dụng animation vì Entity.h có unique_ptr<Animation>)
     playerManager.animation->setPosition({1400.0f, 650.0f - 100.0f});
 
+    DeleteSaveFile();
+
     // 3. Xóa sạch Đạn (Khắc phục lỗi đạn không reset)
     bullets.clear();
 
@@ -280,6 +289,8 @@ void GameManager::handleReturnToMenu() {
 }
 
 void GameManager::handleMainMenuEvent() {
+    // Cập nhật UI bằng tên hàm đúng
+    mainMenu.checkContinueAvailable();
     if (inputManager.IsKeyPressed(sf::Keyboard::Scancode::Enter)) {
         ResetGame();
         SpawnInitialEntities();
@@ -311,7 +322,37 @@ void GameManager::handleMainMenuEvent() {
             Audio::Get().PlayLoopVol("dinosaur", 5.0f);
             MusicManager::Get().Play("Game");
             currentState = GameState::Playing;
-        } else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
+        }
+            // 2. [MỚI] Nút CONTINUE
+    else if (mainMenu.canContinue() && 
+             mainMenu.getBtnContinueSprite().getGlobalBounds().contains(mousePos)) {
+        
+        Audio::Get().Play("click");
+        MusicManager::Get().Stop();
+        
+        std::cout << ">>> CONTINUE GAME <<<\n";
+        
+        // Load Player
+        nlohmann::json savedData = LoadGame();
+        if (savedData.contains("Player")) {
+            playerManager.LoadState(savedData["Player"]);
+        }
+        
+        // Load Đạn
+        bullets.clear();
+        if (savedData.contains("Bullets")) {
+            for (auto& b_json : savedData["Bullets"]) {
+                auto bullet = std::make_unique<Bullet>("assets/Images/bullet/image6.png", 0, 0, 30.f, 40.f, 1, sf::Vector2f(0,0), 0);
+                bullet->LoadState(b_json);
+                bullets.push_back(std::move(bullet));
+            }
+        }
+
+        SpawnInitialEntities(); // Luôn spawn quái mới
+        Audio::Get().PlayLoopVol("dinosaur", 5.0f);
+        currentState = GameState::Playing;
+        }
+         else if (mainMenu.getBtnHighScoresSprite().getGlobalBounds().contains(mousePos)) {
             Audio::Get().Play("click");
             MusicManager::Get().Stop();
             MusicManager::Get().Play("HighScores");
@@ -577,6 +618,7 @@ void GameManager::updatePlaying(float deltaTime) {
 
     // === KIỂM TRA GAME OVER ===
     if (!playerManager.IsAlive()) {
+        DeleteSaveFile();
         currentState = GameState::GameOver;
 
         // Gán điểm vào UI và Lưu điểm vào file khi Game Over
