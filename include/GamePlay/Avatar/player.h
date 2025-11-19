@@ -7,6 +7,8 @@
 #include <SFML/System/Clock.hpp>
 #include <vector>
 #include <memory>
+#include "Core/GameLoop/json.hpp"
+
 class Trap;
 class PlayerManager : public Entity {
   private:

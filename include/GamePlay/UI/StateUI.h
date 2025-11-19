@@ -41,8 +41,10 @@ class MainMenuUI : public IGameStateUI {
     const sf::Sprite &sunSprite;
     const sf::Sprite &treeSprite;
     std::unique_ptr<sf::Text> githubLinkText;
+    bool m_canContinue = false;
     bool isLinkVisible = false;
   public:
+  
     MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sprite &tree, const sf::Font &font);
     void Render(sf::RenderWindow &window, const sf::Font &font) override;
     //Hàm kiểm tra file save để ẩn/hiện nút continue
@@ -65,7 +67,11 @@ class MainMenuUI : public IGameStateUI {
     }
     void toggleLink() {
         isLinkVisible = !isLinkVisible;
+    } 
+    const sf::Sprite& getBtnContinueSprite() { 
+        return *btnContinueSprite;
     }
+    bool canContinue() const { return m_canContinue; }
 
 };
 
