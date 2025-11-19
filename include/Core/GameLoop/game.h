@@ -19,7 +19,7 @@
 
 #include "GamePlay/UI/StateUI.h"
 #include "Utils/GameSate.h"
-
+#include "GamePlay/Gun/Trap.h"
 #include "Core/Input/Input.h"
 #include "GamePlay/Gun/bullet.h"
 #include "GamePlay/Gun/gun.h"
@@ -57,7 +57,10 @@ class GameManager {
     sf::Clock clock; // Đồng hồ đo thời gian (cho deltaTime, animation, v.v.)
 
     PlayerManager playerManager;
+    std::vector<std::unique_ptr<Trap>> traps; // Danh sách bẫy
 
+    // Thêm hàm helper để tạo bẫy cho gọn
+    void initTraps();
     std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
     Map map;
     float timePassed = 0.f;         // Tích thời gian chơi
@@ -66,6 +69,7 @@ class GameManager {
     int totalScore = 0;
 
     sf::Text scoreDisplay;
+
   public:
     // ui
     MainMenuUI mainMenu;       // Màn hình menu chính
@@ -75,7 +79,6 @@ class GameManager {
     GameOverUI gameOverUI;     // Màn hình gemOver
     GameInfoUI gameInfoUI;
 
-
   public:
     GameManager(sf::RenderWindow &win, sf::Font &font, sf::Sprite &player, sf::Sprite &bg, sf::Sprite &bg2,
                 sf::Sprite &sun, sf::Sprite &tree, sf::RectangleShape &gr, sf::Sprite &btnHome,
@@ -84,29 +87,27 @@ class GameManager {
           sunSprite(sun), treeSprite(tree), ground(gr), btnHomeSprite(btnHome), obstacles(obs),
           scoreDisplay(menuFont, sf::String("Điểm: 0"), 24),
           // Khởi tạo playerManager tại đây nè 👇
-          playerManager("Meo_bao", 1700.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png", PLAYER_SIZE,
+          playerManager("Meo_bao", 1700.0f, WINDOW_HEIGHT / 2.f, 3, 1.f, "assets/Images/sprite_0-sheet.png",
+                        PLAYER_SIZE,
                         PLAYER_SIZE,        // Rộng, Cao
                         sf::Vector2i(6, 1), // <-- VÍ DỤ: Ảnh player ("a.png") có 6 khung hình ngang, 1 dọc
                         0.1f),              // <-- VÍ DỤ: 0.1 giây mỗi khung
           // Khởi tạo UI
           mainMenu(backgroundSprite, sunSprite, treeSprite, menuFont),
           highScoresUI(backgroundSprite, btnHomeSprite, menuFont), helpUI(backgroundSprite, btnHomeSprite, menuFont),
-          settingsUI(backgroundSprite, btnHomeSprite, menuFont), gameOverUI(backgroundSprite, menuFont), 
-          
+          settingsUI(backgroundSprite, btnHomeSprite, menuFont), gameOverUI(backgroundSprite, menuFont),
+
           gameInfoUI(backgroundSprite, btnHomeSprite, menuFont),
 
           currentState(GameState::MainMenu) {
 
-            // THÊM: Khởi tạo scoreDisplay
+        // THÊM: Khởi tạo scoreDisplay
         scoreDisplay.setFont(menuFont);
         scoreDisplay.setCharacterSize(24);
         scoreDisplay.setFillColor(sf::Color::Yellow);
         // Đặt vị trí dưới thanh máu (ví dụ: cách lề phải 200px, cách lề trên 60px)
-        scoreDisplay.setPosition({WINDOW_WIDTH - 100.f, 60.f}); 
+        scoreDisplay.setPosition({WINDOW_WIDTH - 100.f, 60.f});
         scoreDisplay.setString("DIEM: 0"); // Giá trị khởi tạo
-
-
-
 
         ground2.setSize(sf::Vector2f(WINDOW_WIDTH, GROUND_HEIGHT));
         ground2.setFillColor(sf::Color::Transparent);
@@ -172,7 +173,7 @@ class GameManager {
 
     // Hàm tiện ích để quay về menu
     void handleReturnToMenu();
-
+    void handleGameInfoEvent();
     // Hàm xử lý sự kiện cho từng trạng thái
     void handleMainMenuEvent();
     void handlePlayingEvent();

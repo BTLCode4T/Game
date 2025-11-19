@@ -1,4 +1,5 @@
 #include "GamePlay/Physics/PhysicsSystem.h"
+#include "GamePlay/Entity/Dinosaur.h" // <--- Đừng quên include này
 #include "Utils/Entity.h"
 #include <iostream>
 
@@ -38,6 +39,8 @@ void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector
     for (const auto &obs : obstacles) {
         sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
         sf::FloatRect cnvBounds = obs.sprite->getGlobalBounds();
+
+        // Kiểm tra giao nhau
         if (playerBounds.findIntersection(cnvBounds)) {
             if (entity.GetType() == "Dinosaur") {
                 continue; // Nếu là Khủng long, bỏ qua vật cản này
@@ -61,8 +64,6 @@ void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector
         }
     }
 
-
-
     // 2. Va chạm Y với mặt đất (cuối cùng)
     sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
     if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y) {
@@ -75,8 +76,9 @@ void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector
     }
 }
 
-// Hàm cập nhật vật lý chính (Public)
+// Hàm cập nhật vật lý chính (Public) - ĐÃ SỬA: Thêm tham số dinosaurs
 void PhysicsSystem::Update(sf::Sprite &playerSprite, float deltaTime, const std::vector<Obstacle> &obstacles,
+                           const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, // <--- THAM SỐ QUAN TRỌNG
                            Entity &entity) {
     // 1. Lưu vị trí cũ
     sf::Vector2f oldPos = playerSprite.getPosition();
@@ -88,19 +90,54 @@ void PhysicsSystem::Update(sf::Sprite &playerSprite, float deltaTime, const std:
         entity.setVelocityY(temp);
     }
 
-    if (entity.getVelocity().y > MAX_FALL_VELOCITY) { // Sử dụng hằng số từ Constants.h
+    if (entity.getVelocity().y > MAX_FALL_VELOCITY) {
         entity.setVelocityY(MAX_FALL_VELOCITY);
     }
 
     // 3. Di chuyển theo trục X
     playerSprite.move({entity.getVelocity().x * deltaTime, 0.f});
 
-    // 4. Kiểm tra và xử lý va chạm X
+    // 4. Kiểm tra và xử lý va chạm X (Với vật cản tĩnh)
     HandleXCollision(playerSprite, oldPos, obstacles, entity);
+
+    // --- 4.1 XỬ LÝ VA CHẠM VỚI KHỦNG LONG (CHẶN KHÔNG CHO ĐI XUYÊN) ---
+    sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
+    for (const auto &dino : dinosaurs) {
+        sf::FloatRect dinoBounds = dino->getBounds();
+        auto intersection = playerBounds.findIntersection(dinoBounds);
+
+        if (intersection) {
+            sf::FloatRect overlap = *intersection;
+            // Chỉ xử lý va chạm ngang
+            if (overlap.size.x < overlap.size.y) {
+                // Nếu người chơi đang ở bên trái khủng long
+                if (playerBounds.position.x < dinoBounds.position.x) {
+                    // SỬA: Trừ đi 0.1f để tạo khoảng cách cực nhỏ, tránh bị dính
+                    float wallPos = dinoBounds.position.x - playerBounds.size.x - 0.1f;
+                    playerSprite.setPosition({wallPos, playerSprite.getPosition().y});
+
+                    // Chỉ chặn vận tốc nếu đang cố đi vào khủng long (velocity.x > 0)
+                    // Nếu người chơi bấm nút lùi (velocity.x < 0) thì vẫn cho đi
+                    if (entity.getVelocity().x > 0) {
+                        entity.setVelocity(0.f, entity.getVelocity().y);
+                    }
+                } else {
+                    // Bên phải
+                    float wallPos = dinoBounds.position.x + dinoBounds.size.x + 0.1f;
+                    playerSprite.setPosition({wallPos, playerSprite.getPosition().y});
+                    if (entity.getVelocity().x < 0) {
+                        entity.setVelocity(0.f, entity.getVelocity().y);
+                    }
+                }
+            }
+        }
+    }
+    // -----------------------------------------------------------------------
 
     // 5. Di chuyển theo trục Y
     playerSprite.move({0.f, entity.getVelocity().y * deltaTime});
 
     // 6. Kiểm tra và xử lý va chạm Y (Trọng lực, CNV, Mặt đất)
     HandleYCollision(playerSprite, obstacles, entity);
-}
+
+} // Đã đóng ngoặc hàm Update đúng

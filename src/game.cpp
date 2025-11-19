@@ -73,7 +73,7 @@ int main() {
     
 
     sf::Texture btnHome; // nút home
-    sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 50.0f, 50.0f, 15.0f, 15.0f);
+    sf::Sprite btnHomeSprite = createSprite(btnHome, "assets/Images/Home.png", 200.0f,200.0f, 15.0f, 15.0f);
 
     sf::Texture heartTexture;
     if (!heartTexture.loadFromFile("assets/Images/heart.png")) { // Đảm bảo bạn có file này

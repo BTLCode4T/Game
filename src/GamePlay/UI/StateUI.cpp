@@ -22,7 +22,7 @@
  * ============================================================ */
 MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sprite &tree, const sf::Font &font)
     : backgroundSprite(bg), sunSprite(sun), treeSprite(tree) {
-
+    isLinkVisible = false;
     // --- [1] Nút “New Game” ---
     // Dùng std::make_unique để tạo sprite, truyền texture và vị trí nút
     btnNewSprite = std::make_unique<sf::Sprite>(
@@ -73,6 +73,10 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
                                                   420.0f,  // Vị trí X (bằng X của nút Start để thẳng hàng)
                                                   -20.0f   // Vị trí Y (nhỏ hơn 200 để nằm PHÍA TRÊN nút Start)
                                                   ));
+    githubLinkText = std::make_unique<sf::Text>(
+        createText(font, L"https://github.com/BTLCode4T/Game", 24, sf::Color::Yellow, 300.0f, 650.0f));
+
+    isLinkVisible = false; // Mặc định ẩn
 }
 
 /* --- Hàm Render của MainMenuUI ---
@@ -106,7 +110,9 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*btnSettingsSprite);
     window.draw(*btnHelpSprite);
     window.draw(*btnExtraSprite);
-    // window.draw(*infoText);
+    if (isLinkVisible) {
+        window.draw(*githubLinkText);
+    }
     // window.draw(*versionText);
 }
 
@@ -116,30 +122,30 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
 HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
     // --- [1] Tiêu đề ---
-    titleText = std::make_unique<sf::Text>(createText(font, L"BẢNG XẾP HẠNG", 40, sf::Color::Red, 350.0f, 125.0f));
+    titleText = std::make_unique<sf::Text>(createText(font, L"BẢNG XẾP HẠNG", 40, sf::Color::Red, 960.0f, 205.0f));
 
     // --- [2] Dòng hiển thị điểm số người chơi ---
 
     tableListSprite = std::make_unique<sf::Sprite>(
-        createSprite(tableListTexture, "assets/Images/list.png", 670.5f, 502.5f, 25.0f, 60.0f));
+        createSprite(tableListTexture, "assets/Images/list.png", 670.5f, 502.5f, 615.0f, 130.0f));
 
     btnNoneSprite1 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture1, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 125.0f));
+        createSprite(btnNoneTexture1, "assets/Images/none.png", 225.0f, 55.5f, 1300.0f, 200.0f));
 
     btnNoneSprite2 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture2, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 225.0f));
+        createSprite(btnNoneTexture2, "assets/Images/none.png", 225.0f, 55.5f, 1300.0f, 300.0f));
 
     btnNoneSprite3 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture3, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 325.0f));
+        createSprite(btnNoneTexture3, "assets/Images/none.png", 225.0f, 55.5f, 1300.0f, 400.0f));
 
     btnNoneSprite4 = std::make_unique<sf::Sprite>(
-        createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 55.5f, 750.0f, 425.0f));
+        createSprite(btnNoneTexture4, "assets/Images/none.png", 225.0f, 55.5f, 1300.0f, 500.0f));
 
     btnTextInputSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnTextInputTexture, "assets/Images/TextInput.png", 225.0f, 55.5f, 750.0f, 525.0f));
+        createSprite(btnTextInputTexture, "assets/Images/TextInput.png", 225.0f, 55.5f, 837.5f, 630.0f));
 
     notFoundSprite = std::make_unique<sf::Sprite>(
-        createSprite(notFoundSpriteTexture, "assets/Images/btnone.png", 420.0f, 333.0f, 250.0f, 150.0f));
+        createSprite(notFoundSpriteTexture, "assets/Images/btnone.png", 420.0f, 333.0f, 200.0f, 150.0f));
 
     // Khu vực tạo text sắp xếp
     // std::unique_ptr<sf::Text> decreaingScore;
@@ -148,42 +154,43 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
     // std::unique_ptr<sf::Text> decreaingTime;
 
     // --- THAY THẾ: Khởi tạo prompt và input riêng biệt ---
+
     promptText = std::make_unique<sf::Text>(
-        createText(font, L"Tìm theo điểm", 22, sf::Color(128, 128, 128), 862.0f, 550.0f, true));
+        createText(font, L"Tìm theo điểm", 22, sf::Color(128, 128, 128), 950.0f, 655.0f, true));
     inputTextDisplay =
         std::make_unique<sf::Text>(font, "", 22); // SỬA: Sử dụng constructor có tham số đúng thứ tự: font, string, size
     inputTextDisplay->setFillColor(sf::Color::Red);
-    inputTextDisplay->setPosition(sf::Vector2f(840.0f, 540.5f)); // SỬA: Sử dụng Vector2f
+    inputTextDisplay->setPosition(sf::Vector2f(890.0f, 645.5f)); // SỬA: Sử dụng Vector2f
     inputTextDisplay->setStyle(sf::Text::Style::Bold);           // Giữ bold nếu có (tùy chọn)
 
     // --- THÊM: Khởi tạo con trỏ "|" ---
     cursorShape.setSize(sf::Vector2f(2.0f, 22.0f)); // Kích thước "|" (rộng 2px, cao bằng font size)
     cursorShape.setFillColor(sf::Color::Black);     // Màu đen
-    cursorShape.setPosition(sf::Vector2f(
-        862.5f + 100.0f, 552.75f)); // SỬA: Sử dụng Vector2f Vị trí sau prompt/input (điều chỉnh offset nếu cần)
+    cursorShape.setPosition(
+        sf::Vector2f(892.f, 560.0f)); // SỬA: Sử dụng Vector2f Vị trí sau prompt/input (điều chỉnh offset nếu cần)
 
     // currentInput giữ nguyên rỗng ban đầu
     currentInput = "";
 
     decreaingScore =
-        std::make_unique<sf::Text>(createText(font, L"Điểm giảm dần", 20, sf::Color::White, 855.0f, 150.0f));
+        std::make_unique<sf::Text>(createText(font, L"Điểm giảm dần", 20, sf::Color::White, 1410.0f, 222.0f));
 
     increaingScore =
-        std::make_unique<sf::Text>(createText(font, L"Điểm tăng dần", 20, sf::Color::White, 855.0f, 250.0f));
+        std::make_unique<sf::Text>(createText(font, L"Điểm tăng dần", 20, sf::Color::White, 1410.0f, 322.0f));
 
     decreaingTime =
-        std::make_unique<sf::Text>(createText(font, L"Thời gian giảm dần", 20, sf::Color::White, 855.0f, 350.0f));
+        std::make_unique<sf::Text>(createText(font, L"Thời gian giảm dần", 20, sf::Color::White, 1410.0f, 422.0f));
 
     increaingTime =
-        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 855.0f, 450.0f));
+        std::make_unique<sf::Text>(createText(font, L"Thời gian tăng dần", 20, sf::Color::White, 1410.0f, 522.0f));
 
     searchNone =
-        std::make_unique<sf::Text>(createText(font, L"Không tìm thấy !", 30, sf::Color::Yellow, 450.0f, 250.0f));
+        std::make_unique<sf::Text>(createText(font, L"Không tìm thấy !", 30, sf::Color::Yellow, 400.0f, 220.0f));
     searchNone2 = std::make_unique<sf::Text>(
-        createText(font, L"Ấn vị trí trống bất \n\nkì để tiếp tục !", 25, sf::Color::Blue, 450.0f, 350.0f));
+        createText(font, L"Ấn vị trí trống bất \n\nkì để tiếp tục !", 25, sf::Color::Blue, 400.0f, 330.0f));
 
     scrollText = std::make_unique<sf::Text>(
-        createText(font, L"< Ấn phím mũi tên ^/v để cuộn! >", 15, sf::Color::Yellow, 350.0f, 515.0f));
+        createText(font, L"< Ấn phím mũi tên ^/v để cuộn! >", 15, sf::Color::Yellow, 950.0f, 585.0f));
 
     // Load scores từ file ngay khi tạo UI
     initList(scoresList);
@@ -210,7 +217,7 @@ void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*scrollText);
 
     // *** DÙNG scoresList THÀNH VIÊN ĐÃ TẢI ***
-    drawScoresList(window, scoresList, font, 120.0f, 200.0f, scrollIndex);
+    drawScoresList(window, scoresList, font, 745.0f, 270.0f, scrollIndex);
 
     window.draw(*btnNoneSprite1);
     window.draw(*btnNoneSprite2);
@@ -258,11 +265,11 @@ HelpUI::HelpUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &
         createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text hướng dẫn điều khiển ---
     helpText = std::make_unique<sf::Text>(createText(font, L"Hướng dẫn:\n- Dùng mũi tên để di chuyển\n- Space để nhảy",
-                                                     28, sf::Color::White, 500.0f, 200.0f));
+                                                     28, sf::Color::White, 950.0f, 300.0f));
 
     // --- [2] Thông tin tác giả ---
     aboutText =
-        std::make_unique<sf::Text>(createText(font, L"Tác giả: Code 4T", 24, sf::Color(200, 200, 200), 500.0f, 550.0f));
+        std::make_unique<sf::Text>(createText(font, L"Tác giả: Code 4T", 24, sf::Color(200, 200, 200), 950.0f, 600.0f));
 }
 
 /* --- Render HelpUI ---
@@ -285,29 +292,32 @@ SettingsUI::SettingsUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf
         createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text thông báo đang phát triển ---
     settingsText = std::make_unique<sf::Text>(
-        createText(font, L"Tùy chỉnh (đang phát triển)", 28, sf::Color::White, 500.0f, 250.0f));
+        createText(font, L"Tùy chỉnh (đang phát triển)", 28, sf::Color::White, 950.0f, 200.0f));
 
     // --- [2] Text Âm thanh
 
-    AudioSettingText = std::make_unique<sf::Text>(createText(font, L"Âm thanh", 28, sf::Color::White, 320.0f, 200.0f));
+    AudioSettingText = std::make_unique<sf::Text>(createText(font, L"Âm thanh", 28, sf::Color::White, 830.0f, 320.0f));
 
     MusicSettingText =
-        std::make_unique<sf::Text>(createText(font, L"Âm thanh nhạc nền", 28, sf::Color::White, 385.0f, 350.0f));
+        std::make_unique<sf::Text>(createText(font, L"Âm thanh nhạc nền", 28, sf::Color::White, 830.0f, 450.0f));
 
     btnNoneSprite =
-        std::make_unique<sf::Sprite>(createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 170.0f, 50.0f));
+        std::make_unique<sf::Sprite>(createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 635.0f, 160.0f));
+
+    btnNoneSprite =
+        std::make_unique<sf::Sprite>(createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 630.0f, 160.0f));
 
     mutedSprite = std::make_unique<sf::Sprite>(
-        createSprite(mutedTexture, "assets/Images/muted_true.png", 50.0f, 50.0f, 650.0f, 175.0f));
+        createSprite(mutedTexture, "assets/Images/music_off.png", 100.0f, 100.0f, 1050.0f, 270.0f));
 
     unmutedSprite = std::make_unique<sf::Sprite>(
-        createSprite(unmutedTexture, "assets/Images/muted_false.png", 50.0f, 50.0f, 650.0f, 175.0f));
+        createSprite(unmutedTexture, "assets/Images/misic.png", 100.0f, 100.0f, 1050.0f, 270.0f));
 
     musicMutedSprite = std::make_unique<sf::Sprite>(
-        createSprite(musicMutedTexture, "assets/Images/muted_true.png", 50.0f, 50.0f, 650.0f, 325.0f)); // Vị trí mới
+        createSprite(musicMutedTexture, "assets/Images/sound_off.png", 100.0f, 100.0f, 1050.0f, 410.0f)); // Vị trí mới
 
     musicUnmutedSprite = std::make_unique<sf::Sprite>(
-        createSprite(musicUnmutedTexture, "assets/Images/muted_false.png", 50.0f, 50.0f, 650.0f, 325.0f)); // Vị trí mới
+        createSprite(musicUnmutedTexture, "assets/Images/sound.png", 100.0f, 100.0f, 1050.0f, 410.0f)); // Vị trí mới
 }
 
 /* --- Render SettingsUI ---
@@ -341,13 +351,13 @@ void SettingsUI::Render(sf::RenderWindow &window, const sf::Font &font) {
 GameOverUI::GameOverUI(const sf::Sprite &bg, const sf::Font &font) : backgroundSprite(bg) {
 
     btnNoneSprite =
-        std::make_unique<sf::Sprite>(createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 170.0f, 50.0f));
+        std::make_unique<sf::Sprite>(createSprite(btnNone, "assets/Images/btnone.png", 630.0f, 500.0f, 620.0f, 150.0f));
 
     btnHomeSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnHomeTexture, "assets/Images/Home.png", 75.0f, 75.0f, 350.0f, 325.0f));
+        createSprite(btnHomeTexture, "assets/Images/Home.png", 200.0f, 200.0f, 560.0f, 325.0f));
 
     btnUndoSprite = std::make_unique<sf::Sprite>(
-        createSprite(btnUndoTexture, "assets/Images/Undo.png", 75.0f, 75.0f, 550.0f, 325.0f));
+        createSprite(btnUndoTexture, "assets/Images/restart.png", 140.0f, 140.0f, 530.0f, 325.0f));
 
     gameOverText = std::make_unique<sf::Text>(createText(
         font, L"Bạn đã thua!\n\nDIEM CUA BAN: 0\n\nThời gian: **/**/****", 28, sf::Color::White, 450.0f, 220.0f, true));
@@ -356,11 +366,37 @@ GameOverUI::GameOverUI(const sf::Sprite &bg, const sf::Font &font) : backgroundS
 }
 
 void GameOverUI::Render(sf::RenderWindow &window, const sf::Font &font) {
-    window.draw(backgroundSprite);
-    window.draw(*btnNoneSprite);
-    window.draw(*gameOverText);
-    window.draw(*btnHomeSprite);
-    window.draw(*btnUndoSprite);
+    // 1. Reset Camera
+    window.setView(window.getDefaultView());
+    sf::Vector2f center(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
+
+    // 2. Background Full màn hình
+    sf::Sprite bg = backgroundSprite;
+    const sf::Texture &tex = bg.getTexture();
+    bg.setTextureRect(sf::IntRect({0, 0}, {int(tex.getSize().x), int(tex.getSize().y)}));
+    bg.setScale({window.getSize().x / float(tex.getSize().x), window.getSize().y / float(tex.getSize().y)});
+    bg.setPosition({0, 0});
+    window.draw(bg);
+
+    // 3. Nút bấm
+    if (btnNoneSprite)
+        window.draw(*btnNoneSprite);
+    if (btnHomeSprite) {
+        btnHomeSprite->setPosition({center.x + 10, center.y + 0});
+        window.draw(*btnHomeSprite);
+    }
+    if (btnUndoSprite) {
+        btnUndoSprite->setPosition({center.x - 190, center.y + 30});
+        window.draw(*btnUndoSprite);
+    }
+    
+    if (gameOverText) {
+        sf::FloatRect b = gameOverText->getLocalBounds();
+        gameOverText->setOrigin({b.size.x / 2.f, b.size.y / 2.f});
+
+        gameOverText->setPosition({center.x, center.y - 100});
+        window.draw(*gameOverText);
+    }
 }
 
 void GameOverUI::setScore(int score) {
@@ -391,9 +427,9 @@ void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &fon
     float currentY = startY;
 
     // --- [1] Vẽ Tiêu đề ---
-    sf::Text headerText(font, L"ĐIỂM\t\t\tTHỜI GIAN\t\t\tNGÀY", 22);
-    headerText.setFillColor(sf::Color::Yellow);
-    headerText.setPosition(sf::Vector2f(135.0f, 175.0f));
+    sf::Text headerText(font, L"ĐIỂM\t\t    THỜI GIAN\t\t  NGÀY", 22);
+    headerText.setFillColor(sf::Color(255, 215, 0));
+    headerText.setPosition(sf::Vector2f(735.0f, 255.0f));
     window.draw(headerText);
     currentY += 35.0f;
 
@@ -559,16 +595,23 @@ void HighScoresUI::resetScroll() {
 }
 
 GameInfoUI::GameInfoUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &font)
-    : backgroundSprite(bg), btnHomeSprite(homeBtn)  {
+    : backgroundSprite(bg), btnHomeSprite(homeBtn) {
     menuBgSprite = std::make_unique<sf::Sprite>(
         createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text hướng dẫn điều khiển ---
-    helpText = std::make_unique<sf::Text>(createText(font, L"Hướng dẫn:\n- Thông tin phiên bản\n- v1.0.0",
-                                                     28, sf::Color::White, 500.0f, 200.0f));
+    helpText = std::make_unique<sf::Text>(
+        createText(font, L"Hướng dẫn:\n- Thông tin phiên bản\n- v1.0.0", 28, sf::Color::White, 500.0f, 200.0f));
 
     // --- [2] Thông tin tác giả ---
     aboutText =
         std::make_unique<sf::Text>(createText(font, L"Tác giả: Code 4T", 24, sf::Color(200, 200, 200), 500.0f, 550.0f));
+    aboutText = std::make_unique<sf::Text>(createText(font,
+                                                      L"Github: https://github.com/BTLCode4T/Game", // Nội dung Link
+                                                      30,                                           // Cỡ chữ
+                                                      sf::Color::Yellow,                            // Màu chữ
+                                                      WINDOW_WIDTH / 2.0f,
+                                                      WINDOW_HEIGHT / 2.0f // Vị trí (x, y) - chỉnh lại cho vừa mắt
+                                                      ));
 }
 
 /* --- Render HelpUI ---
@@ -579,6 +622,7 @@ void GameInfoUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     /* window.draw(backgroundSprite);*/
     window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
-    window.draw(*helpText);
+    /* window.draw(*helpText);*/
     window.draw(*aboutText);
+   /* window.draw(btnHomeSprite);*/
 }

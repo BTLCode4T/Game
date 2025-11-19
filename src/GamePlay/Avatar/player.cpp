@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-
+#include "GamePlay/Gun/Trap.h"
 // Constructor của PlayerManager
 PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxHealth, float speed,
                              const std::string &texturePath, float width, float height, sf::Vector2i frameNum,
@@ -17,9 +17,12 @@ PlayerManager::PlayerManager(const std::string &name, float x, float y, int maxH
 }
 
 // Hàm xử lý Input
-void PlayerManager::HandleInputPlayerManager(bool leftPressed, bool rightPressed, float deltaTime,
-                                             const std::vector<Obstacle> &obs, const int MAX_JUMPS) {
-    this->Move(leftPressed, rightPressed, deltaTime, obs, MAX_JUMPS);
+void PlayerManager::HandleInputPlayerManager(
+    bool leftPressed, bool rightPressed, float deltaTime, const std::vector<Obstacle> &obs,
+    const std::vector<std::unique_ptr<Dinosaur>> &dinosaurs, 
+    const int MAX_JUMPS) {
+
+    this->Move(leftPressed, rightPressed, deltaTime, obs, dinosaurs, MAX_JUMPS);
 }
 int PlayerManager::GetHealth() {
     return Entity::getHealth();
@@ -58,6 +61,11 @@ bool PlayerManager::CheckCollision(const Entity &other) const {
      // 1. Lấy khung hình chữ nhật của bản thân
     sf::FloatRect playerBounds = this->getBounds();
 
+    // Mở rộng sang trái phải mỗi bên 5 pixel
+    // Điều này đảm bảo dù PhysicsSystem đã đẩy ra, ta vẫn phát hiện được va chạm
+    playerBounds.position.x -= 5.0f;
+    playerBounds.size.x += 10.0f;
+
     // 2. Lấy khung hình chữ nhật của đối tượng kia
     sf::FloatRect otherBounds = other.getBounds();
 
@@ -78,6 +86,10 @@ void PlayerManager::HandleDinosaurCollision(const Entity &other) {
             std::cout << GetName() << " va cham voi " << other.GetName() << " (Khung long)!" << std::endl;
             // 3. Trừ máu
             TakeDamage(1);
+
+            this->setVelocity(-500.0f, -300.0f);
+            this->setIsOnGround(false);
+
             // 4. Reset đồng hồ để bắt đầu đếm ngược lại từ đầu
             damageCooldownClock.restart();
         }
@@ -95,72 +107,54 @@ void PlayerManager::DisplayStatus() const {
     std::cout << "-----------------------------" << std::endl;
 }
 void PlayerManager::Render(sf::RenderWindow &window) {
+    // 1. Mặc định là sẽ vẽ
+    bool isVisible = true;
 
-    Entity::Render(window); 
+    // 2. Kiểm tra xem có đang trong thời gian "Bất tử" (Cooldown) không
+    // Nếu chưa hết thời gian cooldown thì xử lý chớp tắt
+    float elapsed = damageCooldownClock.getElapsedTime().asSeconds();
+    if (isAlive && elapsed < damageCooldownTime) {
+        // Logic chớp tắt:
+        // Chia thời gian cho 0.1s (tốc độ chớp).
+        // Nếu kết quả là số lẻ thì ẩn đi (isVisible = false), số chẵn thì hiện.
+        // Ví dụ: 0.1s -> ẩn, 0.2s -> hiện, 0.3s -> ẩn...
+        if (static_cast<int>(elapsed / 0.1f) % 2 != 0) {
+            isVisible = false;
+        }
+    }
 
-    if (currentGun) {
-        currentGun->Render(window); 
+    // 3. Chỉ vẽ nếu isVisible == true
+    if (isVisible) {
+        Entity::Render(window); // Vẽ nhân vật (Animation)
+
+        if (currentGun) {
+            currentGun->Render(window); // Vẽ súng
+        }
     }
 }
-// ===============================================
-// ĐỊNH NGHĨA HÀM LƯU/TẢI TRẠNG THÁI
-// ===============================================
+// Trong player.cpp (viết ở cuối file hoặc bất kỳ đâu trong file)
 
-nlohmann::json PlayerManager::SaveState() const {
-    nlohmann::json j;
+// Trong file src/GamePlay/Avatar/player.cpp
 
-    j["name"] = GetName();
-    j["current_health"] = Entity::getHealth(); 
-    j["max_health"] = Entity::getMaxHealth();
-    j["speed"] = GetSpeed();
-    
-    if (animation) {
-        j["position_x"] = animation->getPosition().x;
-        j["position_y"] = animation->getPosition().y;
-    } else {
-        j["position_x"] = 0.0f;
-        j["position_y"] = 0.0f;
-    }
-    
-    j["is_alive"] = isAlive;
-    j["damage_cooldown_time"] = damageCooldownTime;
+// Trong file src/GamePlay/Avatar/player.cpp
 
-    if (currentGun) {
-        j["has_gun"] = true;
-        j["gun_name"] = currentGun->GetName();
-    } else {
-        j["has_gun"] = false;
-    }
+void PlayerManager::HandleTrapCollision(std::vector<std::unique_ptr<Trap>> &traps) {
+    if (!isAlive)
+        return;
 
-    return j;
-}
+    for (auto &trap : traps) {
+        if (!trap->IsTriggered()) {
 
-void PlayerManager::LoadState(const nlohmann::json& j) {
-    // 1. Tải vị trí
-    float x = j.at("position_x").get<float>();
-    float y = j.at("position_y").get<float>();
-    if (animation) {
-        animation->setPosition(sf::Vector2f(x, y));
-    }
+            // ⚠️ SỬA LỖI GẠCH CHÂN ĐỎ: Dùng findIntersection().has_value()
+            if (this->getBounds().findIntersection(trap->getBounds()).has_value()) {
 
-    // 2. Tải máu
-    int savedHealth = j.at("current_health").get<int>();
-    int currentHP = Entity::getHealth();
-    
-    if (currentHP > savedHealth) {
-        Entity::TakeDamage(currentHP - savedHealth);
-    } 
+                // Logic này là đúng và đã được kiểm tra:
+                trap->Trigger();
+                this->TakeDamage(trap->GetDamage());
 
-    // 3. Tải trạng thái sống
-    isAlive = j.at("is_alive").get<bool>();
-    if (j.contains("damage_cooldown_time")) {
-        damageCooldownTime = j.at("damage_cooldown_time").get<float>();
-    }
-
-    // 4. Tải súng
-    bool hasGun = j.at("has_gun").get<bool>();
-    if (hasGun) {
-        std::string gunName = j.at("gun_name").get<std::string>();
-        std::cout << "[LoadState] Player loaded with gun name: " << gunName << "\n";
+                // Áp dụng đẩy lùi
+                this->setVelocity(this->getPushV(), -400.0f);
+            }
+        }
     }
 }

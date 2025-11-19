@@ -18,6 +18,7 @@ class Animation : public sf::Sprite {
     void calculateRectUV();   // dua vao frameCurrent nhan voi rectSize
     void ApplyRect();         // tinh xong roi chuyen qua frame tiep theo
     void Update(float deltaTime);
+    void Reset();
     sf::Vector2i getFrameSize() const {
         return m_rectSize;
     }
