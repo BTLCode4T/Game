@@ -61,6 +61,8 @@ void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector
         }
     }
 
+
+
     // 2. Va chạm Y với mặt đất (cuối cùng)
     sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
     if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y) {
