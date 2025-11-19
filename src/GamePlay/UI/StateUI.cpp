@@ -84,13 +84,11 @@ MainMenuUI::MainMenuUI(const sf::Sprite &bg, const sf::Sprite &sun, const sf::Sp
  */
 // --- CHỈNH SỬA HÀM NÀY: CHỈ CHECK TRẠNG THÁI, KHÔNG ĐỔI VỊ TRÍ ---
 void MainMenuUI::checkContinueAvailable() {
-    nlohmann::json data = LoadGame();
+    m_canContinue = IsSaveFileValid();
     
-    // Kiểm tra điều kiện hiện nút Continue
-    if (data.contains("Player") && data["Player"].value("is_alive", false)) {
-        m_canContinue = true;
-    } else {
-        m_canContinue = false;
+    // Sắp xếp vị trí nút
+    if (m_canContinue) {
+        btnContinueSprite->setPosition({810.0f,650.0f});
     }
 }
 void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
