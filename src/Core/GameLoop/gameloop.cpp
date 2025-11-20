@@ -570,7 +570,6 @@ void GameManager::handleSettingsEvent() {
     }
 }
 
-// File: gameloop.cpp (trong hàm GameManager::updatePlaying, bắt đầu từ khoảng dòng 306)
 
 void GameManager::updatePlaying(float deltaTime) {
     updateScrollingBackground(deltaTime);
@@ -787,7 +786,7 @@ void GameManager::updatePlaying(float deltaTime) {
     if (timeSinceLastMeteorSpawn >= meteorSpawnCooldown) {
 
         // 1. Reset thời gian chờ
-        meteorSpawnCooldown = 0.5f + (rand() % 150) / 100.0f;
+        meteorSpawnCooldown = 3.f + (rand() % 150) / 100.0f;
         timeSinceLastMeteorSpawn = 0.0f;
 
         // ------------------------------------------------------------------
@@ -840,8 +839,7 @@ void GameManager::updatePlaying(float deltaTime) {
         MusicManager::Get().Stop();
         Audio::Get().Play("gameOver");
     }
-} // <-- Hàm kết thúc đúng ở đây
-
+} 
 void GameManager::updateScrollingBackground(float deltaTime) {
 
     timePassed += deltaTime;

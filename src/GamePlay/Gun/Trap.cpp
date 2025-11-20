@@ -32,7 +32,7 @@ void Trap::Update(float deltaTime) {
 void Trap::Trigger() {
     if (!triggered) {
         triggered = true;
-        std::cout << "Bẫy đã sập!" << std::endl;
+        std::cout << "dat bay" << std::endl;
         // Phát âm thanh ở đây nếu cần
     }
 }

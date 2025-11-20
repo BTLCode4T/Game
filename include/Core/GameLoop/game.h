@@ -61,7 +61,6 @@ class GameManager {
     PlayerManager playerManager;
     std::vector<std::unique_ptr<Trap>> traps; // Danh sách bẫy
 
-    // Thêm hàm helper để tạo bẫy cho gọn
     void initTraps();
     std::vector<std::unique_ptr<Dinosaur>> dinosaurs;
     Map map;
@@ -142,7 +141,7 @@ class GameManager {
         if (!meteorTexture.loadFromFile("assets/Images/Meteors.png")) {
             std::cerr << "Loi: Khong the tai 'assets/Images/Meteors.png'" << std::endl;
         }
-        meteorSpawnCooldown = 3.0f; // 3 giây xuất hiện 1 lần (khởi điểm)
+        meteorSpawnCooldown = 6.0f; // 3 giây xuất hiện 1 lần (khởi điểm)
         timeSinceLastMeteorSpawn = 0.0f;
         // 3. Tạo các sprite trái tim (Bạn có thể đã có đoạn này)
         for (int i = 0; i < playerManager.GetMaxHealth(); ++i) {

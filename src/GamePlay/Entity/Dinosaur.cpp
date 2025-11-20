@@ -11,7 +11,7 @@ Dinosaur::Dinosaur(const string &name, float x, float y, int maxHealth, float sp
     // Thiết lập type cố định là "Dinosaur"
     : Entity("Dinosaur", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
       attackRange(2000.0f), // Tầm bắn (xa hơn một chút để bắn)
-      shootCooldown(2.0f), // Bắn mỗi 2 giây
+      shootCooldown(9.0f), // Bắn mỗi 2 giây
       timeSinceLastShot(0.0f)
 {
     cout << "Dinosaur '" << name << "' da duoc tao tai (" << x << ", " << y << ")." << endl;
