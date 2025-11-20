@@ -29,12 +29,18 @@ int PlayerManager::GetHealth() {
 }
 // Ghi đè hàm nhận sát thương (ĐÃ SỬA LỖI 3: GetHealth)
 void PlayerManager::TakeDamage(int amount) {
+    if (damageCooldownClock.getElapsedTime().asSeconds() < damageCooldownTime) {
+        return; // Không làm gì cả, thoát hàm
+    }
+
     if (!isAlive)
         return;
-
+    int currentHealth = GetHealth();
+    int newHealth = currentHealth - amount;
+    Entity::SetHealth(newHealth);
     // 1. Gọi hàm của class cha để trừ máu thực tế
-    Entity::TakeDamage(amount);
-
+    //Entity::TakeDamage(amount);
+    damageCooldownClock.restart();
     // 2. Kiểm tra máu sau khi bị trừ.
     // Lỗi GetHealth đã được giải quyết bằng cách đảm bảo nó là public trong Entity.h
     if (GetHealth() <= 0) {

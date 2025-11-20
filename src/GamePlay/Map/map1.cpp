@@ -37,23 +37,23 @@ void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgro
 
     // chỗ thêm vật cản =============================================================================
 
-obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, -120.0f, 650.0f - 60.0f);
+//obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, -120.0f, 650.0f - 60.0f);
 
     obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 130.0f, 650.0f - 100.0f);
     
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 400.0f, 650.0f - 60.0f);
+    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 400.0f, 650.0f - 60.0f);*/
     
     obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 650.0f, 650.0f - 100.0f);
 
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 900.0f, 650.0f - 60.0f);
+   /* obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 900.0f, 650.0f - 60.0f);*/
 
     obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 1150.0f, 650.0f - 100.0f);  
     
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1620.0f, 1400.0f - 60.0f);
+    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1620.0f, 1400.0f - 60.0f);*/
 
     obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 1600.0f, 650.0f - 100.0f);
 
-    obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1900.0f, 1400.0f - 60.0f);
+    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1900.0f, 1400.0f - 60.0f);*/
 
     obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, -70.0f, 650.0f - 208.0f);
 
@@ -65,13 +65,13 @@ obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, -120.0f, 650.0f -
 
     obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 950.0f,650.0f - 318.0f);
     
-    obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1140.0f,650.0f - 428.0f);
+    /*obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1140.0f,650.0f - 428.0f);*/
     
     obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1330.0f, 650.0f - 208.0f);
 
     obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1520.0f, 650.0f - 318.0f);
 
-     obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1710.0f,650.0f - 428.0f);
+     /*obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1710.0f,650.0f - 428.0f);*/
 
      obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1900.0f, 650.0f - 318.0f);
 

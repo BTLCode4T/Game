@@ -13,9 +13,10 @@
 void GameManager::runGameLoop() {
     map.map1(window, menuFont, backgroundSprite, backgroundSprite2, sunSprite, treeSprite, ground, ground2, obstacles);
     while (window.isOpen()) {
+
         float deltaTime = clock.restart().asSeconds(); // thời gian giữa 2 frame nè
         playerManager.setPushV(-SCROLL_SPEED * deltaTime*daySpeedMultiplier);
-
+        scoreDisplay.setPosition({0.0f, 0.0f});
         //============================================================================================================
         // 1. Xử lý Sự kiện (Input) // bắt buộc có, nếu  k sẽ k chạy đc :-)
         handleEvents();
@@ -176,6 +177,12 @@ void GameManager::render() {
                 window.draw(*bullet->animation);
             }
         }
+
+        // Vẽ thiên thạch
+        for (auto &meteor : meteors) {
+            meteor->Render(window);
+        }
+
         for (const auto &trap : traps) {
             if (trap) {
                 trap->Render(window);
@@ -694,10 +701,68 @@ void GameManager::updatePlaying(float deltaTime) {
     }
     // Lấy vị trí người chơi để khủng long biết đường đuổi
     sf::Vector2f playerPos = playerManager.animation->getPosition();
+    sf::FloatRect currentPlayerBounds = playerManager.animation->getGlobalBounds();
 
+    for (auto &meteor : meteors) {
+        // 1. QUAN TRỌNG NHẤT: Gọi hàm này để thiên thạch di chuyển!
+        meteor->Update(deltaTime);
+
+        // 2. Kiểm tra va chạm với người chơi
+        if (!meteor->IsDestroyed() && playerManager.IsAlive() &&
+            meteor->GetGlobalBounds().findIntersection(currentPlayerBounds)) {
+
+            playerManager.TakeDamage(meteor->GetDamage());
+
+            //// Kiểm tra chết
+            //if (newHealth <= 0) {
+            //    playerManager.setIsAlive(false);
+            //}
+
+            meteor->Destroy(); // Thiên thạch biến mất sau khi đâm trúng
+
+            // Audio::Get().Play("boom"); // Thêm tiếng nổ nếu có
+        }
+    }
+
+    // 3. Xóa các thiên thạch đã bị hủy khỏi bộ nhớ (để game không bị lag)
+    meteors.erase(std::remove_if(meteors.begin(), meteors.end(),
+                                 [](const std::unique_ptr<Meteor> &m) { return m->IsDestroyed(); }),
+                  meteors.end());
     // Lặp qua tất cả khủng long trong danh sách
     for (auto &dino_ptr : dinosaurs) {
         dino_ptr->ChasePlayer(playerPos.x, playerPos.y);
+
+        //CẬP NHẬT TẤN CÔNG (BẮN CẦU LỬA)
+        dino_ptr->UpdateAttack(deltaTime, playerPos);
+
+        // Lấy danh sách đạn của con khủng long này
+        auto &enemyFireballs = dino_ptr->GetFireballs();
+
+        for (auto &fireball : enemyFireballs) {
+            if (fireball.isDestroyed)
+                continue;
+
+            // Kiểm tra va chạm 
+            if (fireball.animation->getGlobalBounds().findIntersection(playerBounds)) {
+
+                // NẾU TRÚNG NGƯỜI CHƠI:
+                if (playerManager.IsAlive()) {
+                    
+                  playerManager.TakeDamage(1);
+                    // 3. Đánh dấu đạn hủy
+                    
+                    // Hiệu ứng/Âm thanh
+                  fireball.isDestroyed = true;
+
+                    // Đẩy lùi người chơi một chút (tùy chọn)
+                    // playerManager.animation->move({-50.f, 0.f});
+                }
+            }
+            
+            Audio::Get().Play("hurt"); // Cần thêm âm thanh hurt
+
+        }
+
         dino_ptr->animation->Update(deltaTime);
         PhysicsSystem::Update(*dino_ptr->animation, deltaTime, obstacles, dinosaurs, *dino_ptr);
         if (dino_ptr->getHealth() <= 0) {
@@ -713,8 +778,45 @@ void GameManager::updatePlaying(float deltaTime) {
             // Nhưng hiện tại code này sẽ thắng ngay khi có 1 con chết (phù hợp đánh Boss).
             return; // Thoát hàm update ngay
         }
+
+
     }
-    
+    timeSinceLastMeteorSpawn += deltaTime;
+    // Kiểm tra nếu hết thời gian chờ thì tạo thiên thạch mới
+    // ... (Code check cooldown giữ nguyên) ...
+    if (timeSinceLastMeteorSpawn >= meteorSpawnCooldown) {
+
+        // 1. Reset thời gian chờ
+        meteorSpawnCooldown = 0.5f + (rand() % 150) / 100.0f;
+        timeSinceLastMeteorSpawn = 0.0f;
+
+        // ------------------------------------------------------------------
+        // A. VỊ TRÍ XUẤT PHÁT (startX) - TỪ GIỮA MAP ĐỔ VỀ PHẢI
+        float playerX = playerManager.animation->getPosition().x;
+
+        // "Từ giữa map": Bắt đầu từ vị trí người chơi
+      
+        // (Bạn có thể tăng số 600 lên nếu muốn nó rải xa hơn)
+        float startX = 300 + (rand() % 1500);
+        float startY = -100.0f; // Trên trời cao
+
+        // B. ĐIỂM RƠI (targetX) - RƠI TỰ NHIÊN
+        // Rơi thẳng xuống nhưng có độ lệch nhẹ (gió thổi) cho tự nhiên
+        // Lệch từ -50 (trái) đến +50 (phải) so với vị trí thả
+        float drift = 200.0f + (rand() % 400);
+        float targetX = startX + drift;
+        float targetY = (float)WINDOW_HEIGHT + 100.0f; // Đáy màn hình
+
+        // C. TỐC ĐỘ & SÁT THƯƠNG
+        float speed = 300.0f; // Tốc độ 400 - 800
+        int damage = 1;
+        // ------------------------------------------------------------------
+
+        // Tạo thiên thạch
+        meteors.push_back(std::make_unique<Meteor>(meteorTexture, sf::Vector2f(startX, startY),
+                                                   sf::Vector2f(targetX, targetY), speed, damage, sf::Vector2i(6, 1),
+                                                   0.1f));
+    }
     // === CẬP NHẬT MÁU (Hiển thị trái tim) ===
     updateHealthBarUI();
 
