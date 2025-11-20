@@ -164,3 +164,11 @@ void Entity::SetY(float newY) {
         animation->setPosition({x, y});
     }
 }
+sf::Vector2f Entity::getPosition() const {
+    // Ưu tiên lấy vị trí thực tế từ Animation (chính xác nhất)
+    if (animation) {
+        return animation->getPosition();
+    }
+    // Nếu chưa có animation thì trả về biến x, y đã lưu
+    return {x, y};
+}

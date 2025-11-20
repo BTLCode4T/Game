@@ -31,6 +31,6 @@ const float ACCELERATION = 2000.f;
 const float FRICTION = 1500.f;
 
 // --- HẰNG SỐ CHUYỂN ĐỘNG CỦA GAME ---
-const float SCROLL_SPEED = 135.0f;
+const float SCROLL_SPEED = 90.0f;
 
 const int MAX_JUMPS = 2;

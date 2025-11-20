@@ -40,72 +40,54 @@ Dinosaur::Dinosaur(const string &name, float x, float y, int maxHealth, float sp
 void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
     timeSinceLastShot += deltaTime;
 
-    sf::Vector2f myPos = animation->getPosition();
-    float myX = myPos.x;
-    float myY = myPos.y;
+    // [SỬA LỖI] Dùng hàm getPosition() thay vì truy cập biến x, y private
+    sf::Vector2f myPos = getPosition();
 
-    // 1. Logic Bắn đạn
-    float dist = std::sqrt(std::pow(playerPos.x - myX, 2) + std::pow(playerPos.y - myY, 2));
+    // Tính khoảng cách
+    float dx = playerPos.x - myPos.x; // Sửa x -> myPos.x
+    float dy = playerPos.y - myPos.y; // Sửa y -> myPos.y
+    float distance = std::sqrt(dx * dx + dy * dy);
 
-    if (dist < attackRange + 200.0f && timeSinceLastShot >= shootCooldown) {
+    if (timeSinceLastShot >= shootCooldown && distance <= attackRange) {
+        timeSinceLastShot = 0;
 
-        Fireball fireball;
+        Fireball newFireball;
 
-        // --- KHỞI TẠO ANIMATION ---
-        // sf::Vector2i(4, 1): Nghĩa là ảnh có 4 cột (4 frames ngang) và 1 hàng.
-        // 0.1f: Thời gian chuyển giữa các frame (tốc độ chớp tắt của lửa).
-        fireball.animation = std::make_unique<Animation>(fireballTexture, sf::Vector2i(4, 1), 0.1f);
+        // SFML 3.0: Dùng ngoặc nhọn {}
+        newFireball.animation = std::make_unique<Animation>(fireballTexture, sf::Vector2i{4, 1}, 0.1f);
 
-        // Chỉnh tâm về giữa để xoay cho đẹp
-        // Lưu ý: Animation kế thừa Sprite nên dùng getLocalBounds bình thường
-        // Tuy nhiên, bounds của Animation là kích thước 1 frame, không phải cả ảnh to -> Rất chuẩn.
-        sf::IntRect rect = fireball.animation->getTextureRect();
-        fireball.animation->setOrigin({(float)rect.size.x / 2.f, (float)rect.size.y / 2.f});
-
-        // Chỉnh kích thước (Ví dụ muốn nó to cỡ 40x40)
-        fireball.animation->setScale({40.f / rect.size.x, 40.f / rect.size.y});
-
-        // Vị trí xuất phát
-        fireball.animation->setPosition({myX + 350.f, myY + 130.f});
-
-        // Tính hướng bắn
-        sf::Vector2f direction = playerPos - sf::Vector2f(myX, myY);
-        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
+        // [SỬA LỖI] Set vị trí xuất phát từ vị trí của Khủng long
+        float offsetX = 335.f;
+        float offsetY = 120.f;
+        newFireball.animation->setPosition({myPos.x + offsetX, myPos.y + offsetY});
+        // Tính hướng bay
+        float dirX = playerPos.x - myPos.x; // Sửa x -> myPos.x
+        float dirY = playerPos.y - myPos.y; // Sửa y -> myPos.y
+        newFireball.animation->setScale({0.5f, 0.5f});
+        float length = std::sqrt(dirX * dirX + dirY * dirY);
         if (length != 0) {
-            direction /= length;
-            fireball.velocity = direction * 500.0f;
-
-            // Xoay đầu đạn về phía người chơi
-            float angleVal = std::atan2(direction.y, direction.x) * 180 / 3.14159f;
-            fireball.animation->setRotation(sf::degrees(angleVal));
-
-            fireballs.push_back(std::move(fireball));
-            timeSinceLastShot = 0.0f;
-
-            // Audio::Get().Play("fire_shoot");
+            dirX /= length;
+            dirY /= length;
         }
+
+        float fireballSpeed = 300.0f;
+        newFireball.velocity = {dirX * fireballSpeed, dirY * fireballSpeed}; // SFML 3.0
+
+        newFireball.isDestroyed = false;
+        fireballs.push_back(std::move(newFireball));
     }
-    // 2. Cập nhật đạn
+
+    // ... (Phần update đạn bên dưới giữ nguyên)
     for (auto &fb : fireballs) {
-        // Di chuyển
-        fb.animation->move(fb.velocity * deltaTime);
-
-        // --- QUAN TRỌNG: CẬP NHẬT ANIMATION ---
-        // Dòng này sẽ làm cho cầu lửa chuyển từ hình 1 -> 2 -> 3 -> 4 liên tục
-        fb.animation->Update(deltaTime);
-
-        // (Tùy chọn) Vừa bay vừa xoay vòng tròn nếu bạn thích lửa cuộn tròn
-        // fb.animation->rotate(sf::degrees(360.0f * deltaTime));
-
-        // Hủy đạn nếu bay xa
-        sf::Vector2f pos = fb.animation->getPosition();
-        if (pos.x < 0 || pos.x > 3000 || pos.y > 1000 || pos.y < -500) {
-            fb.isDestroyed = true;
+        if (!fb.isDestroyed) {
+            fb.animation->move(fb.velocity * deltaTime);
+            fb.animation->Update(deltaTime);
+            if (fb.animation->getPosition().x < 0 || fb.animation->getPosition().x > 30000) {
+                fb.isDestroyed = true;
+            }
         }
     }
 
-    // Xóa đạn hỏng
     fireballs.erase(
         std::remove_if(fireballs.begin(), fireballs.end(), [](const Fireball &fb) { return fb.isDestroyed; }),
         fireballs.end());
