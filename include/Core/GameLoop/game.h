@@ -25,6 +25,7 @@
 #include "GamePlay/Gun/gun.h"
 #include "Core/GameLoop/json.h"
 
+#include "GamePlay/Entity/Meteor.h"
 #include "GamePlay/Avatar/player.h"
 #include "GamePlay/Entity/Dinosaur.h"
 #include "GamePlay/Map/map.h"
@@ -71,6 +72,10 @@ class GameManager {
 
     sf::Text scoreDisplay;
 
+    sf::Texture meteorTexture;
+    std::vector<std::unique_ptr<Meteor>> meteors;
+    float meteorSpawnCooldown; // Thời gian chờ giữa 2 lần spawn thiên thạch
+    float timeSinceLastMeteorSpawn;
   public:
     // ui
     MainMenuUI mainMenu;       // Màn hình menu chính
@@ -133,7 +138,12 @@ class GameManager {
         if (!healthTexture_empty.loadFromFile("assets/Images/border.png")) {
             std::cerr << "Loi: Khong the tai 'assets/Images/Heart-empty.png'" << std::endl;
         }
-
+        // Load ảnh Thiên thạch
+        if (!meteorTexture.loadFromFile("assets/Images/Meteors.png")) {
+            std::cerr << "Loi: Khong the tai 'assets/Images/Meteors.png'" << std::endl;
+        }
+        meteorSpawnCooldown = 3.0f; // 3 giây xuất hiện 1 lần (khởi điểm)
+        timeSinceLastMeteorSpawn = 0.0f;
         // 3. Tạo các sprite trái tim (Bạn có thể đã có đoạn này)
         for (int i = 0; i < playerManager.GetMaxHealth(); ++i) {
             // Sửa lỗi C2512: Cung cấp texture ngay khi tạo sprite

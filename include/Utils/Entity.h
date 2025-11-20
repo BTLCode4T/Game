@@ -153,7 +153,7 @@ class Entity {
     float getY() const {
         return y;
     }
-   
+    sf::Vector2f getPosition() const;
     // Hàm hiển thị trạng thái
     virtual void DisplayStatus() const;
 

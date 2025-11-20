@@ -100,9 +100,9 @@ void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(*logoSprite);
     window.draw(*btnNewSprite);
 
-    if (m_canContinue) {
+   /* if (m_canContinue) {
         window.draw(*btnContinueSprite);
-    }
+    }*/
 
     window.draw(*btnHighScoresSprite);
     window.draw(*btnSettingsSprite);

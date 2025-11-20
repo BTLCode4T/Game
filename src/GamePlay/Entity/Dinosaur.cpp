@@ -10,9 +10,17 @@ Dinosaur::Dinosaur(const string &name, float x, float y, int maxHealth, float sp
     // Gọi Constructor của class Entity (class cha)
     // Thiết lập type cố định là "Dinosaur"
     : Entity("Dinosaur", name, x, y, maxHealth, speed, texturePath, width, height, frameNum, frameTime),
-      attackRange(50.0f) // Thiết lập tầm tấn công mặc định
+      attackRange(2000.0f), // Tầm bắn (xa hơn một chút để bắn)
+      shootCooldown(2.0f), // Bắn mỗi 2 giây
+      timeSinceLastShot(0.0f)
 {
     cout << "Dinosaur '" << name << "' da duoc tao tai (" << x << ", " << y << ")." << endl;
+   
+    // --- LOAD ẢNH CẦU LỬA ---
+    if (!fireballTexture.loadFromFile("assets/Images/CauLua.png")) {
+        // Nếu bạn để file cùng thư mục exe thì chỉ cần "CauLua.png"
+        std::cerr << "Loi: Khong the tai 'CauLua.png'" << std::endl;
+    }
     // --- CẤU HÌNH THANH MÁU (INIT) ---
     // 1. Kích thước thanh máu 
     sf::Vector2f barSize(100.f, 10.f);
@@ -26,6 +34,63 @@ Dinosaur::Dinosaur(const string &name, float x, float y, int maxHealth, float sp
     // 3. Thiết lập thanh hiện tại (Màu xanh lá)
     healthBarCurrent.setSize(barSize);
     healthBarCurrent.setFillColor(sf::Color::Green);
+}
+// Trong file Dinosaur.cpp
+
+void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
+    timeSinceLastShot += deltaTime;
+
+    // [SỬA LỖI] Dùng hàm getPosition() thay vì truy cập biến x, y private
+    sf::Vector2f myPos = getPosition();
+
+    // Tính khoảng cách
+    float dx = playerPos.x - myPos.x; // Sửa x -> myPos.x
+    float dy = playerPos.y - myPos.y; // Sửa y -> myPos.y
+    float distance = std::sqrt(dx * dx + dy * dy);
+
+    if (timeSinceLastShot >= shootCooldown && distance <= attackRange) {
+        timeSinceLastShot = 0;
+
+        Fireball newFireball;
+
+        // SFML 3.0: Dùng ngoặc nhọn {}
+        newFireball.animation = std::make_unique<Animation>(fireballTexture, sf::Vector2i{4, 1}, 0.1f);
+
+        // [SỬA LỖI] Set vị trí xuất phát từ vị trí của Khủng long
+        float offsetX = 335.f;
+        float offsetY = 120.f;
+        newFireball.animation->setPosition({myPos.x + offsetX, myPos.y + offsetY});
+        // Tính hướng bay
+        float dirX = playerPos.x - myPos.x; // Sửa x -> myPos.x
+        float dirY = playerPos.y - myPos.y; // Sửa y -> myPos.y
+        newFireball.animation->setScale({0.5f, 0.5f});
+        float length = std::sqrt(dirX * dirX + dirY * dirY);
+        if (length != 0) {
+            dirX /= length;
+            dirY /= length;
+        }
+
+        float fireballSpeed = 300.0f;
+        newFireball.velocity = {dirX * fireballSpeed, dirY * fireballSpeed}; // SFML 3.0
+
+        newFireball.isDestroyed = false;
+        fireballs.push_back(std::move(newFireball));
+    }
+
+    // ... (Phần update đạn bên dưới giữ nguyên)
+    for (auto &fb : fireballs) {
+        if (!fb.isDestroyed) {
+            fb.animation->move(fb.velocity * deltaTime);
+            fb.animation->Update(deltaTime);
+            if (fb.animation->getPosition().x < 0 || fb.animation->getPosition().x > 30000) {
+                fb.isDestroyed = true;
+            }
+        }
+    }
+
+    fireballs.erase(
+        std::remove_if(fireballs.begin(), fireballs.end(), [](const Fireball &fb) { return fb.isDestroyed; }),
+        fireballs.end());
 }
 
 void Dinosaur::UpdateHealthBar() {
@@ -95,6 +160,10 @@ void Dinosaur::Render(sf::RenderWindow &window) {
     if (getHealth() > 0) {
         window.draw(healthBarBg);      // Vẽ nền đỏ dưới
         window.draw(healthBarCurrent); // Vẽ máu xanh đè lên
+    }
+    // 4. Vẽ Đạn cầu lửa
+    for (const auto &fb : fireballs) {
+        window.draw(*fb.animation); 
     }
 }
 
