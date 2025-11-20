@@ -8,21 +8,33 @@ void PhysicsSystem::HandleXCollision(sf::Sprite &playerSprite, const sf::Vector2
                                      const std::vector<Obstacle> &obstacles, Entity &entity) {
 
     sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
+
+    // --- KHẮC PHỤC LỖI KẸT (QUAN TRỌNG NHẤT) ---
+    // Vì ở hàm Y ta cho nhân vật lún xuống 15px (visualSink), nên ở đây ta phải
+    // "nhấc" cái hitbox lên đúng 15px + thêm 2px an toàn nữa để nó thoát khỏi mặt đất.
+    float visualSink = 15.0f;
+
+    sf::FloatRect walkHitbox = playerBounds;
+    walkHitbox.position.y -= (visualSink + 2.0f); // Nhấc lên cao hơn mặt đất một chút
+    walkHitbox.size.y -= 10.0f;                   // Thu nhỏ chiều cao thêm xíu để đỡ vướng đầu
+    // -------------------------------------------
+
     sf::Vector2f vel = entity.getVelocity();
     for (const auto &obs : obstacles) {
-        if (entity.GetType() == "Dinosaur") {
-            continue; // Nếu là Khủng long, bỏ qua vật cản này
-        }
-        // Va chạm X: kiểm tra giao nhau sau khi di chuyển
-        if (playerBounds.findIntersection(obs.sprite->getGlobalBounds())) {
-            playerSprite.setPosition({oldPos.x + entity.getPushV(),
-                                      playerSprite.getPosition().y}); // Nếu va chạm X, đặt lại vị trí X về vị trí cũ
-            vel.x = 0;                                                // Dừng di chuyển ngang
+        if (entity.GetType() == "Dinosaur")
+            continue;
+
+        // Dùng walkHitbox đã được "nhấc lên" để kiểm tra va chạm
+        // Lúc này nó sẽ chỉ đụng Tường thôi, không đụng Đất dưới chân nữa
+        if (walkHitbox.findIntersection(obs.sprite->getGlobalBounds())) {
+
+            playerSprite.setPosition({oldPos.x + entity.getPushV(), playerSprite.getPosition().y});
+            vel.x = 0;
             entity.setVelocity(vel.x, vel.y);
             return;
         }
     }
-    // đẩy người chơi theo chiều X
+
     float pushX = entity.getPushV();
     if (pushX != 0.f) {
         playerSprite.move({pushX, 0.f});
@@ -30,48 +42,59 @@ void PhysicsSystem::HandleXCollision(sf::Sprite &playerSprite, const sf::Vector2
 }
 
 // Hàm riêng tư để xử lý va chạm với chướng ngại vật/mặt đất theo trục Y
+//
 void PhysicsSystem::HandleYCollision(sf::Sprite &playerSprite, const std::vector<Obstacle> &obstacles, Entity &entity) {
-    entity.setIsOnGround(false); // Luôn reset trạng thái chạm đất trước khi kiểm tra
+    entity.setIsOnGround(false);
 
     sf::Vector2f vel = entity.getVelocity();
+    sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
 
-    // 1. Va chạm Y với TẤT CẢ CNV
+    // Đồng bộ số này với bên HandleX (phải giống nhau)
+    float visualSink = 15.0f;
+
+    // 1. Va chạm Y với vật cản
     for (const auto &obs : obstacles) {
-        sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
-        sf::FloatRect cnvBounds = obs.sprite->getGlobalBounds();
+        sf::FloatRect obsBounds = obs.sprite->getGlobalBounds();
 
-        // Kiểm tra giao nhau
-        if (playerBounds.findIntersection(cnvBounds)) {
-            if (entity.GetType() == "Dinosaur") {
-                continue; // Nếu là Khủng long, bỏ qua vật cản này
-            }
-            if (vel.y > 0) // Đang rơi (va chạm từ trên xuống)
-            {
-                // Đặt nhân vật đứng trên chướng ngại vật
-                playerSprite.setPosition({playerSprite.getPosition().x, cnvBounds.position.y - playerBounds.size.y});
+        // Cắt ngắn hitbox Y để logic rơi xuống mượt hơn
+        sf::FloatRect fallHitbox = playerBounds;
+        fallHitbox.size.y -= visualSink;
+
+        if (fallHitbox.findIntersection(obsBounds)) {
+            if (entity.GetType() == "Dinosaur")
+                continue;
+
+            // Điều kiện: Đang rơi VÀ Chân (đã trừ sink) phải cao hơn tâm khối một chút
+            if (vel.y > 0 && (fallHitbox.position.y + fallHitbox.size.y) < (obsBounds.position.y + 40.0f)) {
+                // Tính toán vị trí đặt chân:
+                // Đặt sao cho hitbox nằm TRÊN mặt khối, rồi cộng thêm visualSink để dìm hình xuống
+                float newY = (obsBounds.position.y - playerBounds.size.y) + visualSink;
+
+                playerSprite.setPosition({playerSprite.getPosition().x, newY});
 
                 vel.y = 0;
                 entity.setVelocity(vel.x, vel.y);
-                entity.setIsOnGround(true); // Coi như đang "trên mặt đất"
+                entity.setIsOnGround(true);
                 return;
-            } else if (vel.y < 0) // Đang nhảy (va chạm từ dưới lên - đụng đầu)
+            } else if (vel.y < 0) // Đụng đầu
             {
-                // Đặt nhân vật bên dưới chướng ngại vật
-                playerSprite.setPosition({playerSprite.getPosition().x, cnvBounds.position.y + cnvBounds.size.y});
-                vel.y = 0; // Ngừng lực nhảy
+                playerSprite.setPosition({playerSprite.getPosition().x, obsBounds.position.y + obsBounds.size.y});
+                vel.y = 0;
                 entity.setVelocity(vel.x, vel.y);
             }
         }
     }
 
-    // 2. Va chạm Y với mặt đất (cuối cùng)
-    sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
-    if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y) {
-        playerSprite.setPosition({playerSprite.getPosition().x, GROUND_Y - playerBounds.size.y});
+    // 2. Va chạm Y với MẶT ĐẤT (Ground)
+    // Cần tính lại bounds mới nhất
+    playerBounds = playerSprite.getGlobalBounds();
+
+    // Logic mặt đất: Cũng phải cho lún xuống tương tự
+    if (playerBounds.position.y + playerBounds.size.y >= GROUND_Y + visualSink) {
+        playerSprite.setPosition({playerSprite.getPosition().x, (GROUND_Y - playerBounds.size.y) + visualSink});
 
         vel.y = 0;
         entity.setVelocity(vel.x, vel.y);
-
         entity.setIsOnGround(true);
     }
 }

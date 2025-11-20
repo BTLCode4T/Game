@@ -9,7 +9,7 @@ const float PLAYER_SIZE = 50.0f;
 const float PLAYER_START_X = 100.0f;
 const float PLAYER_START_Y = 500.0f;
 const float GROUND_HEIGHT = 50.0f;
-const float GROUND_Y = 650.0f;
+const float GROUND_Y = 630.0f;
 const float GRAVITY = 3200.0f;
 const float JUMP_VELOCITY = -1000.0f;
 const float MAX_FALL_VELOCITY = 1500.0f; // Tốc độ rơi tối đa (để tránh lỗi xuyên vật thể)
@@ -31,6 +31,6 @@ const float ACCELERATION = 2000.f;
 const float FRICTION = 1500.f;
 
 // --- HẰNG SỐ CHUYỂN ĐỘNG CỦA GAME ---
-const float SCROLL_SPEED = 90.0f;
+const float SCROLL_SPEED = 80.0f;
 
 const int MAX_JUMPS = 2;

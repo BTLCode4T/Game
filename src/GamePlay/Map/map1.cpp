@@ -39,41 +39,44 @@ void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgro
 
 //obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, -120.0f, 650.0f - 60.0f);
 
-    obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 130.0f, 650.0f - 100.0f);
-    
-    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 400.0f, 650.0f - 60.0f);*/
-    
-    obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 650.0f, 650.0f - 100.0f);
+ // --- 1. CÁC KHỐI ĐẤT LỚN (Da2 - Ground Islands) ---
+    // Y = 585 (685 - 100) là mặt đất cơ bản
+    // Size Da2: 200x150
 
-   /* obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 900.0f, 650.0f - 60.0f);*/
+    // Đảo khởi đầu (Chỗ đứng an toàn lúc spawn)
+    obstacles.emplace_back("assets/Images/PNG/Da2.png", 200.0f, 150.0f, 100.0f, 685.0f - 100.0f);
 
-    obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 1150.0f, 650.0f - 100.0f);  
-    
-    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1620.0f, 1400.0f - 60.0f);*/
+    // Đảo giữa 1 (Cách đảo đầu 300px - phải nhảy qua bục đệm)
+    obstacles.emplace_back("assets/Images/PNG/Da2.png", 200.0f, 150.0f, 600.0f, 685.0f - 100.0f);
 
-    obstacles.emplace_back("assets/Images/PNG/moss_obstacle_2.png", 60.0f, 100.0f, 1600.0f, 650.0f - 100.0f);
+    // Đảo giữa 2
+    obstacles.emplace_back("assets/Images/PNG/Da2.png", 200.0f, 150.0f, 1100.0f, 685.0f - 100.0f);
 
-    /*obstacles.emplace_back("assets/Images/dat3.png", 60.0f, 60.0f, 1900.0f, 1400.0f - 60.0f);*/
+    // Đảo cuối
+    obstacles.emplace_back("assets/Images/PNG/Da2.png", 200.0f, 150.0f, 1600.0f, 685.0f - 100.0f);
 
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, -70.0f, 650.0f - 208.0f);
+    // --- 2. CÁC BỤC BAY (Da1 - Floating Platforms) ---
+    // Size Da1: 170x60
+    // Tầng 1 (Thấp): Y ≈ 455 (Dễ nhảy từ đất lên)
+    // Tầng 2 (Cao): Y ≈ 325 (Phải nhảy từ Tầng 1 lên)
 
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 260.0f, 650.0f - 208.0f);
+    // -- Cụm 1: Bắc cầu từ Đảo khởi đầu sang Đảo giữa 1 --
+    // Bục này giúp nhân vật nhảy qua khoảng trống giữa X=300 và X=600
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 350.0f, 685.0f - 230.0f); // Cao hơn đất 130px
 
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 570.0f, 650.0f - 318.0f);
-    
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 760.0f,650.0f - 208.0f);
+    // -- Cụm 2: Thử thách leo cao tại Đảo giữa 1 --
+    // Bục thấp (Tầng 1)
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 750.0f, 685.0f - 230.0f);
+    // Bục cao (Tầng 2) - Nhảy từ bục 750 lên bục này
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 950.0f, 705.0f - 360.0f); // Cao hơn tầng 1 130px
 
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 950.0f,650.0f - 318.0f);
-    
-    /*obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1140.0f,650.0f - 428.0f);*/
-    
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1330.0f, 650.0f - 208.0f);
+    // -- Cụm 3: Đường xuống Đảo giữa 2 --
+    // Bục trung gian để nhảy xuống đất an toàn
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1350.0f, 685.0f - 230.0f);
 
-    obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1520.0f, 650.0f - 318.0f);
-
-     /*obstacles.emplace_back("assets/Images/blend/may.png", 160.0f, 38.0f, 1710.0f,650.0f - 428.0f);*/
-
-     obstacles.emplace_back("assets/Images/PNG/moss_tile.png", 140.0f, 42.0f, 1900.0f, 650.0f - 318.0f);
+    // -- Cụm 4: Bậc thang về đích --
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1850.0f, 695.0f - 200.0f);
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 2050.0f, 685.0f - 330.0f);
 
     //===============================================================================================
 
