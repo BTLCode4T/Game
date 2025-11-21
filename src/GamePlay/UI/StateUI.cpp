@@ -92,6 +92,7 @@ void MainMenuUI::checkContinueAvailable() {
     }
 }
 void MainMenuUI::Render(sf::RenderWindow &window, const sf::Font &font) {
+    checkContinueAvailable();
     window.draw(backgroundSprite);
 
     window.draw(sunSprite);
