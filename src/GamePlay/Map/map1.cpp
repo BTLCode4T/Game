@@ -68,15 +68,15 @@ void Map::map1(sf::RenderWindow &window, sf::Font &menuFont, sf::Sprite &backgro
     // Bục thấp (Tầng 1)
     obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 750.0f, 685.0f - 230.0f);
     // Bục cao (Tầng 2) - Nhảy từ bục 750 lên bục này
-    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 950.0f, 705.0f - 360.0f); // Cao hơn tầng 1 130px
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1050.0f, 705.0f - 360.0f); // Cao hơn tầng 1 130px
 
     // -- Cụm 3: Đường xuống Đảo giữa 2 --
     // Bục trung gian để nhảy xuống đất an toàn
     obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1350.0f, 685.0f - 230.0f);
 
     // -- Cụm 4: Bậc thang về đích --
-    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1850.0f, 695.0f - 200.0f);
-    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 2050.0f, 685.0f - 330.0f);
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 1900.0f, 695.0f - 200.0f);
+    obstacles.emplace_back("assets/Images/PNG/Da1.png", 170.0f, 60.0f, 2150.0f, 685.0f - 330.0f);
 
     //===============================================================================================
 

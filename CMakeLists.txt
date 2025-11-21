@@ -36,7 +36,7 @@ add_executable (main
                 src/GamePlay/UI/Animation.cpp
                  src/GamePlay/Map/map1.cpp
                 src/Core/Input/SettingsManager.cpp
-                 "include/GamePlay/Gun/Trap.h" "src/GamePlay/Gun/Trap.cpp" "src/GamePlay/Entity/Meteor.cpp")
+                 "include/GamePlay/Gun/Trap.h" "src/GamePlay/Gun/Trap.cpp" "src/GamePlay/Entity/Meteor.cpp" )
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)

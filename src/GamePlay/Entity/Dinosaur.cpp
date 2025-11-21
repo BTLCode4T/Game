@@ -71,6 +71,7 @@ void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
         }
 
         float fireballSpeed = 300.0f;
+
         newFireball.velocity = {dirX * fireballSpeed, dirY * fireballSpeed}; // SFML 3.0
 
         newFireball.isDestroyed = false;
@@ -78,6 +79,7 @@ void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
     }
 
     // ... (Phần update đạn bên dưới giữ nguyên)
+
     for (auto &fb : fireballs) {
         if (!fb.isDestroyed) {
             fb.animation->move(fb.velocity * deltaTime);
@@ -91,7 +93,9 @@ void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
     fireballs.erase(
         std::remove_if(fireballs.begin(), fireballs.end(), [](const Fireball &fb) { return fb.isDestroyed; }),
         fireballs.end());
-}
+
+
+      }
 
 void Dinosaur::UpdateHealthBar() {
     if (!animation)
@@ -162,9 +166,11 @@ void Dinosaur::Render(sf::RenderWindow &window) {
         window.draw(healthBarCurrent); // Vẽ máu xanh đè lên
     }
     // 4. Vẽ Đạn cầu lửa
+
     for (const auto &fb : fireballs) {
         window.draw(*fb.animation); 
     }
+
 }
 
 // Ghi đè hàm DisplayStatus

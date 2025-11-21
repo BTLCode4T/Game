@@ -12,11 +12,12 @@ class Meteor {
     bool isDestroyed;      // Đánh dấu để xóa
 
   public:
+    // Constructor nhận vào vị trí bắt đầu, mục tiêu và tốc độ
     Meteor(sf::Texture &texture, sf::Vector2f startPos, sf::Vector2f targetPos, float speed, int damage,
            sf::Vector2i frameNum, float frameTime);
 
-    void Update(float deltaTime);
-    void Render(sf::RenderWindow &window);
+    void Update(float deltaTime); // Tính toán vị trí mới
+    void Render(sf::RenderWindow &window);// Vẽ lên màn hình
 
     const sf::FloatRect GetGlobalBounds() const;
     bool IsDestroyed() const {
