@@ -344,7 +344,7 @@ void GameManager::handleReturnToMenu() {
             Audio::Get().Stop("dinosaur");
             MusicManager::Get().Stop(); // <-- THÊM DÒNG NÀY
             MusicManager::Get().Play("menu");
-            ResetGame();
+            SaveGame(playerManager, bullets, totalScore);
         }
 
         currentState = GameState::MainMenu;
@@ -361,7 +361,7 @@ void GameManager::handleReturnToMenu() {
                 Audio::Get().Stop("dinosaur");
                 MusicManager::Get().Stop(); // <-- THÊM DÒNG NÀY
                 MusicManager::Get().Play("menu");
-                ResetGame();
+                SaveGame(playerManager, bullets, totalScore);
             }
             currentState = GameState::MainMenu;
         }
