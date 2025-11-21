@@ -58,7 +58,7 @@ int main() {
     sf::Sprite sunSprite = createSprite(sunTexture, "assets/Images/blend/x2sun9.png", 50.0f, 50.0f, 200.0f, 100.0f);
 
     sf::Texture treeTexture; // cây
-    sf::Sprite treeSprite = createSprite(treeTexture, "assets/Images/blend/ca.png", 154.0f, 272.0f, 50.0f, 100.0f);
+    sf::Sprite treeSprite = createSprite(treeTexture, "assets/Images/blend/cay.png", 154.0f, 272.0f, 50.0f, 100.0f);
 
     sf::Texture playerTexture; // nhân vật
     sf::Sprite playerSprite = createSprite(playerTexture, "assets/Images/a.png",

@@ -758,7 +758,7 @@ void GameManager::updatePlaying(float deltaTime) {
                 }
             }
             
-            Audio::Get().Play("hurt"); // Cần thêm âm thanh hurt
+       
 
         }
 
