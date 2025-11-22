@@ -31,12 +31,14 @@ add_executable (main
                 src/GamePlay/Gun/gun.cpp
                 src/GamePlay/Gun/bullet.cpp
                 src/GamePlay/Entity/Dinosaur.cpp
-                  src/Core/Audio/Audio.cpp
+                src/Core/Audio/Audio.cpp
                 src/Core/Audio/MusicManager.cpp
                 src/GamePlay/UI/Animation.cpp
-                 src/GamePlay/Map/map1.cpp
+                src/GamePlay/Map/map1.cpp
                 src/Core/Input/SettingsManager.cpp
-                 "include/GamePlay/Gun/Trap.h" "src/GamePlay/Gun/Trap.cpp" "src/GamePlay/Entity/Meteor.cpp" )
+                src/GamePlay/Gun/Trap.cpp
+                src/GamePlay/Gun/Trap.cpp 
+                src/GamePlay/Entity/Meteor.cpp )
 
 # Sử dụng C++17
 target_compile_features(main PRIVATE cxx_std_17)
@@ -46,7 +48,7 @@ target_link_libraries(main PRIVATE
     SFML::Graphics      # Bắt buộc khi dùng hình ảnh
     SFML::Window        # Bắt buộc khi dùng RenderWindow
     SFML::System        # Bắt buộc
-    SFML::Audio         # Nếu dùng âm thanh (Sound/Music) → có thể bỏ nếu không dùng
+    SFML::Audio         # Nếu dùng âm thanh (Sound/Music)
     
 )
 
