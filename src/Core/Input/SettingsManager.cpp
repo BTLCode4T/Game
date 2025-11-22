@@ -99,3 +99,7 @@ void SettingsManager::SetSoundMuted(bool m) {
     Audio::Get().SetMute(soundMuted);
     SaveSettingsInternal();
 }
+
+SettingsManager::~SettingsManager() {
+    SaveSettings();
+}

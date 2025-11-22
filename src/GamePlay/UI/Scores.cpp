@@ -42,15 +42,15 @@ void readFile(const std::string &filename, List &l) {
         int point, hour, minute, day, month, year;
         // SỬA: Dùng sscanf để parse "point hour:minute day/month/year" (handle : / no space)
         int parsed = sscanf(line.c_str(), "%d %d:%d %d/%d/%d", &point, &hour, &minute, &day, &month, &year);
-        if (parsed == 6) { // Thành công nếu đọc đủ 6 số
+        if (parsed == 6) {                      // Thành công nếu đọc đủ 6 số
             Time t = {hour, minute};
             Date d = {day, month, year};
             Node *p = createNode(point, t, d);
             addTail(l, p);
             std::cout << "Loaded: " << point << " at " << hour << ":" << minute << " " << day << "/" << month << "/"
-                      << year << std::endl; // Debug
+                      << year << std::endl;
         } else {
-            std::cerr << "Parse fail line: " << line << std::endl; // Debug
+            std::cerr << "Parse fail line: " << line << std::endl; 
         }
     }
 
@@ -227,14 +227,13 @@ void SaveCurrentScore(int point) {
     int hour = ltm->tm_hour;
     int minute = ltm->tm_min;
     int day = ltm->tm_mday;
-    int month = ltm->tm_mon + 1;    // tm_mon chạy từ 0-11
-    int year = ltm->tm_year + 1900; // tm_year là số năm kể từ 1900
+    int month = ltm->tm_mon + 1;    
+    int year = ltm->tm_year + 1900;
 
     // 3. Mở file Scores.txt để ghi thêm
     std::ofstream outfile("Scores.txt", std::ios::app);
     if (outfile.is_open()) {
        
-        // SỬA LỖI: Ghi ra định dạng có dấu `:` và `/` để khớp với sscanf trong readFile
         // Ví dụ: 100 8:0 18/11/2025
         outfile << point << " " 
                 << hour << ":" << minute << " "

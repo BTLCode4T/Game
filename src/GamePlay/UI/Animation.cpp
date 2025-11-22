@@ -32,7 +32,6 @@ void Animation::Update(float deltaTime) {
     m_frameTimeCurrent += deltaTime;
     if (m_frameTimeCurrent >= m_frameTime) {
         m_frameCurrent.x++;
-        m_frameCurrent.x++;
         if (m_frameCurrent.x == m_frameNum.x) {
             m_frameCurrent.x = 0;
         }

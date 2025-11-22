@@ -40,7 +40,8 @@ public:
     void SetSoundMuted(bool m);
     
     // Phương thức công khai để lưu cài đặt (nếu cần gọi thủ công)
-    void SaveSettings(); 
+    void SaveSettings();
+    ~SettingsManager(); 
 };
 
 #endif

@@ -53,7 +53,6 @@ void Dinosaur::UpdateAttack(float deltaTime, sf::Vector2f playerPos) {
 
         Fireball newFireball;
 
-        // SFML 3.0: Dùng ngoặc nhọn {}
         newFireball.animation = std::make_unique<Animation>(fireballTexture, sf::Vector2i{4, 1}, 0.1f);
 
         // [SỬA LỖI] Set vị trí xuất phát từ vị trí của Khủng long

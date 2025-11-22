@@ -89,7 +89,6 @@ void Entity::Move(bool leftPressed, bool rightPressed, float deltaTime, const st
 
 // MỚI: Định nghĩa hàm SetTexture (hàm "edit" ảnh)
 void Entity::SetTexture(const string &texturePath) {
-
 }
 
 // vẽ

@@ -203,10 +203,6 @@ HighScoresUI::HighScoresUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, cons
  * Vẽ nền, nút home và các text liên quan đến bảng điểm.
  */
 void HighScoresUI::Render(sf::RenderWindow &window, const sf::Font &font) {
-    // List l; // >> Bỏ dòng này
-    // initList(l); // >> Bỏ dòng này
-    // readFile("Scores.txt", l); // >> Bỏ dòng này
-
     /*window.draw(backgroundSprite);*/
     window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
@@ -261,13 +257,12 @@ HelpUI::HelpUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf::Font &
     : backgroundSprite(bg), btnHomeSprite(homeBtn) {
     menuBgSprite = std::make_unique<sf::Sprite>(
         createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
-    // --- [1] Text hướng dẫn điều khiển ---
-    helpText = std::make_unique<sf::Text>(createText(font, L"Hướng dẫn:\n- Dùng mũi tên để di chuyển\n- Space để nhảy",
-                                                     28, sf::Color::White, 950.0f, 300.0f));
+     helpText = std::make_unique<sf::Text>(createText(font, L"HƯỚNG DẪN:\n\n- Mục tiêu: Chạy vô tận, né chướng ngại vật (bẫy, vật cản) để đạt điểm cao.\n\n- Nhảy: Spacebar hoặc Mũi tên Lên\n- Bắn: Dùng chuột trái\n- Di chuyển: Mũi tên Trái/Phải hoặc phím A, D\n\n- Game có Mạng sống (Trái tim); hết mạng Game Over.\n- Điều chỉnh Âm thanh/Nhạc trong Cài đặt.\n- Xem thành tích tại Bảng Điểm Cao.",
+                                                28, sf::Color::Black, 950.0f, 300.0f));
 
     // --- [2] Thông tin tác giả ---
     aboutText =
-        std::make_unique<sf::Text>(createText(font, L"Tác giả: Code 4T", 24, sf::Color(200, 200, 200), 950.0f, 600.0f));
+        std::make_unique<sf::Text>(createText(font, L"CHƠI GAME QUÁ 180 PHÚT MỖI NGÀY\n\t\tSẼ CÓ HẠI CHO SỨC KHỎE", 24, sf::Color::Yellow, 950.0f, 600.0f));
 }
 
 /* --- Render HelpUI ---
@@ -427,7 +422,7 @@ void drawScoresList(sf::RenderWindow &window, const List &l, const sf::Font &fon
     // --- [1] Vẽ Tiêu đề ---
     sf::Text headerText(font, L"ĐIỂM\t\t    THỜI GIAN\t\t  NGÀY", 22);
     headerText.setFillColor(sf::Color(255, 215, 0));
-    headerText.setPosition(sf::Vector2f(735.0f, 255.0f));
+    headerText.setPosition(sf::Vector2f(755.0f, 255.0f));
     window.draw(headerText);
     currentY += 35.0f;
 
@@ -597,18 +592,19 @@ GameInfoUI::GameInfoUI(const sf::Sprite &bg, const sf::Sprite &homeBtn, const sf
     menuBgSprite = std::make_unique<sf::Sprite>(
         createSprite(menuBgTexture, "assets/Images/bg.png", WINDOW_WIDTH, WINDOW_HEIGHT, 0.0f, 0.0f));
     // --- [1] Text hướng dẫn điều khiển ---
-    helpText = std::make_unique<sf::Text>(
-        createText(font, L"Hướng dẫn:\n- Thông tin phiên bản\n- v1.0.0", 28, sf::Color::White, 500.0f, 200.0f));
+        helpText = std::make_unique<sf::Text>(
+        createText(font, L"\t\tPhiên bản: v0.0.1\n\nBản quyền thuộc về Code4T - 2025\n", 28, sf::Color::Red, WINDOW_WIDTH / 2.0f,
+                                                      WINDOW_HEIGHT / 2.0f + 50.0f ));
 
     // --- [2] Thông tin tác giả ---
     aboutText =
         std::make_unique<sf::Text>(createText(font, L"Tác giả: Code 4T", 24, sf::Color(200, 200, 200), 500.0f, 550.0f));
     aboutText = std::make_unique<sf::Text>(createText(font,
-                                                      L"Github: https://github.com/BTLCode4T/Game", // Nội dung Link
+                                                      L"Github: https://github.com/BTLCode4T/Game\n\n", // Nội dung Link
                                                       30,                                           // Cỡ chữ
-                                                      sf::Color::Yellow,                            // Màu chữ
+                                                      sf::Color::Black,                            // Màu chữ
                                                       WINDOW_WIDTH / 2.0f,
-                                                      WINDOW_HEIGHT / 2.0f // Vị trí (x, y) - chỉnh lại cho vừa mắt
+                                                      WINDOW_HEIGHT / 2.0f - 100.0f // Vị trí (x, y) - chỉnh lại cho vừa mắt
                                                       ));
 }
 
@@ -620,7 +616,7 @@ void GameInfoUI::Render(sf::RenderWindow &window, const sf::Font &font) {
     /* window.draw(backgroundSprite);*/
     window.draw(*menuBgSprite);
     window.draw(btnHomeSprite);
-    /* window.draw(*helpText);*/
+    window.draw(*helpText);
     window.draw(*aboutText);
    /* window.draw(btnHomeSprite);*/
 }
